@@ -1,0 +1,7 @@
+0.9-3
+Support of break file.
+Heeding of parameter_bounds.
+Fixed error in logfile formatting.
+
+0.9-2
+Support of project file and log file.

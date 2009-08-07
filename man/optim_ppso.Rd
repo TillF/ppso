@@ -105,9 +105,9 @@ waiting for keystroke between iterations (e.g. for plotting)
 
 \details{
 recommended use:
-\code{optim_pso}: serial computation for fast objective functions and single core machines
-\code{optim_ppso}			: parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       
-\code{optim_ppso_robust}	: slightly slower than \code{optim_ppso}, but presumably more robust (to be tested), since it doesn't leave slaves in "listen" mode after crashes
+\item{optim_pso}: serial computation for fast objective functions and single core machines
+\item{optim_ppso}			: parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       
+\item{optim_ppso_robust}	: slightly slower than \code{optim_ppso}, but presumably more robust (to be tested), since it doesn't leave slaves in "listen" mode after crashes
 
 }
 \value{
@@ -134,29 +134,33 @@ Till Francke <francke_at_uni-potsdam.de>
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-optim_pso(objective_function=sample_function)
+#simple application
+	result = optim_pso(objective_function=sample_function, projectfile=NULL, logfile=NULL)
+	print (result)
 
+#simple application with visualisation
+	result = optim_pso(objective_function=sample_function, projectfile=NULL, do_plot="rgl")
+	print (result)
 
+#writing and resuming from project file
+	projectfile	=tempfile()
+	result = optim_pso(objective_function=sample_function, projectfile=projectfile, logfile=NULL)		#start optimization, generate project file
+	print (result)
 
-set.seed(2)
-optim_ppso_robust(objective_function=sample_function,projectfile=NULL)
+	result = optim_pso(objective_function=sample_function, projectfile=projectfile, logfile=NULL, load_projectfile="yes")		#resume optimization from previous project file
+	print (result)
+	unlink(projectfile)	#delete project file
 
-set.seed(2)
-optim_ppso_robust(objective_function=sample_function,projectfile=NULL,nslaves=1)
+#parallel application
+	result = optim_ppso(objective_function=sample_function, nslaves=2, projectfile=NULL, logfile=NULL)
+	print (result)
 
+#parallel application, robust
+	result = optim_ppso(objective_function=sample_function, nslaves=2, projectfile=NULL, logfile=NULL)
+	print (result)
 
-set.seed(2)
-optim_ppso(objective_function=sample_function)
-
-set.seed(2)
-optim_ppso(objective_function=sample_function, abstol=0.01,max_wait_iterations=2,max_number_of_iterations=10,load_projectfile="no")
-
-set.seed(2)
-optim_ppso(objective_function=sample_function, abstol=0.1,max_wait_iterations=2,max_number_of_iterations=10,load_projectfile="yes")
+	
 
 
 optim_ppso(objective_function=sample_function)

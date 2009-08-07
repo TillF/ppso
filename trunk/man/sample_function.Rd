@@ -1,12 +1,13 @@
 \name{sample_function}
 \Rdversion{1.1}
 \alias{sample_function}
+\alias{sample_function2}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-A sample function that can be optimized for 2 parameters
+Sample function that can be optimized for 2 parameters
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Just demo functions for testin purposes.
 }
 \usage{
 sample_function(param_vec, fast = FALSE)
@@ -14,10 +15,10 @@ sample_function(param_vec, fast = FALSE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{param_vec}{
-%%     ~~Describe \code{param_vec} here~~
+parameter vector
 }
   \item{fast}{
-%%     ~~Describe \code{fast} here~~
+when set TRUE, the function is evaluated at maximum speed, otherwise a random delay of up to maxwaittime (=0.1 s) is introduced. Useful for simulating heterogenous clusters.   
 }
 }
 \details{
@@ -50,16 +51,33 @@ sample_function(param_vec, fast = FALSE)
 ##-- ==>  Define data, use random,
 ##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
+##sample_function is currently defined as
 function(param_vec,fast=FALSE)          #objective function to be minimized
 {
   obj=0
   for (i in 1:NROW(param_vec))
     obj=obj+(cos(param_vec[i])+1)
   obj=-abs(obj)
+ 
+  if (!fast)
+  {
+    maxwaittime=0.1               #function to be run on slaves, with random delay
+    starttime=Sys.time()
+    waittime= runif(1,0,maxwaittime)
+    while (as.numeric(Sys.time()-starttime)<waittime)
+    {
+    }
+  }
+  return(obj)
+  }
+}
 
- # r <- sqrt((param_vec[1]*4)^2+(param_vec[2]*4)^2) 
-#  obj=-5 * sin(r)/r 
+
+## sample_function2 is currently defined as
+function(param_vec,fast=FALSE)          #objective function to be minimized
+{
+  r <- sqrt((param_vec[1]*4)^2+(param_vec[2]*4)^2) 
+  obj=-5 * sin(r)/r 
 
   if (!fast)
   {
@@ -73,7 +91,8 @@ function(param_vec,fast=FALSE)          #objective function to be minimized
   return(obj)
   }
 }
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ ~optimization }
+\keyword{ ~example }% __ONLY ONE__ keyword per line

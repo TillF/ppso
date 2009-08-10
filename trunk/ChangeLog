@@ -1,3 +1,7 @@
+0.9-4
+fixed bug in particle initialisation (wrong ranges, missing X_lbest)
+ensure that no particle stands still
+
 0.9-3
 Support of break file.
 Heeding of parameter_bounds.

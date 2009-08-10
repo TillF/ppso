@@ -86,8 +86,10 @@ init_particles_i=function(lhc_init=FALSE)
   
     tobeinitialized=(number_of_particles-noninitialised_particles+1):number_of_particles
     # Initialize the particle positions
-    X[tobeinitialized,] = parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * random_numbers
+    #X[tobeinitialized,] = parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * random_numbers
+    X[tobeinitialized,] = t(parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * t(random_numbers)) #strangely, this transposing is necessary
     #...and their other parameters
+    X_lbest       [tobeinitialized,] =  X[tobeinitialized,]
     V             [tobeinitialized,] = 0
     fitness_lbest [tobeinitialized] = Inf
     status        [tobeinitialized] = 0          

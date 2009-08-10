@@ -103,6 +103,8 @@ update_tasklist_pso_i=function()                        #update particle positio
       return()
    }
 
+   if(max(which(completed_particles))>2) browser()
+   
    # Update the particle velocity and position
    for (i in which(completed_particles))
    {
@@ -111,6 +113,7 @@ update_tasklist_pso_i=function()                        #update particle positio
      V[i,] = w*V[i,] +
              C1*R1*(X_lbest[i,] - X[i,]) +
              C2*R2*(X_gbest - X[i,])
+     if (all(V==0)) V[i,]= runif(min=-0.01, max=0.01)*Vmax else       #ensure that a particle doesn't stand still
      V[i,] = V[i,] * min(1,abs(Vmax/V[i,]))        #limit to maximum velocity
      X[i,] = X[i,] + V[i,]
    }

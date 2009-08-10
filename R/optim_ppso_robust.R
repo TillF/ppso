@@ -196,7 +196,7 @@ while ((closed_slaves < nslaves) )
       if (tag == 2) {      #retrieve result
         current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
         #ii: deal with obsolete results, deal with error message, determine average runtime
-        fitness_X [current_particle] =slave_message
+        fitness_X [current_particle] = slave_message
         status    [current_particle] =1      #mark as "finished"
         iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
         #print(paste(slave_id,"ready"))

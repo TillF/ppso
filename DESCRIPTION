@@ -1,12 +1,11 @@
 Package: ppso
 Type: Package
 Title: Particle Swarm Optimization, optionally using parallel computing based on Rmpi
-Version: 0.9-3
+Version: 0.9-4
 Date: 2009-08-05
 Author: Till Francke
 Maintainer: Till Francke <francke@uni-potsdam.de>
-Description: ppso, (Parallel) Particle Swarm Optimization, provides optimization capabilities for a given objective function f. It adjusts the parameter vector p to produce a minimum value of f. 
-This algorithm especially excells for multidimensional (multi-parameter) functions with many local extrema. The parallelized version builds on Rmpi and is intended for highly computationally intensive objective functions (>20 s evaluation time).
+Description: ppso, (Parallel) Particle Swarm Optimization, provides optimization capabilities for a given objective function f. It adjusts the parameter vector p to produce a minimum value of f. \nThis algorithm especially excells for multidimensional (multi-parameter) functions with many local extrema. The parallelized version builds on Rmpi and is intended for highly computationally intensive objective functions (>20 s evaluation time).
 Depends: R (>= 2.8.0)
 Suggests: Rmpi (>= 0.5-7), rgl, lhs
 License:  WTFPL

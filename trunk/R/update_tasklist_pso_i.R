@@ -103,7 +103,6 @@ update_tasklist_pso_i=function()                        #update particle positio
       return()
    }
 
-   if(max(which(completed_particles))>2) browser()
    
    # Update the particle velocity and position
    for (i in which(completed_particles))

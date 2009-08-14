@@ -35,7 +35,7 @@ do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro
   
 eval(parse(text=paste(c("update_tasklist_pso=",deparse(update_tasklist_pso_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
 eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))  #this creates local version of the function init_particles (see explanation there)
-if ((!is.null(break_file)) & (file.exists(break_file)))      #delete break_file, if existent
+if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
 
 evals_since_lastsave=0                    #for counting function evaluations since last save of project file
@@ -54,17 +54,16 @@ evals_since_lastsave=0                    #for counting function evaluations sin
     .Last <- function(){
       if (is.loaded("mpi_initialize")){
           if (mpi.comm.size(1) > 0){
-              print("Please use mpi.close.Rslaves() to close slaves.")
+              #print("Please use mpi.close.Rslaves() to close slaves.")
               mpi.close.Rslaves()
           }
-          print("Please use mpi.quit() to quit R")
-          .Call("mpi_finalize")
+          #print("Please use mpi.quit() to quit R")
+          #.Call("mpi_finalize")
       }
     }
   
     print(paste(mpi.comm.size()-1,"slaves spawned"))
-    
-    #options(error=.Last)     #close rmpi on errors
+    options(error=.Last)     #close rmpi on errors
   
     slavefunction <- function() {
         # Note the use of the tag for sent slave_messages:

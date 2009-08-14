@@ -36,7 +36,7 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
   
 eval(parse(text=paste(c("update_tasklist_pso=",deparse(update_tasklist_pso_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
 eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))  #this creates local version of the function init_particles (see explanation there)
-if ((!is.null(break_file)) & (file.exists(break_file)))      #delete break_file, if existent
+if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
 
 

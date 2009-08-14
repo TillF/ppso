@@ -69,6 +69,9 @@ init_particles_i=function(lhc_init=FALSE)
         X_gbest[] = X_lbest[min_fitness_index[1],]
         assign("X_gbest",X_gbest,parent.frame())
         assign("fitness_gbest",fitness_gbest,parent.frame())
+        
+        if (all(V[min_fitness_index,]==0)) 
+           V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that a particle doesn't stand still
       }
     }
   }

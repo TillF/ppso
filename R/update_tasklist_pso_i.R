@@ -5,7 +5,7 @@ update_tasklist_pso_i=function()                        #update particle positio
 #for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
 
 {
-   if ((!is.null(break_file)) & (file.exists(break_file)))      #check if interrupt by user is requested
+   if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       assign("break_flag","user interrupt",parent.frame())   
    
    completed_particles=status==1                   #mark completed particles
@@ -112,7 +112,6 @@ update_tasklist_pso_i=function()                        #update particle positio
      V[i,] = w*V[i,] +
              C1*R1*(X_lbest[i,] - X[i,]) +
              C2*R2*(X_gbest - X[i,])
-     if (all(V==0)) V[i,]= runif(min=-0.01, max=0.01)*Vmax else       #ensure that a particle doesn't stand still
      V[i,] = V[i,] * min(1,abs(Vmax/V[i,]))        #limit to maximum velocity
      X[i,] = X[i,] + V[i,]
    }

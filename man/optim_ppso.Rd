@@ -5,10 +5,10 @@
 \alias{optim_ppso_robust}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-optim_pso
+optim_pso, optim_ppso, optim_ppso_robust
 }
 \description{
-Optimize a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f
+\code{optim_pso}, \code{optim_ppso}, and \code{optim_ppso_robust} optimize a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f
 }
 \usage{
 optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4), load_projectfile="try", break_file=NULL)

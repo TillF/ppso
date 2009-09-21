@@ -82,6 +82,8 @@ update_tasklist_pso_i=function()                        #update particle positio
    if (min(iterations) >= max_number_of_iterations)
        break_flag="max iterations reached"
 
+   if (!is.null(max_number_function_calls) && (sum(iterations) >= max_number_function_calls))
+       break_flag="max number of function calls reached"
    
 
     assign("evals_since_lastsave",evals_since_lastsave+sum(completed_particles),parent.frame())

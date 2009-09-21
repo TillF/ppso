@@ -138,10 +138,21 @@ Till Francke <francke_at_uni-potsdam.de>
 #simple application
 	result = optim_pso(objective_function=sample_function, projectfile=NULL, logfile=NULL)
 	print (result)
+	result = optim_dds(objective_function=sample_function, projectfile=NULL, logfile=NULL)
+	print (result)
+
+  	result = optim_dds(objective_function=sample_function)
+	print (result)
+
+
 
 #simple application with visualisation
 	result = optim_pso(objective_function=sample_function, projectfile=NULL, do_plot="rgl")
 	print (result)
+	
+	result = optim_dds(objective_function=sample_function, max_number_of_iterations=200,do_plot="rgl",load_projectfile="no")
+	print (result)
+
 
 #writing and resuming from project file
 	projectfile	=tempfile()

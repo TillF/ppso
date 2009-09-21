@@ -1,5 +1,5 @@
 sample_function <-
-function(param_vec,fast=FALSE)          #objective function to be minimized
+function(param_vec,maxwaittime=0)          #objective function to be minimized
 {
   obj=0
   for (i in 1:NROW(param_vec))
@@ -15,15 +15,15 @@ function(param_vec,fast=FALSE)          #objective function to be minimized
 #    error("error in objective function simulated by slave ",mpi.comm.rank())
 #  }
 
-  if (!fast)
+  if (maxwaittime>0)  #function to be run on slaves, with random delay
   {
-    maxwaittime=1               #function to be run on slaves, with random delay
     starttime=Sys.time()
     waittime= runif(1,0,maxwaittime)
     while (as.numeric(Sys.time()-starttime)<waittime)
     {
     }
   }
+  
   return(obj)
 }
 

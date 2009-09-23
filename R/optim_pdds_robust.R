@@ -1,43 +1,41 @@
-optim_ppso_robust <-
-function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=5, max_number_function_calls=NULL, w=1,  C1=2, C2=2, abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
-   wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
+optim_pdds_robust <-
+function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=50, max_number_function_calls=NULL, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
+   parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)),lhc_init=FALSE,
   #runtime & display parameters
-do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, nslaves=3)
-# do particle swarm optimization
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, nslaves=3)
+# do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
   
  # #algorithm parameters
-#    number_of_particles=40
-#    max_number_of_iterations=5
-#    w=1                             #inertia constant
-#    C1=2                            #cognitive components
-#    C2=2                            #social component
+#    number_of_particles=40         #number of DDS-thread that are tracked
+#    max_number_of_iterations=5    #maximum number of calls to objective function (per DDS-thread)
+#    r=0.2                             #neighbourhood size perturbation parameter 
 #    #abort criteria
 #    abstol=-Inf                      #minimum absolute improvement between iterations  (default: -Inf)
 #    reltol=-Inf                       #minimum absolute improvement between iterations (default: -Inf)
 #    max_wait_iterations=50    #number of iterations, within these an improvement of the above described quality has to be achieved (default:number_of_iterations)
 #    #parallel options
-#    wait_complete_iteration=FALSE    #wait for evaluation of all particles (complete iteration) before new iteration is started
 #    objective_function=sample_function  #
 #  
 #  #problem parameters
 #    number_of_parameters=2
 #    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters))     #matrix containing lower and uppaer boundary for each parameter
-#    Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3    #maximum velocity
 #  
 #  #runtime & display parameters
 #    do_plot=c(NULL,"base","rgl")             #enable 3D-plot of response surface and search progress (didactical purpose, only for two-parameter search and fast objective function. "base works only with  wait_complete_iteration=TRUE)
 #    do_plot=NULL
 #    wait_for_keystroke=FALSE                  #waiting for keystroke between iterations
 #    logfile="log.txt"                         #logfile for optional logging of all model runs
-#    nslaves=3                                      #number of rmpi slaves to spawn (default -1: as many as possible)
+
 #  
 
 
-eval(parse(text=paste(c("update_tasklist_pso=",deparse(update_tasklist_pso_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
+
+eval(parse(text=paste(c("update_tasklist_dds=",deparse(update_tasklist_dds_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
 eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))  #this creates local version of the function init_particles (see explanation there)
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
+
 
 evals_since_lastsave=0                    #for counting function evaluations since last save of project file
 
@@ -147,11 +145,12 @@ X_gbest     =array(Inf,number_of_parameters)            #global optimum
 
 break_flag=NULL       #flag indicating if a termination criterium has been reached
 
-# Initialize the global and local fitness to the worst possible
- fitness_gbest = Inf;
- fitness_lbest[] = Inf
+# Initialize the local fitness to the worst possible
+fitness_lbest[] = Inf
+fitness_gbest = min(fitness_lbest);
 
 init_particles(lhc_init)  #initialize velocities and particle positions
+
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
@@ -165,7 +164,7 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves) else nslaves=NULL           
 
 while ((closed_slaves < nslaves) )
 {
-      update_tasklist_pso()   #update particle speeds and positions based on available results
+      update_tasklist_dds()   #update particle positions based on available results
       tobecomputed=status==0
       while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
       {
@@ -173,23 +172,15 @@ while ((closed_slaves < nslaves) )
             current_particle=which.min(iterations[tobecomputed])   #treat particles with low number of itereations first
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
             slave_id=idle_slaves[length(idle_slaves)]                     #get free slave        
-#            browser()
             mpi.remote.exec(cmd=perform_task,task=list(objective_function,X[current_particle,]),slave_id=slave_id,ret=FALSE)        #set slave to listen mode
             idle_slaves=idle_slaves[-length(idle_slaves)]                         #remove this slave from list
             status            [current_particle]=2               #mark this particle as "in progress"
             node_id           [current_particle]=slave_id        #store slave_id of this task
             computation_start [current_particle]=Sys.time()      #store time of start of this computation
-            #print(paste("command sent to slave",slave_id))
           }   
-          update_tasklist_pso()   #update particle speeds and positions based on available results
+          update_tasklist_dds()   #update particle speeds and positions based on available results
           
-#          starttime=Sys.time()
-#          while (as.numeric(Sys.time()-starttime)<waittime)
-#          {
-#          }
-         
           tobecomputed=status==0
-         flush.console()
       } 
 
       if (!is.null(break_flag)) break

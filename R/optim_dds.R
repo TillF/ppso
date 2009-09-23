@@ -1,29 +1,25 @@
-optim_pso <-
-function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=5, max_number_function_calls=NULL, w=1,  C1=2, C2=2, abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
-   wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
+optim_dds <-
+function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=50, max_number_function_calls=NULL, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
+   parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)),lhc_init=FALSE,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL)
-# do particle swarm optimization
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL)
+# do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
   
  # #algorithm parameters
-#    number_of_particles=40
-#    max_number_of_iterations=5
-#    w=1                             #inertia constant
-#    C1=2                            #cognitive components
-#    C2=2                            #social component
+#    number_of_particles=40         #number of DDS-thread that are tracked
+#    max_number_of_iterations=5    #maximum number of calls to objective function (per DDS-thread)
+#    r=0.2                             #neighbourhood size perturbation parameter 
 #    #abort criteria
 #    abstol=-Inf                      #minimum absolute improvement between iterations  (default: -Inf)
 #    reltol=-Inf                       #minimum absolute improvement between iterations (default: -Inf)
 #    max_wait_iterations=50    #number of iterations, within these an improvement of the above described quality has to be achieved (default:number_of_iterations)
 #    #parallel options
-#    wait_complete_iteration=FALSE    #wait for evaluation of all particles (complete iteration) before new iteration is started
 #    objective_function=sample_function  #
 #  
 #  #problem parameters
 #    number_of_parameters=2
 #    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters))     #matrix containing lower and uppaer boundary for each parameter
-#    Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3    #maximum velocity
 #  
 #  #runtime & display parameters
 #    do_plot=c(NULL,"base","rgl")             #enable 3D-plot of response surface and search progress (didactical purpose, only for two-parameter search and fast objective function. "base works only with  wait_complete_iteration=TRUE)
@@ -34,7 +30,7 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 #  
 
   
-eval(parse(text=paste(c("update_tasklist_pso=",deparse(update_tasklist_pso_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
+eval(parse(text=paste(c("update_tasklist_dds=",deparse(update_tasklist_dds_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
 eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))  #this creates local version of the function init_particles (see explanation there)
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
@@ -103,21 +99,10 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
 
 while (is.null(break_flag))
 {
-  if (wait_complete_iteration)      #evaluate all tasks before updateing
-  {    
-      fitness_X=apply(X,1,objective_function)
-      status    [] =1      #mark as "finished"
-      iterations[] =iterations[]+1        #increase iteration counter
-      update_tasklist_pso()   #update particle speeds and positions based on available results
-  } else
-  for (current_particle in 1:number_of_particles)      #do updates of tasks between single evaluations
-  {
-    fitness_X [current_particle] =objective_function(X[current_particle,])
-    status    [current_particle] =1      #mark as "finished"
-    iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
-    update_tasklist_pso()   #update particle speeds and positions based on available results
-  }
-    
+    fitness_X=apply(X,1,objective_function)
+    status    [] =1      #mark as "finished"
+    iterations[] =iterations[]+1        #increase iteration counter
+    update_tasklist_dds()   #update particle positions based on available results
 }      
       
    

@@ -1,3 +1,10 @@
+0.9-7
+introduced parallel DDS
+fixed bug in DDS (overreflection)
+introduced max_number_function_calls
+fixed bug concerning existence of logfile
+revised docu
+
 0.9-6
 included simple DDS
 included more and corrected sample functions for testing

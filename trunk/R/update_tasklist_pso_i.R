@@ -1,8 +1,8 @@
 #internal function: update particle positions and velocities according to newly available results
 update_tasklist_pso_i=function()                        #update particle positions for the next iteration based on all available results
-#note: this function reads and writes to non-local variables (i.e. varaibles declared in the calling function, usually optim_p*)
+#note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
-#for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
+#for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)
 
 {
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested

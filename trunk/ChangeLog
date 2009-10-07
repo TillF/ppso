@@ -1,3 +1,8 @@
+0.9-8
+fixed severe DDS-bug (error in probabilty of decision varibale to be included)
+added DDS-pre-search (initialisation)
+minor clarifications
+
 0.9-7
 introduced parallel DDS
 fixed bug in DDS (overreflection)

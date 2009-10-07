@@ -1,15 +1,15 @@
-#internal function: update particle positions and velocities according to newly available results
-update_tasklist_dds_i=function()                        #update particle positions for the next iteration based on all available results
-#note: this function reads and writes to non-local variables (i.e. varaibles declared in the calling function, usually optim_p*)
+#internal function: update list of "particle positions" that need to be recorded
+update_tasklist_dds_i=function()                        
+#note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
-#for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
+#for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)
 
 {
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       assign("break_flag","user interrupt",parent.frame())   
    
    completed_particles=status==1                   #mark completed particles
-   if (all(completed_particles==FALSE)) return()                   #no results available...don't update
+   if (all(completed_particles==FALSE)) return()                   #no new results available...don't update tasks
 
     if (!is.null(logfile))        #append to logfile
       write.table(file = logfile, cbind(format(computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(X[completed_particles, ],ncol=ncol(X))  , fitness_X[completed_particles],
@@ -71,8 +71,8 @@ update_tasklist_dds_i=function()                        #update particle positio
         break_flag="converged"  #status=3
    }
 
-   if (min(iterations) >= max_number_of_iterations)
-       break_flag="max iterations reached"
+#   if (min(iterations) >= max_number_of_iterations)
+#       break_flag="max iterations reached"
 
    if (!is.null(max_number_function_calls) && (sum(iterations) >= max_number_function_calls))
        break_flag="max number of function calls reached"
@@ -96,13 +96,13 @@ update_tasklist_dds_i=function()                        #update particle positio
       return()
    }
 
-   
-   # Update the particle velocity and position
-
-   parameter_ranges=r*(parameter_bounds[,2]-parameter_bounds[,1]) #parameter range times neighbourhood pertubation parameter
+   # Update the particle position
+   parameter_ranges=r*(parameter_bounds[,2]-parameter_bounds[,1]) #neighbourhood pertubation parameter * parameter range  
    for (i in which(completed_particles))
    {
-    p_inclusion=1-log(iterations[i])/log(max_number_of_iterations)    #probability of including a parameter in th search
+    p_inclusion=1-log(iterations[i])/log(max_number_function_calls)    #probability of including a parameter in the search
+#   p_inclusion=1-log(iterations[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
+
     dimensions_to_search=NULL
     for (d in 1:number_of_parameters) 
     if (runif(1)<=p_inclusion)
@@ -121,7 +121,6 @@ update_tasklist_dds_i=function()                        #update particle positio
       params_overreflected=params_below_bounds & (X[i,] > parameter_bounds[,2])    #identify parameters that are now above bounds due to the reflection
       X[i,params_overreflected]=parameter_bounds[params_overreflected,1]                                              #set to lower bounds
     }
-
     {
       X[i,params_above_bounds]=parameter_bounds[params_above_bounds,2]+(parameter_bounds[params_above_bounds,2]-X[i,params_above_bounds])
       params_overreflected=params_above_bounds & (X[i,] < parameter_bounds[,1])    #identify parameters that are now below bounds due to the reflection

@@ -2,7 +2,7 @@
 rastrigin_function <-
 function(param_vec,maxwaittime=0)          #objective function to be minimized
 {
-  dimen=length(param_vec);
+#  dimen=length(param_vec);
 
   obj=sum(param_vec^2-cos(2*pi*param_vec))
 

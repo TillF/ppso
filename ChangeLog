@@ -1,3 +1,17 @@
+0.9-84
+optional error catching in optim_pso, optim_ppso_robust, optim_pdds_robust
+
+0.9-83
+allows the specification of working directories for the slaves
+fixed bug in formatting output of logfile in optim_pdds
+
+0.9-82
+fixed faulty import of project file when recommencing run that lead to corrupted results
+check existence of lhs package
+
+0.9-81
+parallel DDS: probability of decision variable to be included is computed based on the max number of function calls allotted to the thread, not the total number
+
 0.9-8
 fixed severe DDS-bug (error in probabilty of decision varibale to be included)
 added DDS-pre-search (initialisation)

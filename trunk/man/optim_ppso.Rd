@@ -3,9 +3,11 @@
 \alias{optim_pso}
 \alias{optim_ppso}
 \alias{optim_ppso_robust}
-%- Also NEED an '\alias' for EACH other topic documented here.
+\alias{optim_dds}
+\alias{optim_pdds_robust}
+
 \title{
-optim_pso, optim_ppso, optim_ppso_robust
+optim_pso, optim_ppso, optim_ppso_robust, optim_dds, optim_pdds_robust
 }
 \description{
 \code{optim_pso} optimizes a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f using Particle Swarm Optimization.
@@ -13,12 +15,12 @@ optim_pso, optim_ppso, optim_ppso_robust
 \code{optim_dds} optimizes using a Dynamically Dimensioned Search with  \code{optim_pdds_robust} being the parallel version.
 }
 \usage{
-optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL)
-optim_ppso       (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, nslaves = 3)
-optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, nslaves = 3)
+optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, tryCall=FALSE)
+optim_ppso       (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL,                nslaves = -1)
+optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, tryCall=FALSE, nslaves = -1, working_dir_list=NULL)
 
-optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40,                               max_number_function_calls= 500, r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL)
-optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40,                               max_number_function_calls= 500, r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, nslaves = 3)
+optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500, r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL)
+optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40,                               max_number_function_calls= 500, r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, tryCall=FALSE, nslaves = -1, working_dir_list=NULL,...)
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -87,6 +89,16 @@ minimum number of function evaluations to compute before the \code{projectfile} 
 Name of a file file that will cause the termination of the optimization when it is encountered. Useful for interrupting a running optimization gracefully. At start-up, a existing file of this name will be deleted.
 }
 
+  \item{tryCall}{
+If set to \code{TRUE}, \code{objective_function} is executed using \code{try}, which yield error messages if \code{objective_function} fails on any slave. For very fast evaluating functions, this may increase evaluation time.
+}
+
+
+
+#  \item{...}{
+#Further arguments passed to \code{objective_function}.
+#}
+
 for \code{optim_ppso*}:
 
   \item{w}{
@@ -110,8 +122,14 @@ for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
   \item{nslaves}{
 number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
 }
+  \item{working_dir_list}{
+ String matrix of working directories the slaves should change to. First column holds the hostname, the second column the directory.\\ 
+ A hostname may be listed several times, if more than one slave is run on it. If a host is listed less times than it has slaves, the last entry will be recycled as necessary.\\ 
+ The entry "default" denotes the directory all slaves of unlisted hosts will be change to. If missing, slaves on unlisted hosts will stay in the directory they are spawned in (don't ask me which this is).\\
+ Beware: "~" apparently doesn't work, so rather use the full path. 
+}
 
-(didactical purpose, only for two-parameter search and fast objective function. "base" works only with  wait_complete_iteration=TRUE)
+(didactical purpose, only for two-parameter search and fast objective function, non-parallelized. )
   \item{do_plot}{
 enable 3D-plot of response surface and search progress.
 "base": use basic 3D-plotting functions.
@@ -128,8 +146,8 @@ recommended use:
 \item{optim_pso}: serial computation for fast objective functions and single core machines
 \item{optim_ppso}			: parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       
 \item{optim_ppso_robust}	: slightly slower than \code{optim_ppso}, but presumably more robust (to be tested), since it doesn't leave slaves in "listen" mode after crashes
-
 }
+
 \value{
 \code{ret_val=list(value,par,iterations)}
 %%  ~Describe the value returned
@@ -146,7 +164,7 @@ recommended use:
 Till Francke <francke_at_uni-potsdam.de>
 }
 \note{
-- still in development, comments welcome -
+- still in development, use with care, comments welcome -
 }
 
 
@@ -166,7 +184,7 @@ Till Francke <francke_at_uni-potsdam.de>
 #simple application with visualisation
 	result = optim_pso(objective_function=rastrigin_function, projectfile=NULL, logfile=NULL, do_plot="rgl")
 	print (result)
-	result = optim_dds(objective_function=rastrigin_function, projectfile=NULL, logfile=NULL, do_plot="rgl")
+	result = optim_dds(objective_function=rastrigin_function, projectfile=NULL, logfile=NULL, do_plot="base")
 	print (result)
 
 
@@ -189,6 +207,15 @@ Till Francke <francke_at_uni-potsdam.de>
 	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)    #"robust" version
 	print (result)
 	
+  working_dir_list=rbind( #specify working directory
+  c(host="default", wd="/tmp/defaultdir"),
+  c(host="host1", wd="/home/me/firstthread"),
+  c(host="host1", wd="/home/me/firstthread"),
+  c(host="host2", wd="/home/me/onlyonethread")
+  )
+
+	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=2, working_dir_list=working_dir_list)    
+
 
 }
 

@@ -17,7 +17,7 @@ update_tasklist_pso_i=function()                        #update particle positio
     node_id[completed_particles]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
 
-  if (("base" %in% do_plot) & wait_complete_iteration)       #do base plotting
+  if (("base" %in% do_plot))       #do base plotting
     {
       res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
       points(trans3d(X[,1], X[,2], fitness_X, pmat = res), col = 2, pch =16)

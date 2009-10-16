@@ -2,7 +2,7 @@ optim_pdds_robust <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)),lhc_init=FALSE,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, nslaves=3)
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, tryCall=FALSE, nslaves=-1, working_dir_list=NULL)
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
   
@@ -30,74 +30,15 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 
 
 eval(parse(text=paste(c("update_tasklist_dds=",deparse(update_tasklist_dds_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
-eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))  #this creates local version of the function init_particles (see explanation there)
+eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))       #this creates local version of the function init_particles (see explanation there)
+eval(parse(text=paste(c("prepare_mpi_cluster=",deparse(prepare_mpi_cluster_i)))))  #this creates local version of the function prepare_mpi_cluster_i (see explanation there)
+
+
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
 
 
 evals_since_lastsave=0                    #for counting function evaluations since last save of project file
-
-prepare_mpi_cluster=function(nslaves)
-{
-  if (!is.loaded("mpi_initialize")) {         
-  library("Rmpi")
-  }
- 
-  if (nslaves==-1) nslaves=mpi.universe.size() else  # Spawn as many slaves as possible
-  if (nslaves>mpi.universe.size()) warning("Number of specified slaves exceeds number of available slaves.")
-
-  mpi.spawn.Rslaves(nslaves=nslaves)
-
-     .Last <- function(){
-      if (is.loaded("mpi_initialize")){
-          if (mpi.comm.size(1) > 0){
-              #print("Please use mpi.close.Rslaves() to close slaves.")
-              mpi.close.Rslaves()
-          }
-          #print("Please use mpi.quit() to quit R")
-          #.Call("mpi_finalize")
-      }
-    }
-  
-   print(paste(mpi.comm.size()-1,"slaves spawned"))
-   options(error=.Last)     #close rmpi on errors
-
-  
-  #options(error=.Last)     #close rmpi on errors
-
-  perform_task <- function(task,slave_id) {
-      # Note the use of the tag for sent slave_messages:
-      #     1=ready_for_task, 2=done_task, 3=exiting
-      # Note the use of the tag for received slave_messages:
-      #     1=task, 2=done_tasks
-
-      #write.table(file=paste("slave",slave_id),"contacted")
-
-      if (!(mpi.comm.rank() %in% slave_id)) return(1) #only the adressed slaves should go to "listen" mode
-      #write.table(file=paste("slave",slave_id),"activated")
-      
-      # Receive a task
-      #write.table(file=paste("slave",slave_id),"task received")
-          results=task[[1]](task[[2]])
-          # perform the task with the respective parameters, and create results
-
-          # Send the results back as a task_done slave_message
-          #ii isend
-          mpi.send.Robj(results,0,2)
-  }
-  
-
-  mpi.bcast.Robj2slave(objective_function)               #send function to slave
-  mpi.bcast.Robj2slave(perform_task)               #send function to slave
-
- 
-  assign("closed_slaves",         0,parent.frame())        #set globals
-  nslaves = mpi.comm.size()-1
-  assign("nslaves",         nslaves,parent.frame())        #  
-  assign("idle_slaves",   1:nslaves,parent.frame())        #
-}
-
-
 
 
 # visualisation
@@ -152,7 +93,7 @@ break_flag=NULL       #flag indicating if a termination criterium has been reach
 fitness_lbest[] = Inf
 fitness_gbest = min(fitness_lbest);
 
-if (!is.null(nslaves)) prepare_mpi_cluster(nslaves) else nslaves=NULL             #initiate cluster, if enabled
+if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
@@ -200,7 +141,7 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
           status    [current_particle] =1      #mark as "finished"
           idle_slaves=c(idle_slaves,slave_id)
           
-          if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[current_particle],"%Y-%m-%d %H:%M:%S"), matrix(X,ncol=ncol(X))  , fitness_X[current_particle], 
+          if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[current_particle],"%Y-%m-%d %H:%M:%S"), matrix(X[current_particle,],ncol=number_of_parameters)  , fitness_X[current_particle], 
           node_id[current_particle]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
        }
@@ -278,6 +219,10 @@ while ((closed_slaves < nslaves) )
       else if (tag == 3) {    # A slave has closed down.
           #print(paste("slave",slave_id,"closed gracefully."))
           closed_slaves <- closed_slaves + 1
+      }
+      else if (tag == 4) {    # error occured during the execution of the objective function
+          break_flag=paste("Abort, slave",slave_id,":",slave_message)
+          closed_slaves=nslaves
       }
 }      
       

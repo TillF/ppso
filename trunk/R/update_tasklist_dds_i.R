@@ -100,8 +100,8 @@ update_tasklist_dds_i=function()
    parameter_ranges=r*(parameter_bounds[,2]-parameter_bounds[,1]) #neighbourhood pertubation parameter * parameter range  
    for (i in which(completed_particles))
    {
-    p_inclusion=1-log(iterations[i])/log(max_number_function_calls)    #probability of including a parameter in the search
-#   p_inclusion=1-log(iterations[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
+#    p_inclusion=1-log(iterations[i])/log(max_number_function_calls)    #probability of including a parameter in the search
+    p_inclusion=1-log(iterations[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
 
     dimensions_to_search=NULL
     for (d in 1:number_of_parameters) 

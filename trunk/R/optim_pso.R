@@ -2,7 +2,7 @@ optim_pso <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=5, max_number_function_calls=NULL, w=1,  C1=2, C2=2, abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL)
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL,tryCall=FALSE)
 # do particle swarm optimization
 {
   
@@ -73,7 +73,7 @@ if (do_plot[1]!=FALSE)
 #initialisation
 X             =array(0,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
 V             =array(0,c(number_of_particles,number_of_parameters))  #V: velocity in parameter space
-fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
+fitness_X     =array(Inf,number_of_particles)            #fitness of each particle at current iteration
 status        =array(0,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
 computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
 node_id       =array(0,number_of_particles)                              #node number of worker / slave
@@ -105,14 +105,36 @@ while (is.null(break_flag))
 {
   if (wait_complete_iteration)      #evaluate all tasks before updateing
   {    
-      fitness_X=apply(X,1,objective_function)
+      if (tryCall)                  #catch error message during evaluation (slower)
+      {
+        fitness_X=try(apply(X,1,objective_function),silent=TRUE)
+        if (!is.numeric(fitness_X))                      #an error occured during execution
+        {
+          break_flag=paste("aborted: ",as.character(fitness_X))    
+          next
+        }        
+      }
+      else
+        fitness_X=apply(X,1,objective_function)     #no error message during evaluation (faster)
+
       status    [] =1      #mark as "finished"
       iterations[] =iterations[]+1        #increase iteration counter
       update_tasklist_pso()   #update particle speeds and positions based on available results
   } else
   for (current_particle in 1:number_of_particles)      #do updates of tasks between single evaluations
   {
-    fitness_X [current_particle] =objective_function(X[current_particle,])
+    if (tryCall)                  #catch error message during evaluation (slower)
+    {
+      fitness_X [current_particle]=try(objective_function(X[current_particle,]),silent=TRUE)
+      if (!is.numeric(fitness_X [current_particle]))                      #an error occured during execution
+      {
+        break_flag=paste("aborted: ",as.character(fitness_X [current_particle]))    
+        break
+      }        
+    }
+    else
+      fitness_X [current_particle] =objective_function(X[current_particle,])     #no error message during evaluation (faster)
+  
     status    [current_particle] =1      #mark as "finished"
     iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
     update_tasklist_pso()   #update particle speeds and positions based on available results

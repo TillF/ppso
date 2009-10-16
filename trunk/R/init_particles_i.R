@@ -77,6 +77,11 @@ init_particles_i=function(lhc_init=FALSE)
   }
   if (noninitialised_particles>0)          #no or not sufficient particles initialized from file -> do random initialisation
   {
+    if (!("lhs" %in% installed.packages()[,"Package"]))        #check existence of lhs package
+    {
+      warning("Package lhs not installed, lhs_init disabled")
+      lhc_init=FALSE
+    }
     random_numbers=array(0,c(noninitialised_particles,number_of_parameters))
     if (!lhc_init)         #purely random initialisation
       for (i in 1 : noninitialised_particles)
@@ -105,7 +110,7 @@ init_particles_i=function(lhc_init=FALSE)
   assign("V",                 V,                parent.frame())
   assign("X_lbest",           X_lbest,          parent.frame())
   assign("fitness_lbest",     fitness_lbest,    parent.frame())
-  assign("fitness_X",         node_id,          parent.frame())
+  assign("fitness_X",         fitness_X,          parent.frame())
   assign("status",            status,           parent.frame())
   assign("computation_start", computation_start,parent.frame())
   assign("node_id",           node_id,          parent.frame())

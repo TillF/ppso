@@ -1,5 +1,5 @@
 #internal function: update list of "particle positions" that need to be recorded
-update_tasklist_dds_i=function()                        
+update_tasklist_dds_i=function(loop_counter=1)                        
 #note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 #for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)
@@ -11,7 +11,7 @@ update_tasklist_dds_i=function()
    completed_particles=status==1                   #mark completed particles
    if (all(completed_particles==FALSE)) return()                   #no new results available...don't update tasks
 
-    if (!is.null(logfile))        #append to logfile
+    if (!is.null(logfile) & loop_counter!=0)        #append to logfile, when eneabled and when not in very first loop
       write.table(file = logfile, cbind(format(computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(X[completed_particles, ],ncol=ncol(X))  , fitness_X[completed_particles],
     node_id[completed_particles]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
@@ -85,8 +85,8 @@ update_tasklist_dds_i=function()
       if (!is.null(projectfile))
       {
         col.names=c(paste("best_par_",1:ncol(X),sep=""),"best_objective_function", paste("current_par_",1:ncol(X),sep=""),
-        paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id")
-        write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
+          paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
+        write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, iterations), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
     }
 

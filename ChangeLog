@@ -1,3 +1,6 @@
+0.9-85
+for serial DDS: added options for resuming interrupted calibration runs (not fully tested yet)
+
 0.9-84
 optional error catching in optim_pso, optim_ppso_robust, optim_pdds_robust
 

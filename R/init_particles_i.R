@@ -11,12 +11,12 @@ init_particles_i=function(lhc_init=FALSE)
 {
   X=X                              #create local copies of parent variables 
   V=V
-  X_lbest         =X_lbest
-  fitness_lbest   =fitness_lbest   
-  fitness_X       =fitness_X       
-  status          =status          
+  X_lbest          =X_lbest
+  fitness_lbest    =fitness_lbest   
+  fitness_X        =fitness_X       
+  status           =status          
   computation_start=computation_start
-  node_id         =node_id         
+  node_id          =node_id         
 
   noninitialised_particles=number_of_particles      #number of particles that need to be initialized  (default:all)
   
@@ -29,25 +29,27 @@ init_particles_i=function(lhc_init=FALSE)
     } else
     {
       proj_file_content=read.table(file = projectfile, header=TRUE,sep="\t")
-      if (ncol(proj_file_content)!=3*number_of_parameters+5)
+      if (ncol(proj_file_content)!=3*number_of_parameters+5+1)
       {
-        warning(paste(projectfile,"doesn't seem to match, particles will be initialized randomly."))
-        lhc_init=FALSE
+        warning("The number of parameters in", paste(projectfile,"doesn't seem to match, particles will be initialized randomly."))
+#        lhc_init=FALSE
       }   else
       {
         assign("load_projectfile","loaded",                parent.frame())  #indicator that the project file has successfully been loaded
-        if (nrow(proj_file_content)>number_of_particles)
+        if(!exists("number_of_particles_org")) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initiallized is larger than the actual number used for calculation due to the pre-run
+        if (nrow(proj_file_content)>number_of_particles_org)
         {
-          warning(paste(projectfile,"contains more than the specified number of",number_of_particles,"particles, truncated."))
-          proj_file_content=proj_file_content[1:number_of_particles,]
+          warning(paste(projectfile,"contains more than the specified number of",number_of_particles_org,"particles, truncated."))
+          proj_file_content=proj_file_content[1:number_of_particles_org,]
         }
-        noninitialised_particles=number_of_particles-nrow(proj_file_content)
+        noninitialised_particles=number_of_particles_org-nrow(proj_file_content)
         if (noninitialised_particles > 0)
         {
-          warning(paste(projectfile,"contains less than the specified number of",number_of_particles,"particles, missing particles will be initialized randomly."))
+          warning(paste(projectfile,"contains less than the specified number of",number_of_particles_org,", ",noninitialised_particles,"particle(s) will be initialized randomly."))
+          noninitialised_particles=number_of_particles-nrow(proj_file_content)      #for DDS-initialisation, more particles have to be initialized for the pre-run
           proj_file_content=proj_file_content[c(1:nrow(proj_file_content),rep(nrow(proj_file_content),noninitialised_particles)),]
           proj_file_content[(nrow(proj_file_content)-noninitialised_particles+1):nrow(proj_file_content),1]=   Inf # used as marker which particles have been initialised 
-          lhc_init=FALSE
+#          lhc_init=FALSE
         }
   
         X_lbest           =as.matrix(proj_file_content[,1:number_of_parameters    +0])
@@ -55,10 +57,11 @@ init_particles_i=function(lhc_init=FALSE)
         X                 =as.matrix(proj_file_content[,(1:number_of_parameters)  +(1*number_of_parameters+1)])
         V                 =as.matrix(proj_file_content[,(1:number_of_parameters)  +(2*number_of_parameters+1)])
         fitness_X         =as.vector(proj_file_content[, 1                        +(3*number_of_parameters+1)])
-        status            =as.vector(proj_file_content[, 1                        +(3*number_of_parameters+2)])
-        computation_start =proj_file_content[, 1                        +(3*number_of_parameters+3)]
+        status            =as.vector(proj_file_content$status)
+        computation_start =proj_file_content$begin_execution             #not yet used
         computation_start =strptime(computation_start,"%Y-%m-%d %H:%M:%S") #convert string to POSIX
-        node_id           =as.vector(proj_file_content[, 1                        +(3*number_of_parameters+4)])
+        node_id           =as.vector(proj_file_content$node_id)
+        iterations        =as.vector(proj_file_content$function_calls)
         
         node_id[status==2]=0    #any slaves marked as "in computation" in the projectfile are reset to "to be done"
         status [status==2]=0
@@ -70,7 +73,7 @@ init_particles_i=function(lhc_init=FALSE)
         assign("X_gbest",X_gbest,parent.frame())
         assign("fitness_gbest",fitness_gbest,parent.frame())
         
-        if (all(V[min_fitness_index,]==0)) 
+        if (exists("Vmax") & all(V[min_fitness_index,]==0)) 
            V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that a particle doesn't stand still
       }
     }
@@ -102,6 +105,7 @@ init_particles_i=function(lhc_init=FALSE)
     fitness_lbest [tobeinitialized] = Inf
     status        [tobeinitialized] = 0          
     node_id       [tobeinitialized] = 0
+    iterations    [tobeinitialized] = 0
   }
   
   if (all(status==3)) status[]=0      #enable continuation of computation even if it had been finished properly before
@@ -110,8 +114,9 @@ init_particles_i=function(lhc_init=FALSE)
   assign("V",                 V,                parent.frame())
   assign("X_lbest",           X_lbest,          parent.frame())
   assign("fitness_lbest",     fitness_lbest,    parent.frame())
-  assign("fitness_X",         fitness_X,          parent.frame())
+  assign("fitness_X",         fitness_X,        parent.frame())
   assign("status",            status,           parent.frame())
-  assign("computation_start", computation_start,parent.frame())
+  assign("computation_start", computation_start,parent.frame())    #not yet used
   assign("node_id",           node_id,          parent.frame())
+  assign("iterations",        iterations,       parent.frame())
 }

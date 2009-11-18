@@ -96,6 +96,7 @@ update_tasklist_pso_i=function()                        #update particle positio
         paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id")
         write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
+      if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }
 
    if (!is.null(break_flag))

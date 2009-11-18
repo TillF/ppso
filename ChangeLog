@@ -1,3 +1,6 @@
+0.9-86
+included plot_optimization_progress (stand-alone and integrated into optim_*); excluded init_visualisation
+
 0.9-85
 for serial DDS: added options for resuming interrupted calibration runs (not fully tested yet)
 

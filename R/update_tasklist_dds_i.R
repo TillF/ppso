@@ -11,13 +11,22 @@ update_tasklist_dds_i=function(loop_counter=1)
    completed_particles=status==1                   #mark completed particles
    if (all(completed_particles==FALSE)) return()                   #no new results available...don't update tasks
 
-    if (!is.null(logfile) & loop_counter!=0)        #append to logfile, when eneabled and when not in very first loop
+    if (!is.null(logfile) & loop_counter!=0)        #append to logfile, when enabled and when not in very first loop
       write.table(file = logfile, cbind(format(computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(X[completed_particles, ],ncol=ncol(X))  , fitness_X[completed_particles],
     node_id[completed_particles]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
 
   if (("base" %in% do_plot))       #do base plotting
     {
+      if (exists("plot_window") && (plot_window %in% dev.list()))     #activate progress_plot window, if already open
+      {
+        dev.set(plot_window)
+      }  else
+      {
+        windows()
+        assign("plot_window", dev.cur(), pos=parent.frame())
+      }
+
       res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
       points(trans3d(X[,1], X[,2], fitness_X, pmat = res), col = 2, pch =16)
     }
@@ -88,6 +97,7 @@ update_tasklist_dds_i=function(loop_counter=1)
           paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
         write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, iterations), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
+      if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }
 
    if (!is.null(break_flag))

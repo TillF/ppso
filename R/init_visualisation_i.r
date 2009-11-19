@@ -32,7 +32,6 @@ init_visualisation_i=function()
     }
 
   }
-  
 
   if(is.list(plot_progress) || plot_progress==TRUE)
   {
@@ -40,10 +39,13 @@ init_visualisation_i=function()
     {
       warning("Output of logfile and projectfile must be enabled for plot_progress. plot_progress disabled.")
       plot_progress<<-NULL
+    } else
+    {
+      if (is.logical(plot_progress)) plot_progress<<-NULL #remove TRUE, if  plot_progress has only been used as a binary variable
+      plot_progress<<-as.list(plot_progress)
+      plot_progress[["logfile"]]    <<-logfile              #prepare parameters for plot_optimization_progress
+      plot_progress[["projectfile"]]<<-projectfile
     }
-    plot_progress<<-as.list(plot_progress)
-    plot_progress[["logfile"]]    <<-logfile              #prepare parameters for plot_optimization_progress
-    plot_progress[["projectfile"]]<<-projectfile
   } else plot_progress<<-NULL
 
 }

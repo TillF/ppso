@@ -34,10 +34,14 @@ when not set, the function is evaluated at maximum speed, otherwise a random del
 \value{
 Function value as defined by the respective function.}
 \references{
-\item{Ackley, D. H. (1987),} {A Connectionist Machine for Genetic Hillclimbing, Kluwer, Norwell, MA.}
-\item{Griewank, A. O. (1981),} {Generalized descent for global optimization,  Journal of Optimization Theory and Applications, 34, 11-39.}
-\item{Rastrigin, L. A. (1974),} {Systems of Extremal Control, Nauka, Moscow.  in Russian.}
+  Ackley, D. H. (1987).
+  A Connectionist Machine for Genetic Hillclimbing, Kluwer, Norwell, MA.
+  Griewank, A. O. (1981).
+  Generalized descent for global optimization,  \emph{Journal of Optimization Theory and Applications}, 34, 11-39.
+  Rastrigin, L. A. (1974).
+  Systems of Extremal Control, Nauka, Moscow.  \emph{in Russian}.
 }
+
 \author{
 Till Francke
 }

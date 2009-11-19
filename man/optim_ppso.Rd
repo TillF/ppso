@@ -163,13 +163,15 @@ recommended use:
   \item{break_flag }{criterium that caused the termination of the algorithm (\code{c("max iterations reached", "converged", "all slaves gone", "user interrupt")})}
 }
 \references{
-%% ~put references to the literature/web site here ~
+  Tolson, B. A., and C. A. Shoemaker (2007).
+  Dynamically dimensioned search algorithm for computationally efficient watershed model calibration, \emph{Water Resour. Res.,}
+  43, W01413, doi:10.1029/2005WR004723.  \url{http://www.agu.org/journals/wr/wr0701/2005WR004723/}
 }
 \author{
 Till Francke <francke_at_uni-potsdam.de>
 }
 \note{
-- still in development, use with care, comments welcome -
+- still in development, use with care, all comments welcome -
 }
 
 

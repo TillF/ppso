@@ -2,7 +2,7 @@ optim_dds <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles= 1, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)),lhc_init=FALSE,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCAll=FALSE)
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
   
@@ -131,7 +131,18 @@ if (!is.null(break_flag)) break_flag=paste("nothing done; project file fulfills 
 
 while (is.null(break_flag))
 {
-    fitness_X=apply(X,1,objective_function)
+    if (tryCall)                  #catch error message during evaluation (slower)
+    {
+      fitness_X=try(apply(X,1,objective_function),silent=TRUE)
+      if (!is.numeric(fitness_X))                      #an error occured during execution
+      {
+        break_flag=paste("aborted: ",as.character(fitness_X))    
+        next
+      }        
+    }
+    else
+      fitness_X=apply(X,1,objective_function)     #no error message during evaluation (faster)
+  
     status    [] =1      #mark as "finished"
     iterations[] =iterations[]+1        #increase iteration counter
     update_tasklist_dds()   #update particle positions based on available results

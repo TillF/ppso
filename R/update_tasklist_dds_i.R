@@ -23,7 +23,7 @@ update_tasklist_dds_i=function(loop_counter=1)
         dev.set(plot_window)
       }  else
       {
-        windows()
+        x11()
         assign("plot_window", dev.cur(), pos=parent.frame())
       }
 

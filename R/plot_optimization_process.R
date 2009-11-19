@@ -45,7 +45,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
       extension="ps"
       progress_plot_filename=paste(progress_plot_filename,".ps",sep="")
     }
-    savePlot(filename = progress_plot_filename, type = extension, device = dev.cur(),  restoreConsole = TRUE)
+    savePlot(filename = progress_plot_filename, type = extension, device = dev.cur())
   }
 
 #do goodness plot
@@ -106,6 +106,6 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
       extension="ps"
       goodness_plot_filename=paste(goodness_plot_filename,".ps",sep="")
     }
-    savePlot(filename = goodness_plot_filename, type = extension, device = dev.cur(),  restoreConsole = TRUE)
+    savePlot(filename = goodness_plot_filename, type = extension, device = dev.cur())
   }
 }

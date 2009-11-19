@@ -39,11 +39,12 @@ depicts the variation of each parameter versus the number of function evaluation
   \item{goodness_plot}{
 depicts the value of each parameter versus the objective function, giving clues to parameter sensitivity. Additionally, the distribution of the workload of the slaves and their time for function evaluations is displayed.
 }
-The plots are saved when \code{progress_plot_filename} or \item{goodness_plot_filename}, respectively, are specified. This is especially usefule in conjunction with internal calls by {\code{\link{optim_pso}}} & Co. to supervise an optimization run. If the file names contain an extension supported by savePlot, this file format is used, otherwise a PostScript file is stored.
+The plots are saved when \code{progress_plot_filename} or \code{goodness_plot_filename}, respectively, are specified. This is especially usefule in conjunction with internal calls by {\code{\link{optim_pso}}} & Co. to supervise an optimization run. If the file names contain an extension supported by savePlot, this file format is used, otherwise a PostScript file is stored.
 }
 
 \value{
 None.
+}
 
 \author{
 Till Francke
@@ -63,4 +64,5 @@ Till Francke
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~optimization }
+
 

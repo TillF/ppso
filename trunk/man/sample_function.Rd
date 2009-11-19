@@ -34,11 +34,13 @@ when not set, the function is evaluated at maximum speed, otherwise a random del
 \value{
 Function value as defined by the respective function.}
 \references{
-  Ackley, D. H. (1987).
+  Ackley, D. H. (1987)
   A Connectionist Machine for Genetic Hillclimbing, Kluwer, Norwell, MA.
-  Griewank, A. O. (1981).
+  
+  Griewank, A. O. (1981)
   Generalized descent for global optimization,  \emph{Journal of Optimization Theory and Applications}, 34, 11-39.
-  Rastrigin, L. A. (1974).
+  
+  Rastrigin, L. A. (1974)
   Systems of Extremal Control, Nauka, Moscow.  \emph{in Russian}.
 }
 
@@ -117,4 +119,4 @@ function(param_vec,maxwaittime=0)          #objective function to be minimized
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~optimization }
-\keyword{ ~example }% __ONLY ONE__ keyword per line
+%\keyword{ ~example }% __ONLY ONE__ keyword per line

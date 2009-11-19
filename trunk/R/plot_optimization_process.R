@@ -20,7 +20,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     dev.set(progress_window)
   }  else
   {
-    windows()
+    x11()
     assign("progress_window", dev.cur(), pos=parent.frame())
   }
 
@@ -54,7 +54,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     dev.set(goodness_window)
   }  else
   {
-    windows()
+    x11()
     assign("goodness_window", dev.cur(), pos=parent.frame())
   }
   par(mfcol=c(mfrow,mfcol))

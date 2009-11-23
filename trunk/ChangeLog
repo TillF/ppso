@@ -1,3 +1,6 @@
+0.9-87
+unified structure of DDS and PSO-projectfiles (PSO's didn't contain function_calls)
+
 0.9-86
 included plot_optimization_progress (stand-alone and integrated into optim_*); excluded init_visualisation
 

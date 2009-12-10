@@ -31,7 +31,7 @@ init_particles_i=function(lhc_init=FALSE)
       proj_file_content=read.table(file = projectfile, header=TRUE,sep="\t")
       if (ncol(proj_file_content)!=3*number_of_parameters+5+1) #best_par, current_par, current_velocity)*number_of_parameters + best_objective_function+current_objective_function+status+begin_execution+node_id+function_calls
       {
-        warning("The number of parameters in", paste(projectfile,"doesn't seem to match, particles will be initialized randomly."))
+        warning(paste("The number of parameters in", projectfile,"doesn't seem to match, particles will be initialized randomly."))
 #        lhc_init=FALSE
       }   else
       {

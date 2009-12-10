@@ -1,5 +1,5 @@
 #test function after Ackley (1987), minimum value=-20-e
-plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95)
+plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 {
   logfile_content    =read.table(file=  logfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
   projectfile_content=read.table(file=projectfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
@@ -8,6 +8,15 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   #add positions of current minima of particles to dataset
   for (i in 1:nrow(projectfile_content))  #find at which function call number the current particle positions have been achieved
      projectfile_content$function_call_number[i]=max(-1,which(apply(apply(logfile_content[,1+(1:number_of_parameters)], 1, get("-"),t(projectfile_content[i,1:number_of_parameters]))==0,2,all)))
+
+  if (verbose)
+  {
+    curbest=which.min(projectfile_content$best_objective_function)
+    print(paste("current optimum found: ",projectfile_content$best_objective_function[curbest]))
+    print(" at parameter set:")
+    print(projectfile_content[curbest,1:number_of_parameters])
+    print(paste(" found at function call ",projectfile_content$function_call_number[curbest],"from",max(projectfile_content$function_call_number),"executed calls."))
+  }
 
   necessary_plots=number_of_parameters+2    #+2: one for objective function, one for legend
   mfrow=ceiling(sqrt(3/4*necessary_plots))    #determine number of rows and columns in plot window
@@ -84,12 +93,23 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   execution_time=list()
   for (worker in workers)
   {
-    curr_worker=logfile_content$worker==worker
+    curr_worker=logfile_content$worker==worker             #get index vector to current worker
     if (length(curr_worker)<2) workers=workers[-which(workers==worker)] else   #this worker has only one call so far, omit from further treatment
     execution_time[[worker]]=diff(logfile_content$time[curr_worker])
+    non_positives=execution_time[[worker]]<=0
+    execution_time[[worker]][non_positives]=max(0.5,0.5*min(execution_time[[worker]][!non_positives]))    #set 0 execution times to something positive
+
+    if (verbose)
+    {
+      print(paste("execution time worker",worker,"(min,median,max):"))
+      cat("\t");print(min(execution_time[[worker]]))
+      cat("\t");print(median(execution_time[[worker]]))
+      cat("\t");print(max(execution_time[[worker]]))
+    }
   }
+ 
   if (length(workers)>0)
-    plot(range(logfile_content$time),range(unlist(execution_time)),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep="")) #prepare plot window
+    plot(range(logfile_content$time),range(unlist(execution_time)),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log="y") #prepare plot window
 
   for (worker in workers)
   {

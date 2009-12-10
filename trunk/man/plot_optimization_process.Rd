@@ -3,7 +3,7 @@
 \alias{plot_optimization_process}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-plot_optimization_process
+Visualisation of optimization process
 }
 \description{
 Visualisation of optimization process based on log files. \code{plot_optimization_process} is also used by {\code{\link{optim_pso}}}  & Co. when used with \code{plot_optimization_process=TRUE}.

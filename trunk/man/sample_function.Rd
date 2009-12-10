@@ -7,7 +7,7 @@
 \alias{rastrigin_function}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Sample functions
+Sample functions for testing purposes
 }
 \description{
 Just demo functions that can be optimized for testing purposes.

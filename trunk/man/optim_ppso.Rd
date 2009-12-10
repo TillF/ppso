@@ -7,7 +7,7 @@
 \alias{optim_pdds_robust}
 
 \title{
-optim_pso, optim_ppso, optim_ppso_robust, optim_dds, optim_pdds_robust
+(Parallel) optimization using Particle Swarm Optimization or Dynamically Dimensioned Search
 }
 \description{
 \code{optim_pso} optimizes a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f using Particle Swarm Optimization.
@@ -197,7 +197,7 @@ Till Francke <francke_at_uni-potsdam.de>
 
 #writing and resuming from project file
 	projectfile	=tempfile()
-	result = optim_pso(objective_function=rastrigin_function, projectfile=projectfile, logfile=NULL)		#start optimization, generate project file
+	result = optim_pso(objective_function=rastrigin_function, projectfile=projectfile, logfile=NULL, load_projectfile="no")		#start optimization, generate project file
 	print (result)
 
 	result = optim_pso(objective_function=rastrigin_function, projectfile=projectfile, logfile=NULL, load_projectfile="yes")		#resume optimization from previous project file

@@ -1,3 +1,6 @@
+0.9-88
+updated docu; improved plot_optimization_progress; fixed bug concerning resuming optimization with dds*
+
 0.9-87
 unified structure of DDS and PSO-projectfiles (PSO's didn't contain function_calls)
 

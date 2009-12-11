@@ -1,3 +1,6 @@
+0.9-89
+fixed numerous bugs concerning resuming optimization with dds*
+
 0.9-88
 updated docu; improved plot_optimization_progress; fixed bug concerning resuming optimization with dds*
 

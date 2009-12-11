@@ -102,9 +102,9 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     if (verbose)
     {
       print(paste("execution time worker",worker,"(min,median,max):"))
-      cat("\t");print(min(execution_time[[worker]]))
-      cat("\t");print(median(execution_time[[worker]]))
-      cat("\t");print(max(execution_time[[worker]]))
+      cat("\t");print(min   (execution_time[[worker]]))
+      cat("\t");print(median(execution_time[[worker]]))     
+      cat("\t");print(max   (execution_time[[worker]]))
     }
   }
  

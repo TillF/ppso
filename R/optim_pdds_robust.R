@@ -46,7 +46,7 @@ init_visualisation()                      #prepare visualisation, if selected
 
 
 #initialisation
-init_calls=ceiling(max(0.005*max_number_function_calls,5)) #number of function calls used to initialise each particle
+init_calls=ceiling(max(0.005*max_number_function_calls,5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
 number_of_particles=number_of_particles*init_calls          #increase number of particles for pre-search
 
@@ -72,17 +72,24 @@ fitness_gbest = min(fitness_lbest);
 if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
 
 
-#presearch / initialisation
+#presearch / initialisation: 
+#  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
+#  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
   init_particles(lhc_init)  #initialize particle positions
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
     write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
-  number_of_particles=number_of_particles_org         #bakc to original number of particles
 
-  #restore array dimensions according tor original number of particles
-  X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
-  fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
+  #restore array dimensions according to original number of particles
+  number_of_particles=number_of_particles_org         #back to original number of particles
+  X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters)        # current optimum of each particle so far
+  fitness_lbest =       fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
 
-  status=0  #mark all as "to be computed"
+  offseti=(0:(number_of_particles-1))*init_calls      #for extracting every init_calls'th element from the pre-run results (which contain up to number_of_particles*init_calls runs)
+  uninitialized_particles= which(fitness_lbest==Inf)                      #"real" particles that still need to be initialized with a function value
+  pre_run_computations = rep(1:number_of_particles,init_calls) %in% uninitialized_particles  #"trial" particles that need their function value to be computed (this results in flagging "init_calls" runs for every particle not yet initialized)
+  if (sum(pre_run_computations)>max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
+  status_org=status  #  store original contents
+  status[]=1; status[which(pre_run_computations)]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
 
   while ((closed_slaves < nslaves) & any(status==0))    #do initialisation runs
   {
@@ -108,7 +115,6 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
         slave_message_info <- mpi.get.sourcetag()
         slave_id <- slave_message_info[1]
         tag      <- slave_message_info[2]
-    
        
         if (tag == 2) {      #retrieve result
           current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
@@ -126,25 +132,30 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
         }
   }   
   
-  max_number_function_calls=max_number_function_calls-init_calls*number_of_particles  #reduce number of available calls due to pre-search
-  for (i in 1:number_of_particles)  #initialize each particle with the best of its pre-runs
+  if (max_number_function_calls<0)
+  {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
+    iterations=0
+    max_number_function_calls=abs(max_number_function_calls)
+  } #else                                                    #indicator for "continue computations"
+    #max_number_function_calls=max_number_function_calls-sum(pre_run_computations)  #reduce number of available calls due to pre-search
+
+  for (i in uninitialized_particles)  #initialize each uninitialized particle with the best of its "init_calls" pre-runs
   {
-    offseti=(i-1)*init_calls
-    min_fitness_index = which.min(fitness_X[(1:init_calls)+offseti])
-    fitness_lbest[i] =fitness_X [min_fitness_index+offseti]
-    X_lbest      [i,]=X         [min_fitness_index+offseti,]
+    min_fitness_index = which.min(fitness_X[i+offseti])            
+    fitness_lbest[i] =fitness_X [i+offseti[min_fitness_index]]
+    X_lbest      [i,]=X         [i+offseti[min_fitness_index],]
+    iterations   [i] = init_calls                                 #count the pre-runs, too
   }
-        
   
-  #restore array dimensions according tor original number of particles
+  #restore array dimensions according to original number of particles
   X             =X_lbest  #X: position in parameter space                          
-  V             =array(0,c(           number_of_particles,number_of_parameters))  #V: velocity in parameter space
-  fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
-  status        =array(0,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
+  V             =matrix(V[1:number_of_particles,],ncol=number_of_parameters)   #V: velocity in parameter space
+  fitness_X     =fitness_X[1:number_of_particles]            #optimum of each particle at current iteration
+  status        =array(1,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
   computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
-  iterations    =array(0,number_of_particles)  # iteration counter for each particle
-   
+  iterations    =iterations[1:number_of_particles]  # iteration counter for each particle
+  status=status_org  #  restore original contents 
 
 
 # actual search

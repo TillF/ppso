@@ -31,25 +31,24 @@ init_particles_i=function(lhc_init=FALSE)
       proj_file_content=read.table(file = projectfile, header=TRUE,sep="\t")
       if (ncol(proj_file_content)!=3*number_of_parameters+5+1) #best_par, current_par, current_velocity)*number_of_parameters + best_objective_function+current_objective_function+status+begin_execution+node_id+function_calls
       {
-        warning(paste("The number of parameters in", projectfile,"doesn't seem to match, particles will be initialized randomly."))
+        warning(paste("The number of parameters in", projectfile,"doesn't seem to match, all particles will be initialized randomly."))
 #        lhc_init=FALSE
       }   else
       {
         assign("load_projectfile","loaded",                parent.frame())  #indicator that the project file has successfully been loaded
-        if(!exists("number_of_particles_org")) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initiallized is larger than the actual number used for calculation due to the pre-run
+        if(!exists("number_of_particles_org")) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
         if (nrow(proj_file_content)>number_of_particles_org)
         {
           warning(paste(projectfile,"contains more than the specified number of",number_of_particles_org,"particles, truncated."))
           proj_file_content=proj_file_content[1:number_of_particles_org,]
         }
-        noninitialised_particles=number_of_particles_org-nrow(proj_file_content)
+        noninitialised_particles=number_of_particles_org-nrow(proj_file_content)               #number of particles that need to be initialized
         if (noninitialised_particles > 0)
         {
           warning(paste(projectfile,"contains less than the specified number of",number_of_particles_org,", ",noninitialised_particles,"particle(s) will be initialized randomly."))
-          noninitialised_particles=number_of_particles-nrow(proj_file_content)      #for DDS-initialisation, more particles have to be initialized for the pre-run
-          proj_file_content=proj_file_content[c(1:nrow(proj_file_content),rep(nrow(proj_file_content),noninitialised_particles)),]
-          proj_file_content[(nrow(proj_file_content)-noninitialised_particles+1):nrow(proj_file_content),1]=   Inf # used as marker which particles have been initialised 
-#          lhc_init=FALSE
+          noninitialised_particles=number_of_particles-nrow(proj_file_content)      #for DDS-initialisation, more particles (number_of_particles instead of number_of_particles_org) have to be initialized for the pre-run
+          proj_file_content=proj_file_content[c(1:nrow(proj_file_content),rep(nrow(proj_file_content),noninitialised_particles)),names(proj_file_content)!="begin_execution"]       #just to shape the dataframe and used as marker which particles have to be initialised 
+#          proj_file_content[(nrow(proj_file_content)-noninitialised_particles+1):nrow(proj_file_content),]=   Inf # used as marker which particles have been initialised 
         }
   
         X_lbest           =as.matrix(proj_file_content[,1:number_of_parameters    +0])
@@ -70,11 +69,11 @@ init_particles_i=function(lhc_init=FALSE)
         min_fitness_index = which.min(fitness_lbest)
         fitness_gbest =min(fitness_lbest)          
         X_gbest[] = X_lbest[min_fitness_index[1],]
-        assign("X_gbest",X_gbest,parent.frame())
+        assign("X_gbest",X_gbest,parent.frame())                         #write variable to scope of calling function
         assign("fitness_gbest",fitness_gbest,parent.frame())
         
         if (exists("Vmax") & all(V[min_fitness_index,]==0)) 
-           V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that a particle doesn't stand still
+           V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that the best particle doesn't stand still
       }
     }
   }
@@ -95,7 +94,8 @@ init_particles_i=function(lhc_init=FALSE)
       random_numbers=randomLHS(noninitialised_particles, number_of_parameters)             #generate normalized latin hypercube realisations
     }
   
-    tobeinitialized=(number_of_particles-noninitialised_particles+1):number_of_particles
+#    tobeinitialized=(number_of_particles-noninitialised_particles+1):number_of_particles      #index to particles that need to be initialized
+    tobeinitialized=X[,1]==Inf      #index to particles that need to be initialized
     # Initialize the particle positions
     #X[tobeinitialized,] = parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * random_numbers
     X[tobeinitialized,] = t(parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * t(random_numbers)) #strangely, this transposing is necessary
@@ -108,7 +108,7 @@ init_particles_i=function(lhc_init=FALSE)
     iterations    [tobeinitialized] = 0
   }
   
-  if (all(status==3)) status[]=0      #enable continuation of computation even if it had been finished properly before
+  if (all(status==3)) status[]=0      #continue computation even if it had been finished completely before
   #"export" the variables
   assign("X",                 X,                parent.frame())
   assign("V",                 V,                parent.frame())

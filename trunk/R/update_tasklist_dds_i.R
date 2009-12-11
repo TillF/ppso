@@ -1,5 +1,5 @@
 #internal function: update list of "particle positions" that need to be recorded
-update_tasklist_dds_i=function(loop_counter=1)                        
+update_tasklist_dds_i <- function(loop_counter=1)                        
 #note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 #for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)

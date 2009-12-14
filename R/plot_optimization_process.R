@@ -1,4 +1,4 @@
-#test function after Ackley (1987), minimum value=-20-e
+#plot optimization progress based on log file
 plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 {
   logfile_content    =read.table(file=  logfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
@@ -94,8 +94,14 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   for (worker in workers)
   {
     curr_worker=logfile_content$worker==worker             #get index vector to current worker
-    if (length(curr_worker)<2) workers=workers[-which(workers==worker)] else   #this worker has only one call so far, omit from further treatment
+    if (sum(curr_worker)<2) 
+    {
+      workers=workers[-which(workers==worker)]    #this worker has only one call so far, omit from further treatment
+      next
+    } else
     execution_time[[worker]]=diff(logfile_content$time[curr_worker])
+
+    
     non_positives=execution_time[[worker]]<=0
     execution_time[[worker]][non_positives]=max(0.5,0.5*min(execution_time[[worker]][!non_positives]))    #set 0 execution times to something positive
 

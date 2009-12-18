@@ -1,7 +1,7 @@
 Package: ppso
 Type: Package
 Title: Particle Swarm Optimization and Dynamically Dimensioned Search for R, optionally using parallel computing based on Rmpi
-Version: 0.9-891
+Version: 0.9-892
 Date: 2009-12-14
 Author: Till Francke <francke@uni-potsdam.de>
 Maintainer: Till Francke <francke@uni-potsdam.de>

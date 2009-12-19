@@ -116,13 +116,20 @@ while ((closed_slaves < nslaves) )
   
      
       if (tag == 2) {      #retrieve result
-        current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
-        #ii: deal with obsolete results, deal with error message, determine average runtime
-        fitness_X [current_particle] = slave_message
-        status    [current_particle] =1      #mark as "finished"
-        iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
-        #print(paste(slave_id,"ready"))
-        idle_slaves=c(idle_slaves,slave_id)
+      current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
+          if (length(current_particle) ==0)
+          {
+            current_particle =which(node_id==slave_id)
+            print("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle])
+          }
+             #ii: deal with obsolete results, deal with error message, determine average runtime
+          fitness_X [current_particle] = slave_message
+          status    [current_particle] =1      #mark as "finished"
+                   
+ #why is this disabled here?         if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[current_particle],"%Y-%m-%d %H:%M:%S"), matrix(X[current_particle,],ncol=number_of_parameters)  , fitness_X[current_particle], 
+ #         node_id[current_particle]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
+          
+          idle_slaves=c(idle_slaves,slave_id)
      }
       else if (tag == 3) {    # A slave has closed down.
           #print(paste("slave",slave_id,"closed gracefully."))

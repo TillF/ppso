@@ -1,3 +1,6 @@
+0.9-893
+caught unexpected behaviour when a slave returns a result that is apparently not needed (*_robust) - reason still unclear
+
 0.9-892
 fixed initialisation bug introduced in 0.9-89
 

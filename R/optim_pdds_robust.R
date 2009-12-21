@@ -122,7 +122,8 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
           if (length(current_particle) ==0)
           {
             current_particle =which(node_id==slave_id)
-            print("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle])
+            print(paste("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle]))
+            dump.frames(dumpto = "last.dump", to.file = TRUE)
           }
              #ii: deal with obsolete results, deal with error message, determine average runtime
           fitness_X [current_particle] = slave_message
@@ -210,7 +211,8 @@ while ((closed_slaves < nslaves) )
           if (length(current_particle) ==0)
           {
             current_particle =which(node_id==slave_id)
-            print("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle])
+            print(paste("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle]))
+            dump.frames(dumpto = "last.dump", to.file = TRUE)
           }
         #ii: deal with obsolete results, deal with error message, determine average runtime
         fitness_X [current_particle] = slave_message

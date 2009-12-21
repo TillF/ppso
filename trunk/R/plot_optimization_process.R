@@ -1,4 +1,7 @@
 #plot optimization progress based on log file
+#use like:
+#plot_optimization_progress(logfile="ppso.log", projectfile="ppso.pro", cutoff_quantile=0.8, verbose=T)
+
 plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 {
   logfile_content    =read.table(file=  logfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
@@ -103,7 +106,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 
     
     non_positives=execution_time[[worker]]<=0
-    execution_time[[worker]][non_positives]=max(0.5,0.5*min(execution_time[[worker]][!non_positives]))    #set 0 execution times to something positive
+    execution_time[[worker]][non_positives]=max(0.5,0.5*min(execution_time[[worker]][!non_positives]))    #set execution times that are zero to something positive
 
     if (verbose)
     {
@@ -120,7 +123,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   for (worker in workers)
   {
     curr_worker=which(logfile_content$worker==worker)
-    points(logfile_content$time[curr_worker[-length(curr_worker)]],execution_time[[worker]],col=pal[worker],pch=(19:25)[(worker-1) %% 7 +1])
+    points(logfile_content$time[curr_worker[-length(curr_worker)]],execution_time[[worker]],col=pal[worker],pch=".") #pch=(19:25)[(worker-1) %% 7 +1]
   }
 
   if (!is.null(goodness_plot_filename))

@@ -51,7 +51,7 @@ number_of_particles_org=number_of_particles                 #save original numbe
 number_of_particles=number_of_particles*init_calls          #increase number of particles for pre-search
 
 
-X             =array(0,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
+X             =array(Inf,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
 V             =array(0,c(           number_of_particles,number_of_parameters))  #V: velocity in parameter space
 fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
 status        =array(0,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
@@ -75,6 +75,7 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
+#  browser()
   init_particles(lhc_init)  #initialize particle positions
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
     write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
@@ -157,11 +158,11 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
   X             =X_lbest  #X: position in parameter space                          
   V             =matrix(V[1:number_of_particles,],ncol=number_of_parameters)   #V: velocity in parameter space
   fitness_X     =fitness_X[1:number_of_particles]            #optimum of each particle at current iteration
-  status        =array(1,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
+#  status        =array(1,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
   computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
   iterations    =iterations[1:number_of_particles]  # iteration counter for each particle
-  status=status_org  #  restore original contents 
+  status=status_org[1:number_of_particles]  #  restore original contents 
 
 
 # actual search
@@ -201,7 +202,16 @@ while ((closed_slaves < nslaves) )
   
      
       if (tag == 2) {      #retrieve result
-        current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
+        if (length(node_id) != length(status)) browser()
+#          print(node_id)
+ #         print(status)
+ #         flush.console()
+          current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
+          if (length(current_particle) ==0)
+          {
+            current_particle =which(node_id==slave_id)
+            print("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle])
+          }
         #ii: deal with obsolete results, deal with error message, determine average runtime
         fitness_X [current_particle] = slave_message
         status    [current_particle] =1      #mark as "finished"

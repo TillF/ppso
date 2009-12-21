@@ -47,7 +47,7 @@ init_visualisation()                      #prepare visualisation, if selected
 
 
 #initialisation
-X             =array(0,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
+X             =array(Inf,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
 V             =array(0,c(number_of_particles,number_of_parameters))  #V: velocity in parameter space
 fitness_X     =array(Inf,number_of_particles)            #fitness of each particle at current iteration
 status        =array(0,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress

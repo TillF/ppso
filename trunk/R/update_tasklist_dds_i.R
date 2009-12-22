@@ -119,7 +119,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
       dimensions_to_search=c(dimensions_to_search,d)    #add parameter to "neighbourhood" to be searched
     if (is.null(dimensions_to_search)) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter
     V[i,]=0
-#    browser()
+
     V[i,dimensions_to_search] = rnorm(length(dimensions_to_search))*parameter_ranges[dimensions_to_search]
     X[i,] = X_lbest[i,] + V[i,]
     #reflect parameter if out-of-bounds

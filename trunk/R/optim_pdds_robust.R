@@ -75,7 +75,6 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
-#  browser()
   init_particles(lhc_init)  #initialize particle positions
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
     write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
@@ -121,16 +120,17 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
           current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
           if (length(current_particle) ==0)
           {
-            current_particle =which(node_id==slave_id)
-            print(paste("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle]))
-            dump.frames(dumpto = "last.dump", to.file = TRUE)
+#            current_particle =which(node_id==slave_id)
+#            print(paste("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle]))
+#            dump.frames(dumpto = "last.dump", to.file = TRUE)
+          } else
+          {
+            #ii: deal with obsolete results, deal with error message, determine average runtime
+            fitness_X [current_particle] = slave_message
+            status    [current_particle] =1      #mark as "finished"
+            if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[current_particle],"%Y-%m-%d %H:%M:%S"), matrix(X[current_particle,],ncol=number_of_parameters)  , fitness_X[current_particle], 
+            node_id[current_particle]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)          
           }
-             #ii: deal with obsolete results, deal with error message, determine average runtime
-          fitness_X [current_particle] = slave_message
-          status    [current_particle] =1      #mark as "finished"
-                   
-          if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[current_particle],"%Y-%m-%d %H:%M:%S"), matrix(X[current_particle,],ncol=number_of_parameters)  , fitness_X[current_particle], 
-          node_id[current_particle]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
           
           idle_slaves=c(idle_slaves,slave_id)
 
@@ -174,6 +174,12 @@ it_last_improvent=0               #counter for counting iterations since last im
 
 while ((closed_slaves < nslaves) )
 {
+#      if (any((node_id ==0) & (status!=0)) | any((node_id !=0) & (status==0)))
+#      {
+#        print(paste("strange combination"))
+#        dump.frames(dumpto = "dump4", to.file = TRUE)
+#      }
+
       update_tasklist_dds()   #update particle positions based on available results
       tobecomputed=status==0
       while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
@@ -182,6 +188,12 @@ while ((closed_slaves < nslaves) )
             current_particle=which.min(iterations[tobecomputed])   #treat particles with low number of itereations first
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
             slave_id=idle_slaves[length(idle_slaves)]                     #get free slave        
+#            if (slave_id ==0)
+#            {
+#              print(paste("strange, slave_id is 0"))
+#              dump.frames(dumpto = "dump1", to.file = TRUE)
+#            }
+
             mpi.remote.exec(cmd=perform_task,task=list(objective_function,X[current_particle,]),slave_id=slave_id,ret=FALSE)        #set slave to listen mode
             idle_slaves=idle_slaves[-length(idle_slaves)]                         #remove this slave from list
             status            [current_particle]=2               #mark this particle as "in progress"
@@ -200,10 +212,15 @@ while ((closed_slaves < nslaves) )
       slave_message_info <- mpi.get.sourcetag()
       slave_id <- slave_message_info[1]
       tag      <- slave_message_info[2]
+#      if (slave_id ==0)
+#      {
+#        print(paste("strange, slave_id is 0"))
+#        dump.frames(dumpto = "dump2", to.file = TRUE)
+#      }
+
   
      
       if (tag == 2) {      #retrieve result
-        if (length(node_id) != length(status)) browser()
 #          print(node_id)
  #         print(status)
  #         flush.console()
@@ -212,12 +229,14 @@ while ((closed_slaves < nslaves) )
           {
             current_particle =which(node_id==slave_id)
             print(paste("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle]))
-            dump.frames(dumpto = "last.dump", to.file = TRUE)
+#            dump.frames(dumpto = "last.dump", to.file = TRUE)
+          } else
+          {
+            #ii: deal with obsolete results, deal with error message, determine average runtime
+            fitness_X [current_particle] = slave_message
+            status    [current_particle] =1      #mark as "finished"
+            iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
           }
-        #ii: deal with obsolete results, deal with error message, determine average runtime
-        fitness_X [current_particle] = slave_message
-        status    [current_particle] =1      #mark as "finished"
-        iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
         #print(paste(slave_id,"ready"))
         idle_slaves=c(idle_slaves,slave_id)
      }

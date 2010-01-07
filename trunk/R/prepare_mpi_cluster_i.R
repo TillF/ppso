@@ -14,6 +14,10 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL)
   if (nslaves>mpi.universe.size()) warning("Number of specified slaves exceeds number of available slaves.")
 
   mpi.spawn.Rslaves(nslaves=nslaves)
+  
+  while(mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #empty MPI queue if there is still something in there
+    slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
+
 
      .Last <- function(){
       if (is.loaded("mpi_initialize")){

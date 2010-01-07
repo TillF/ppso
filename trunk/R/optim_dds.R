@@ -70,6 +70,12 @@ fitness_gbest = min(fitness_lbest);
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
   init_particles(lhc_init)  #initialize particle positions
+  if (max_number_function_calls < 0)
+  {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
+    iterations[]=0
+    max_number_function_calls=abs(max_number_function_calls)
+  }
+  
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
     write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
 
@@ -81,7 +87,7 @@ fitness_gbest = min(fitness_lbest);
   offseti=(0:(number_of_particles-1))*init_calls      #for extracting every init_calls'th element from the pre-run results (which contain up to number_of_particles*init_calls runs)
   uninitialized_particles= which(fitness_lbest==Inf)                      #"real" particles that still need to be initialized with a function value
   pre_run_computations = rep(1:number_of_particles,init_calls) %in% uninitialized_particles  #"trial" particles that need their function value to be computed (this results in flagging "init_calls" runs for every particle not yet initialized)
-  if (sum(pre_run_computations)>max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
+  if (sum(pre_run_computations) >= max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
  
   if (any(pre_run_computations))
   {
@@ -93,12 +99,7 @@ fitness_gbest = min(fitness_lbest);
     node_id[pre_run_computations]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
   } 
 
-  if (max_number_function_calls<0)
-  {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
-    iterations=0
-    max_number_function_calls=abs(max_number_function_calls)
-  } #else                                                    #indicator for "continue computations"
-    #max_number_function_calls=max_number_function_calls-sum(pre_run_computations)  #reduce number of available calls due to pre-search
+  max_number_function_calls=max_number_function_calls-sum(pre_run_computations)  #reduce number of available calls due to pre-search
 
 
   for (i in uninitialized_particles)  #initialize each uninitialized particle with the best of its "init_calls" pre-runs
@@ -106,7 +107,6 @@ fitness_gbest = min(fitness_lbest);
     min_fitness_index = which.min(fitness_X[i+offseti])            
     fitness_lbest[i] =fitness_X [i+offseti[min_fitness_index]]
     X_lbest      [i,]=X         [i+offseti[min_fitness_index],]
-    iterations   [i] = init_calls                                 #count the pre-runs, too
   }
   
   #restore array dimensions according to original number of particles

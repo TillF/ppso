@@ -2,7 +2,7 @@ optim_ppso_robust <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=5, max_number_function_calls=NULL, w=1,  C1=2, C2=2, abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
   #runtime & display parameters
-do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves=-1, working_dir_list=NULL)
+do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL)
 # do particle swarm optimization
 {
   
@@ -33,14 +33,24 @@ do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro
 #    nslaves=3                                      #number of rmpi slaves to spawn (default -1: as many as possible)
 #  
 
+if (max_number_function_calls < number_of_particles)
+  stop("max_number_function_calls must be at least number_of_particles.")
 
 eval(parse(text=paste(c("update_tasklist_pso=",deparse(update_tasklist_pso_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
-eval(parse(text=paste(c("init_particles=",     deparse(init_particles_i)))))       #this creates local version of the function init_particles (see explanation there)
-eval(parse(text=paste(c("init_visualisation=",     deparse(init_visualisation_i)))))  #this creates local version of the function init_visualisation 
-eval(parse(text=paste(c("prepare_mpi_cluster=",deparse(prepare_mpi_cluster_i)))))  #this creates local version of the function prepare_mpi_cluster_i (see explanation there)
+eval(parse(text=paste(c("init_particles         =",deparse(init_particles_i      )))))       #this creates local version of the function init_particles (see explanation there)
+eval(parse(text=paste(c("init_visualisation     =",deparse(init_visualisation_i  )))))  #this creates local version of the function init_visualisation 
+eval(parse(text=paste(c("prepare_mpi_cluster    =",deparse(prepare_mpi_cluster_i )))))  #this creates local version of the function prepare_mpi_cluster_i (see explanation there)
+eval(parse(text=paste(c("check_execution_timeout=",deparse(check_execution_timeout_i)))))  #this creates local version of the function check_execution_time_i (see explanation there)
+eval(parse(text=paste(c("close_mpi              =",deparse(close_mpi_i)))))  #this creates local version of the function check_execution_time_i (see explanation there)
 
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
+
+if (!is.null(execution_timeout) && execution_timeout < 1)
+{
+  warning("execution_timeout must be > 1. Ignored.") 
+  execution_timeout=NULL
+}
 
 evals_since_lastsave=0                    #for counting function evaluations since last save of project file
 
@@ -62,6 +72,7 @@ X_gbest     =array(Inf,number_of_parameters)            #global optimum
 
 break_flag=NULL       #flag indicating if a termination criterium has been reached
 
+
 # Initialize the global and local fitness to the worst possible
  fitness_gbest = Inf;
  fitness_lbest[] = Inf
@@ -80,28 +91,23 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
 while ((closed_slaves < nslaves) )
 {
       update_tasklist_pso()   #update particle speeds and positions based on available results
+      if (!is.null(break_flag)) break
       tobecomputed=status==0
       while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
       {
           if (any(tobecomputed)) {
             current_particle=which.min(iterations[tobecomputed])   #treat particles with low number of itereations first
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
-            slave_id=idle_slaves[length(idle_slaves)]                     #get free slave        
+            slave_id=idle_slaves[1]                     #get free slave        
 #            browser()
             mpi.remote.exec(cmd=perform_task,task=list(fun=objective_function,parms=X[current_particle,],tryCall=tryCall),slave_id=slave_id,ret=FALSE)        #set slave to listen mode
-            idle_slaves=idle_slaves[-length(idle_slaves)]                         #remove this slave from list
+            idle_slaves=idle_slaves[-1]                         #remove this slave from list
             status            [current_particle]=2               #mark this particle as "in progress"
             node_id           [current_particle]=slave_id        #store slave_id of this task
             computation_start [current_particle]=Sys.time()      #store time of start of this computation
-            #print(paste("command sent to slave",slave_id))
           }   
           update_tasklist_pso()   #update particle speeds and positions based on available results
           
-#          starttime=Sys.time()
-#          while (as.numeric(Sys.time()-starttime)<waittime)
-#          {
-#          }
-         
           tobecomputed=status==0
          flush.console()
       } 
@@ -116,21 +122,28 @@ while ((closed_slaves < nslaves) )
   
      
       if (tag == 2) {      #retrieve result
-      current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
-          if (length(current_particle) ==0)
+        current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
+        if (length(current_particle) > 1)                                #rr   shouldn't occur
+          print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
+         else    
+        if (length(current_particle) ==0)                                #
+        {
+          if (node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
+             print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message))          
+          if (node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, from a terminated or reset slave
           {
-            current_particle =which(node_id==slave_id)
-            print("strange, slave",slave_id,"returned a result for particle",current_particle,", but its status is",status[current_particle])
-          }
-             #ii: deal with obsolete results, deal with error message, determine average runtime
+            idle_slaves=c(idle_slaves,slave_id)     #give the slave another chance
+            node_interruptions[slave_id,"status"] = 0
+          }   
+        } else
+        {
           fitness_X [current_particle] = slave_message
           status    [current_particle] =1      #mark as "finished"
-                   
- #why is this disabled here?         if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[current_particle],"%Y-%m-%d %H:%M:%S"), matrix(X[current_particle,],ncol=number_of_parameters)  , fitness_X[current_particle], 
- #         node_id[current_particle]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
-          
+          iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
+          if (!is.null(execution_timeout)) execution_times = rbind(execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),computation_start[current_particle],units="sec"))))   #monitor execution times
           idle_slaves=c(idle_slaves,slave_id)
-     }
+        }
+      }  
       else if (tag == 3) {    # A slave has closed down.
           #print(paste("slave",slave_id,"closed gracefully."))
           closed_slaves <- closed_slaves + 1
@@ -141,12 +154,12 @@ while ((closed_slaves < nslaves) )
       }
 }      
       
-  
+if ((closed_slaves==nslaves) && is.null(break_flag))
+  break_flag = "No or delayed response from slaves" 
 
 ret_val=list(value=fitness_gbest,par=X_gbest,iterations=min(iterations),break_flag=break_flag) 
   
-
-if (!is.null(nslaves)) mpi.close.Rslaves()    #close cluster, if enabled
+close_mpi()                        #diligently close Rmpi session
 
 return(ret_val) 
 }

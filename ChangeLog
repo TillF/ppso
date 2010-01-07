@@ -1,3 +1,16 @@
+0.9-90
+- improved finalizing MPI, which in some cases corrupted successive runs when R was not restarted
+- *: introduced optional timeout check for very slow or stuck slaves
+- correction of termination criteria (confusion iteration vs. function calls)
+- dds: removed duplicate logging of model calls
+- dds: corrected counting for function calls of pre-runs
+- parameter check for max_number_function_calls
+- *: sometimes excess function call(s) were issued - fixed
+- improved workload balancing
+- development of optim_ppso deprecated
+- optmization of sample functions
+
+
 0.9-894
 still an issue with resuming from projectfile, probably affecting all optim_*
 

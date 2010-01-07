@@ -5,13 +5,8 @@ function(param_vec,maxwaittime=0)          #objective function to be minimized
   obj=-5 * sin(r)/r 
 
   if (maxwaittime>0)  #function to be run on slaves, with random delay
-  {
-    starttime=Sys.time()
-    waittime= runif(1,0,maxwaittime)
-    while (as.numeric(Sys.time()-starttime)<waittime)
-    {
-    }
-  }
+    Sys.sleep(maxwaittime)
+
   return(obj)
 }
 

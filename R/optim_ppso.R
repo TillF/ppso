@@ -6,6 +6,9 @@ do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro
 # do particle swarm optimization
 {
 
+if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
+  stop("max_number_function_calls must be at least number_of_particles.")
+
  # #algorithm parameters
 #    number_of_particles=40
 #    max_number_of_iterations=5

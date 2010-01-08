@@ -1,5 +1,6 @@
 0.9-91
-fixed faulty global initialization that prevented usability
+- fixed faulty global initialization that prevented usability
+- corrected parameter check for max_number_function_calls
 
 0.9-90
 - improved finalizing MPI, which in some cases corrupted successive runs when R was not restarted

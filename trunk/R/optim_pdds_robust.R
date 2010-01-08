@@ -6,7 +6,7 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
-if (max_number_function_calls < number_of_particles)
+if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
   stop("max_number_function_calls must be at least number_of_particles.")
 
 eval(parse(text=paste(c("update_tasklist_dds    =",deparse(update_tasklist_dds_i )))))  #this creates local version of the function update_tasklist_pso (see explanation there)

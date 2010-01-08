@@ -1,3 +1,6 @@
+0.9-91
+fixed faulty global initialization that prevented usability
+
 0.9-90
 - improved finalizing MPI, which in some cases corrupted successive runs when R was not restarted
 - *: introduced optional timeout check for very slow or stuck slaves

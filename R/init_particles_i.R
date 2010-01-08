@@ -121,7 +121,7 @@ init_particles_i=function(lhc_init=FALSE)
   assign("node_id",           node_id,          parent.frame())
   assign("iterations",        iterations,       parent.frame())
   
-  node_interruptions=array(0,c(nslaves,2),dimnames=list(NULL,c("counter","status")))         #array for recording slave fitness
+  assign("node_interruptions",array(0,c(nslaves,2),dimnames=list(NULL,c("counter","status"))))         #array for recording slave fitness
   if (!exists("execution_timeout") || !is.null(execution_timeout))                          #monitor execution times
     assign("execution_times",        data.frame(slave_id=NULL,secs=NULL),       parent.frame())
     

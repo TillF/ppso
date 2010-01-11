@@ -1,3 +1,7 @@
+0.9-92
+- corrected faulty parameter check for max_number_function_calls in optim_pso
+- added dontrun to docu
+
 0.9-91
 - fixed faulty global initialization that prevented usability
 - corrected parameter check for max_number_function_calls

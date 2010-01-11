@@ -16,7 +16,7 @@
 }
 \usage{
 optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
-#optim_ppso       (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL,                                     nslaves = -1)
+optim_ppso       (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE,                nslaves = -1)
 optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL)
 
 optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500, r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
@@ -116,8 +116,8 @@ for \code{optim_pdds*}:
 Neighbourhood size perturbation parameter . Default value: 0.2.
 }
 
-
-for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
+\item{for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}}{
+\itemize{
   \item{nslaves}{
 number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
 }
@@ -130,7 +130,8 @@ number of rmpi slaves to spawn (default -1: as many as possible, requires packag
   \item{execution_timeout}{
 If set to a factor greater than 1, a slave whose execution time has exceeded (\code{execution_timeout} times the mean of its prior calls) for more than three times is no longer used. This also applies when the slave produces its first result very slow when comared to the other slaves. 
 }
-
+}
+}
 
 (didactical purpose, only for two-parameter search and fast objective function, non-parallelized. )
   \item{do_plot}{
@@ -146,11 +147,13 @@ waiting for keystroke between iterations (e.g. for plotting)
 
 \details{
 recommended use:
+\itemize{
 \item{optim_pso}{ serial computation for fast objective functions and single core machines}
 \item{optim_ppso}{			 parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       }
 \item{optim_ppso_robust}{slightly slower than \code{optim_ppso}, but presumably more robust (to be tested), since it doesn't leave slaves in "listen" mode after crashes}
 }
 concerning reproducibility: setting the seed using \code{set.seed()} should make results reproducable. However, in the parallel versions, the randomness introduced by the order of the results returned from the slaves cannot be controlled, so this may limit reproducibility.
+}
 
 \value{
 \code{ret_val=list(value,par,iterations)}
@@ -203,6 +206,7 @@ Till Francke <francke_at_uni-potsdam.de>
 	print (result)
 	unlink(projectfile)	#delete project file
 
+\dontrun{
 #visualisation of progress
 	projectfile	=tempfile()
   logfile	=tempfile()
@@ -212,7 +216,7 @@ Till Francke <francke_at_uni-potsdam.de>
 
 
 #parallel application
-\dontrun{
+
 	result = optim_ppso(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)     #standard version
 	print (result)
 

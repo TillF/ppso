@@ -210,7 +210,9 @@ Till Francke <francke_at_uni-potsdam.de>
   unlink(c(projectfile,logfile))	#delete log file and project file
 
 
+
 #parallel application
+\dontrun{
 	result = optim_ppso(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)     #standard version
 	print (result)
 
@@ -227,7 +229,7 @@ Till Francke <francke_at_uni-potsdam.de>
   c(host="host2", wd="/home/me/onlyonethread")
   )
 	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=4, working_dir_list=working_dir_list)    
-
+}
 
 }
 
@@ -238,6 +240,3 @@ Till Francke <francke_at_uni-potsdam.de>
 %\keyword{ ~dynamically } 
 %\keyword{ ~dimensioned } 
 %\keyword{ ~search } 
-
-
-% __ONLY ONE__ keyword per line

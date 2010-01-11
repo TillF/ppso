@@ -1,6 +1,7 @@
 0.9-92
 - corrected faulty parameter check for max_number_function_calls in optim_pso
-- added dontrun to docu
+- added initialisation of nslaves to optim_dds and _pso
+- added dontrun to docu, several cleanup steps
 
 0.9-91
 - fixed faulty global initialization that prevented usability

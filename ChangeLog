@@ -1,3 +1,6 @@
+0.9-921
+- computationally irrelevant: handled 0 execution times in plot_optimization_process
+
 0.9-92
 - corrected faulty parameter check for max_number_function_calls in optim_pso
 - added initialisation of nslaves to optim_dds and _pso

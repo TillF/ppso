@@ -1,6 +1,6 @@
 #plot optimization progress based on log file
 #use like:
-#plot_optimization_progress(logfile="ppso.log", projectfile="ppso.pro", cutoff_quantile=0.8, verbose=T)
+#plot_optimization_progress(logfile="ppso.log", projectfile="ppso.pro", cutoff_quantile=1, verbose=T)
 
 plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 {
@@ -105,8 +105,17 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     execution_time[[worker]]=diff(logfile_content$time[curr_worker])
 
     
-    non_positives=execution_time[[worker]]<=0
-    execution_time[[worker]][non_positives]=max(0.5,0.5*min(execution_time[[worker]][!non_positives]))    #set execution times that are zero to something positive
+    positive_times=execution_time[[worker]]>0
+    if (!any(positive_times))
+    {
+      mintime = 0  
+      logplot = ""
+    } else
+    {
+      mintime=0.5*min(execution_time[[worker]][positive_times])
+      logplot = "y"
+    }
+    execution_time[[worker]][!positive_times]=mintime    #set execution times that are zero to something positive to allow log plot
 
     if (verbose)
     {
@@ -118,7 +127,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   }
  
   if (length(workers)>0)
-    plot(range(logfile_content$time),range(unlist(execution_time)),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log="y") #prepare plot window
+    plot(range(logfile_content$time),range(unlist(execution_time)),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log=logplot) #prepare plot window
 
   for (worker in workers)
   {

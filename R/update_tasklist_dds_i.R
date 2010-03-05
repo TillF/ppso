@@ -5,6 +5,8 @@ update_tasklist_dds_i <- function(loop_counter=1)
 #for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)
 
 {
+   eval(parse(text=paste(c("do_plot_function=",     deparse(do_plot_function_i)))))  #this creates local version of the function do_plot_function 
+
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       assign("break_flag","user interrupt",parent.frame())   
    
@@ -15,36 +17,17 @@ update_tasklist_dds_i <- function(loop_counter=1)
       write.table(file = logfile, cbind(format(computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(X[completed_particles, ],ncol=ncol(X))  , fitness_X[completed_particles],
     node_id[completed_particles]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
-
-  if (("base" %in% do_plot))       #do base plotting
-    {
-      if (exists("plot_window") && (plot_window %in% dev.list()))     #activate progress_plot window, if already open
-      {
-        dev.set(plot_window)
-      }  else
-      {
-        x11()
-        assign("plot_window", dev.cur(), pos=parent.frame())
-      }
-
-      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
-      points(trans3d(X[,1], X[,2], fitness_X, pmat = res), col = 2, pch =16)
-    }
-
-    if ("rgl" %in% do_plot)        #do rgl plotting
-    {
-      rgl.pop(id=hdl[completed_particles & hdl!=0])     #remove outdated dots
-      for (i in which(completed_particles))
-         hdl[i]=points3d(X[i,1], X[i,2], fitness_X[i], col="red")
-      assign("hdl",hdl,parent.frame())
-    }
-
-    if (wait_for_keystroke) readline()
+    do_plot_function()
+   
+    if (wait_for_keystroke && (!exists("ch") || ch!="c")) assign("ch",readline(),parent.frame()) 
 
 
    # Update the local bests and their fitness
 
    improved_particles=fitness_X < fitness_lbest #mark particles that improved their fitness
+
+   futile_iter_count[ improved_particles]  = 0        #reset counter of futile iterations for improved particles
+   futile_iter_count[!improved_particles]  = futile_iter_count[!improved_particles] + 1        #reset counter of futile iterations for improved particles
 
    if (any(improved_particles))
    {
@@ -55,7 +38,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
    }
 
    # Update the global best and its fitness
-   min_fitness_index = which.min(fitness_X[completed_particles])
+   min_fitness_index = which.min(fitness_X[completed_particles])[1]
    min_fitness =min(fitness_X[completed_particles])
 
    if (min_fitness < fitness_gbest)        #new global minimum found?
@@ -64,6 +47,18 @@ update_tasklist_dds_i <- function(loop_counter=1)
        X_gbest[] = X[which(completed_particles)[min_fitness_index],]
        assign("X_gbest",X_gbest,parent.frame())
        assign("fitness_gbest",fitness_gbest,parent.frame())
+   }
+
+   if (number_of_particles > 1)
+   {                                                                            #relocate "astray" particles
+     toberelocated = (futile_iter_count==max(futile_iter_count)) & (fitness_lbest==max(fitness_lbest)) & (fitness_lbest!=Inf)    #find particles that are worst in both objective function AND improvement
+     if (any(toberelocated))
+     {
+       if (do_plot!=FALSE) assign("relocated",cbind(t(X_lbest[toberelocated,]),fitness_lbest[toberelocated]),parent.frame())
+       X_lbest[toberelocated,]            = X_gbest[]         #relocate particles to current best
+       fitness_lbest[toberelocated] = fitness_gbest     #set to current best       #could also be set to particle with lowest futile_iter_count
+       futile_iter_count[toberelocated] = 0             #zero iteration counter
+      }
    }
 
    #check abortion criteria

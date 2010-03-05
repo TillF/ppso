@@ -27,7 +27,7 @@ init_visualisation_i=function()
       colorlut <- terrain.colors(zlen) # height color lookup table
       col <- colorlut[ z-zlim[1]+1 ] # assign colors to heights for each point
       surface3d(x, y, z, color=col)
-      hdl=array(0,number_of_particles)
+      hdl=array(0,2*number_of_particles)
       assign("hdl",hdl,parent.frame())
     }
 

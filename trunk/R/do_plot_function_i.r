@@ -1,0 +1,46 @@
+do_plot_function_i = function() #real time plotting of 2-D surface of objective function
+{
+    if (("base" %in% do_plot))       #do base plotting
+    {
+      if (exists("plot_window") && (plot_window %in% dev.list()))     #activate progress_plot window, if already open
+      {
+        dev.set(plot_window)
+      }  else
+      {
+        x11()
+        assign("plot_window", dev.cur(), pos=parent.frame(n=2))
+      }
+
+      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
+      points(trans3d(X[,1], X[,2], fitness_X, pmat = res), col = 2, pch =16)
+      points(trans3d(X_lbest[,1], X_lbest[,2], fitness_lbest, pmat = res), col = 3, pch ="X")
+      for (i in 1: min(10,number_of_particles))
+         lines(rbind(trans3d(X[i,1], X[i,2], fitness_X[i], pmat = res), trans3d(X_lbest[i,1], X_lbest[i,2], fitness_lbest[i], pmat = res)) )
+
+      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocatee during last iteration
+      {
+        points(trans3d(relocated[,1], relocated[,2], relocated[,3], pmat = res), col="blue", pch="O")
+        assign("relocated",NULL,parent.frame(n=2))
+      }
+
+    }
+
+    if ("rgl" %in% do_plot)        #do rgl plotting
+    {
+      rgl.pop(id=hdl[c(completed_particles,completed_particles) & hdl!=0])     #remove outdated dots
+      for (i in which(completed_particles))
+      {
+         hdl[i]                    =points3d(X[i,1],             X[i,2], fitness_X[i],     col="red")
+         hdl[i+number_of_particles]=points3d(X_lbest[i,1], X_lbest[i,2], fitness_lbest[i], col="green")
+      }
+      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocatee during last iteration
+      {
+#        if (exists("hdl_r") && !is.null(hdl_r)) rgl.pop(id=hdl_r)
+        hdl_r = points3d(relocated[,1], relocated[,2], relocated[,3], col="blue")
+        assign("relocated",NULL,parent.frame(n=2))
+        assign("hdl_r",hdl_r,parent.frame(n=2))
+      }
+
+      assign("hdl",hdl,parent.frame(n=2))
+    }
+}

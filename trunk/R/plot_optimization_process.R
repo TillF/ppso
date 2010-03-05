@@ -1,6 +1,6 @@
 #plot optimization progress based on log file
 #use like:
-#plot_optimization_progress(logfile="ppso.log", projectfile="ppso.pro", cutoff_quantile=1, verbose=T)
+#plot_optimization_progress(logfile="ppso.log", projectfile="ppso.pro", cutoff_quantile=0.7, verbose=T)
 
 plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 {

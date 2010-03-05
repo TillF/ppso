@@ -5,6 +5,7 @@ update_tasklist_pso_i=function()                        #update particle positio
 #for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)
 
 {
+   eval(parse(text=paste(c("do_plot_function=",     deparse(do_plot_function_i)))))  #this creates local version of the function do_plot_function 
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       assign("break_flag","user interrupt",parent.frame())   
    
@@ -16,22 +17,10 @@ update_tasklist_pso_i=function()                        #update particle positio
       write.table(file = logfile, cbind(format(computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(X[completed_particles, ],ncol=ncol(X))  , fitness_X[completed_particles],
     node_id[completed_particles]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
-
-  if (("base" %in% do_plot))       #do base plotting
-    {
-      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
-      points(trans3d(X[,1], X[,2], fitness_X, pmat = res), col = 2, pch =16)
-    }
-
-    if ("rgl" %in% do_plot)        #do rgl plotting
-    {
-      rgl.pop(id=hdl[completed_particles & hdl!=0])     #remove outdated dots
-      for (i in which(completed_particles))
-         hdl[i]=points3d(X[i,1], X[i,2], fitness_X[i], col="red")
-      assign("hdl",hdl,parent.frame())
-    }
-
-    if (wait_for_keystroke) readline()
+    do_plot_function()
+   
+    if (wait_for_keystroke && (!exists("ch") || ch!="c")) assign("ch",readline(),parent.frame()) 
+ 
 
 
    # Update the local bests and their fitness

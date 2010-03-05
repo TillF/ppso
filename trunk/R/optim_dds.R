@@ -120,7 +120,7 @@ fitness_gbest = min(fitness_lbest);
   computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
   iterations    =iterations[1:number_of_particles]  # iteration counter for each particle
-
+  futile_iter_count = futile_iter_count[1:number_of_particles]
 
 
 # actual search

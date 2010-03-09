@@ -68,7 +68,6 @@ break_flag=NULL       #flag indicating if a termination criterium has been reach
 fitness_lbest[] = Inf
 fitness_gbest = min(fitness_lbest);
 
-
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
@@ -116,12 +115,13 @@ fitness_gbest = min(fitness_lbest);
   X             =X_lbest  #X: position in parameter space                          
   V             =matrix(V[1:number_of_particles,],ncol=number_of_parameters)   #V: velocity in parameter space
   fitness_X     =fitness_X[1:number_of_particles]            #optimum of each particle at current iteration
-  status        =array(1,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
+#  status        =array(1,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
   computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
   iterations    =iterations[1:number_of_particles]  # iteration counter for each particle
+  status=status_org[1:number_of_particles]  #  restore original contents 
   futile_iter_count = futile_iter_count[1:number_of_particles]
-
+  fitness_gbest = min(fitness_lbest);
 
 # actual search
 

@@ -1,3 +1,6 @@
+0.9-923
+- minor fix of determining fitnessgbest after initialisation and in optim_dds*
+
 0.9-922
 - modified parallel DDS: worst performing particle is replaced by best
 - improved visualisation (active and best position, connection lines); modularised

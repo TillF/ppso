@@ -66,13 +66,6 @@ init_particles_i=function(lhc_init=FALSE)
         node_id[status==2]=0    #any slaves marked as "in computation" in the projectfile are reset to "to be done"
         status [status==2]=0
         
-        # determine the global best and its fitness from file
-        min_fitness_index = which.min(fitness_lbest)
-        fitness_gbest =min(fitness_lbest)          
-        X_gbest[] = X_lbest[min_fitness_index[1],]
-        assign("X_gbest",X_gbest,parent.frame())                         #write variable to scope of calling function
-        assign("fitness_gbest",fitness_gbest,parent.frame())
-        
         if (exists("Vmax") & all(V[min_fitness_index,]==0)) 
            V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that the best particle doesn't stand still
       }
@@ -108,6 +101,14 @@ init_particles_i=function(lhc_init=FALSE)
     node_id       [tobeinitialized] = 0
     iterations    [tobeinitialized] = 0
   }
+  
+  # determine the global best and its fitness from all availabel data
+  min_fitness_index = which.min(fitness_lbest)
+  fitness_gbest =min(fitness_lbest)          
+  X_gbest[] = X_lbest[min_fitness_index[1],]
+  assign("X_gbest",X_gbest,parent.frame())                         #write variable to scope of calling function
+  assign("fitness_gbest",fitness_gbest,parent.frame())
+  
   
   if (all(status==3)) status[]=0      #continue computation even if it had been finished completely before
   #"export" the variables

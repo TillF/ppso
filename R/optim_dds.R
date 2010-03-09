@@ -90,7 +90,9 @@ fitness_gbest = min(fitness_lbest);
   uninitialized_particles= which(fitness_lbest==Inf)                      #"real" particles that still need to be initialized with a function value
   pre_run_computations = rep(1:number_of_particles,init_calls) %in% uninitialized_particles  #"trial" particles that need their function value to be computed (this results in flagging "init_calls" runs for every particle not yet initialized)
   if (sum(pre_run_computations) >= max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
- 
+  status_org=status  #  store original contents
+  status[]=1; status[which(pre_run_computations)]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
+
   if (any(pre_run_computations))
   {
     computation_start[pre_run_computations]=Sys.time()
@@ -121,7 +123,11 @@ fitness_gbest = min(fitness_lbest);
   iterations    =iterations[1:number_of_particles]  # iteration counter for each particle
   status=status_org[1:number_of_particles]  #  restore original contents 
   futile_iter_count = futile_iter_count[1:number_of_particles]
-  fitness_gbest = min(fitness_lbest);
+
+  fitness_gbest = min(fitness_lbest)          #update global minimum
+  min_fitness_index = which(fitness_gbest==fitness_lbest)[1]
+  X_gbest[] = X[min_fitness_index,]
+
 
 # actual search
 

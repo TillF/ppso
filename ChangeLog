@@ -1,8 +1,9 @@
 0.9-923
-- minor fix of determining fitnessgbest after initialisation and in optim_dds*
+- minor fix of determining fitnessgbest and Xgbest after initialisation and in optim_dds*
+- modified parallel DDS: all particles are replaced by best (variant 2)
 
 0.9-922
-- modified parallel DDS: worst performing particle is replaced by best
+- modified parallel DDS: worst performing particle is replaced by best (variant 1)
 - improved visualisation (active and best position, connection lines); modularised
 
 0.9-921

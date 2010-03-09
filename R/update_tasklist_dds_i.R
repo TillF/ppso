@@ -26,9 +26,10 @@ update_tasklist_dds_i <- function(loop_counter=1)
 
    improved_particles=fitness_X < fitness_lbest #mark particles that improved their fitness
 
-   futile_iter_count[ improved_particles]  = 0        #reset counter of futile iterations for improved particles
    futile_iter_count[!improved_particles]  = futile_iter_count[!improved_particles] + 1        #reset counter of futile iterations for improved particles
-
+   futile_iter_count[ improved_particles]  = 0        #reset counter of futile iterations for improved particles     
+   assign("futile_iter_count",futile_iter_count,parent.frame())
+   
    if (any(improved_particles))
    {
      fitness_lbest[completed_particles & improved_particles] = fitness_X[completed_particles & improved_particles]            #store best fitness value
@@ -36,7 +37,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
      assign("X_lbest",X_lbest,parent.frame())
      assign("fitness_lbest",fitness_lbest,parent.frame())
    }
-
+   
    # Update the global best and its fitness
    min_fitness_index = which.min(fitness_X[completed_particles])[1]
    min_fitness =min(fitness_X[completed_particles])
@@ -51,13 +52,21 @@ update_tasklist_dds_i <- function(loop_counter=1)
 
    if (number_of_particles > 1)
    {                                                                            #relocate "astray" particles
-     toberelocated = (futile_iter_count==max(futile_iter_count)) & (fitness_lbest==max(fitness_lbest)) & (fitness_lbest!=Inf)    #find particles that are worst in both objective function AND improvement
+#     toberelocated = (futile_iter_count==max(futile_iter_count)) & (fitness_lbest==max(fitness_lbest)) & (fitness_lbest!=Inf)    #1. find particles that are worst in both objective function AND improvement
+     toberelocated = (fitness_lbest > fitness_gbest)     #2. relocate all but the best particle
+
      if (any(toberelocated))
      {
-       if (do_plot!=FALSE) assign("relocated",cbind(t(X_lbest[toberelocated,]),fitness_lbest[toberelocated]),parent.frame())
-       X_lbest[toberelocated,]            = X_gbest[]         #relocate particles to current best
-       fitness_lbest[toberelocated] = fitness_gbest     #set to current best       #could also be set to particle with lowest futile_iter_count
+  #     browser()
+       cat(paste(sum(toberelocated),"particles relocated\n"))
+       if (do_plot!=FALSE) assign("relocated",cbind(X_lbest[toberelocated,],fitness_lbest[toberelocated]),parent.frame())
+       X_lbest          [toberelocated,]= matrix(rep(X_gbest[],sum(toberelocated)),ncol=number_of_parameters, byrow = TRUE)         #relocate particles to current best
+       fitness_lbest    [toberelocated] = fitness_gbest     #set to current best       #could also be set to particle with lowest futile_iter_count
        futile_iter_count[toberelocated] = 0             #zero iteration counter
+
+       assign("X_lbest",X_lbest,parent.frame())       
+       assign("fitness_lbest",fitness_lbest,parent.frame())
+       assign("futile_iter_count",futile_iter_count,parent.frame())
       }
    }
 

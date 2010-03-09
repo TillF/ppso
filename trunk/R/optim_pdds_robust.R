@@ -164,6 +164,7 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
   iterations    =iterations[1:number_of_particles]  # iteration counter for each particle
   status=status_org[1:number_of_particles]  #  restore original contents 
   futile_iter_count = futile_iter_count[1:number_of_particles]
+  fitness_gbest = min(fitness_lbest);
 
 # actual search
 fitness_itbest= fitness_gbest     #best fitness in the last it_last iterations

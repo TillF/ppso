@@ -76,7 +76,7 @@ status_org=status  #  store original contents
   uninitialized_particles= which(fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
   if (any(uninitialized_particles))
   {
-    pending_preruns = init_calls  - length(uninitialized_particles)        #estimate how many more pre-runs are needed, if the files didn't contain enough
+    pending_preruns = max(0,init_calls  - length(uninitialized_particles))        #estimate how many more pre-runs are needed, if the files didn't contain enough
     pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=pending_preruns)) # do preruns for uninitialized particles and the number of pending preruns
 
     if (length(pre_run_computations) >= max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))

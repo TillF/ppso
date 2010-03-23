@@ -58,7 +58,7 @@ computation_start=rep(Sys.time(),number_of_particles)          #start of computa
 node_id       =array(0,number_of_particles)                              #node number of worker / slave
 X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
 fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
-iterations    =array(0,number_of_particles)  # iteration counter for each particle
+function_calls    =array(0,number_of_particles)  # iteration counter for each particle
                           
 X_gbest     =array(Inf,number_of_parameters)            #global optimum
 
@@ -97,7 +97,7 @@ while (is.null(break_flag))
         fitness_X=apply(X,1,objective_function)     #no error message during evaluation (faster)
 
       status    [] =1      #mark as "finished"
-      iterations[] =iterations[]+1        #increase iteration counter
+      function_calls[] =function_calls[]+1        #increase iteration counter
       update_tasklist_pso()   #update particle speeds and positions based on available results
   } else
   for (current_particle in 1:number_of_particles)      #do updates of tasks between single evaluations
@@ -115,14 +115,14 @@ while (is.null(break_flag))
       fitness_X [current_particle] =objective_function(X[current_particle,])     #no error message during evaluation (faster)
   
     status    [current_particle] =1      #mark as "finished"
-    iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
+    function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter
     update_tasklist_pso()   #update particle speeds and positions based on available results
   }
     
 }      
       
    
-ret_val=list(value=fitness_gbest,par=X_gbest,iterations=min(iterations),break_flag=break_flag) 
+ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls),break_flag=break_flag) 
 
 return(ret_val) 
 }

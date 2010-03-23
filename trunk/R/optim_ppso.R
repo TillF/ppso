@@ -127,7 +127,7 @@ evals_since_lastsave=0                    #for counting function evaluations sin
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
   X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
   fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
-  iterations    =array(0,number_of_particles)  # iteration counter for each particle
+  function_calls    =array(0,number_of_particles)  # function_calls counter for each particle
                             
   X_gbest     =array(Inf,number_of_parameters)            #global optimum
   
@@ -171,7 +171,7 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
           #ii: deal with obsolete results, deal with error message, determine average runtime
           fitness_X [current_particle] =slave_message
           status    [current_particle] =1      #mark as "finished"
-          iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
+          function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter
           #print(paste(slave_id,"result received"))
        }
         else if (tag == 3) {    # A slave has closed down.
@@ -198,15 +198,12 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
             }
            tobecomputed=status==0           
            if (any(tobecomputed)) {
-              current_particle=which.min(iterations[tobecomputed])   #treat particles with low number of itereations first
+              current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
               current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
               slave_id=idle_slaves[length(idle_slaves)]                     #get free slave        
               idle_slaves=idle_slaves[-length(idle_slaves)]                         #remove this slave from list
               #print("before sending");    flush.console()
               mpi.send.Robj(list(objective_function,X[current_particle,]), slave_id, 1)               # Send a task
-              #print(paste("sent",db));    flush.console()
-              # db=db+1
-              #    if (db>199) browser()
               status            [current_particle]=2               #mark this particle as "in progress"
               node_id           [current_particle]=slave_id        #store slave_id of this task
               computation_start [current_particle]=Sys.time()      #store time of start of this computation
@@ -218,7 +215,7 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
         
     }
   
-  ret_val=list(value=fitness_gbest,par=X_gbest,iterations=min(iterations),break_flag=break_flag) 
+  ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls),break_flag=break_flag) 
   
   if (!is.null(nslaves)) mpi.close.Rslaves()    #close cluster, if enabled
   return(ret_val) 

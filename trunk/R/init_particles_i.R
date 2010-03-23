@@ -37,7 +37,7 @@ init_particles_i=function(lhc_init=FALSE)
       }   else
       {
         assign("load_projectfile","loaded",                parent.frame())  #indicator that the project file has successfully been loaded
-        if(!exists("number_of_particles_org")) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
+        if(!exists("number_of_particles_org",parent.frame(), inherits=FALSE)) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
         if (nrow(proj_file_content)>number_of_particles_org)
         {
           warning(paste(projectfile,"contains more than the specified number of",number_of_particles_org,"particles, truncated."))
@@ -61,11 +61,12 @@ init_particles_i=function(lhc_init=FALSE)
         computation_start =proj_file_content$begin_execution             #not yet used
         computation_start =strptime(computation_start,"%Y-%m-%d %H:%M:%S") #convert string to POSIX
         node_id           =as.vector(proj_file_content$node_id)
-        iterations        =as.vector(proj_file_content$function_calls)
+        function_calls        =as.vector(proj_file_content$function_calls)
         
         node_id[status==2]=0    #any slaves marked as "in computation" in the projectfile are reset to "to be done"
         status [status==2]=0
         
+        min_fitness_index = which.min(fitness_lbest)
         if (exists("Vmax") & all(V[min_fitness_index,]==0)) 
            V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that the best particle doesn't stand still
       }
@@ -99,7 +100,7 @@ init_particles_i=function(lhc_init=FALSE)
     fitness_lbest [tobeinitialized] = Inf
     status        [tobeinitialized] = 0          
     node_id       [tobeinitialized] = 0
-    iterations    [tobeinitialized] = 0
+    function_calls    [tobeinitialized] = 0
   }
   
   # determine the global best and its fitness from all availabel data
@@ -120,9 +121,9 @@ init_particles_i=function(lhc_init=FALSE)
   assign("status",            status,           parent.frame())
   assign("computation_start", computation_start,parent.frame())    #not yet used
   assign("node_id",           node_id,          parent.frame())
-  assign("iterations",        iterations,       parent.frame())
+  assign("function_calls",        function_calls,       parent.frame())
 
-  assign("futile_iter_count", array(0,number_of_particles), parent.frame())
+  assign("futile_iter_count", array(0,number_of_particles_org), parent.frame())
   
   assign("node_interruptions",array(0,c(nslaves,2),dimnames=list(NULL,c("counter","status"))),       parent.frame())         #array for recording slave fitness
   if (!exists("execution_timeout") || !is.null(execution_timeout))                          #monitor execution times

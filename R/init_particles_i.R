@@ -20,6 +20,7 @@ init_particles_i=function(lhc_init=FALSE)
   node_id          =node_id         
 
   noninitialised_particles=number_of_particles      #number of particles that need to be initialized  (default:all)
+  if(!exists("number_of_particles_org",parent.frame(), inherits=FALSE)) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
   
   if ((!is.null(projectfile)) && (load_projectfile %in% c("yes","try")))
   {
@@ -37,7 +38,6 @@ init_particles_i=function(lhc_init=FALSE)
       }   else
       {
         assign("load_projectfile","loaded",                parent.frame())  #indicator that the project file has successfully been loaded
-        if(!exists("number_of_particles_org",parent.frame(), inherits=FALSE)) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
         if (nrow(proj_file_content)>number_of_particles_org)
         {
           warning(paste(projectfile,"contains more than the specified number of",number_of_particles_org,"particles, truncated."))

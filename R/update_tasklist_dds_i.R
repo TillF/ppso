@@ -50,19 +50,32 @@ update_tasklist_dds_i <- function(loop_counter=1)
        assign("fitness_gbest",fitness_gbest,parent.frame())
    }
 
+   if (!exists('dds_ver')) dds_ver=1        #DDS-Version (subtype for testing)
+
    if (number_of_particles > 1)
    {                                                                            #relocate "astray" particles
-#     toberelocated = (futile_iter_count==max(futile_iter_count)) & (fitness_lbest==max(fitness_lbest)) & (fitness_lbest!=Inf)    #1. find particles that are worst in both objective function AND improvement
-     toberelocated = (fitness_lbest > fitness_gbest)     #2. relocate all but the best particle
+     if (dds_ver==1) toberelocated = (futile_iter_count==max(futile_iter_count)) & (fitness_lbest==max(fitness_lbest)) & (fitness_lbest!=Inf)    #1. find particles that are worst in both objective function AND improvement
+     if (dds_ver==2) toberelocated = (fitness_lbest > fitness_gbest)     #2. relocate all but the best particle
+     if (dds_ver==3) toberelocated = which.max(futile_iter_count * (fitness_lbest!=min(fitness_lbest)))[1]     #3. find particles is worst in improvement (but not the global best) and set to best improving particle
 
      if (any(toberelocated))
      {
-  #     browser()
-       cat(paste(sum(toberelocated),"particles relocated\n"))
+       #cat(paste(sum(toberelocated),"particles relocated\n"))
        if (do_plot!=FALSE) assign("relocated",cbind(X_lbest[toberelocated,],fitness_lbest[toberelocated]),parent.frame())
-       X_lbest          [toberelocated,]= matrix(rep(X_gbest[],sum(toberelocated)),ncol=number_of_parameters, byrow = TRUE)         #relocate particles to current best
-       fitness_lbest    [toberelocated] = fitness_gbest     #set to current best       #could also be set to particle with lowest futile_iter_count
-       futile_iter_count[toberelocated] = 0             #zero iteration counter
+
+       if ((dds_ver==1) || (dds_ver==2))  #version 1&2
+       {
+         X_lbest          [toberelocated,]= matrix(rep(X_gbest[],sum(toberelocated)),ncol=number_of_parameters, byrow = TRUE)         #relocate particles to current best
+         fitness_lbest    [toberelocated] = fitness_gbest     #set to current best       #could also be set to particle with lowest futile_iter_count
+         futile_iter_count[toberelocated] = 0             #zero iteration counter
+       }
+        if (dds_ver==3) #version 3
+        {
+         most_recent_improved = which.min(futile_iter_count)[1]       #get index to most recently improved particle
+         X_lbest          [toberelocated,]= matrix(rep(X_lbest[most_recent_improved,],length(toberelocated)),ncol=number_of_parameters, byrow = TRUE)         #relocate particles to current best
+         fitness_lbest    [toberelocated] = fitness_lbest[most_recent_improved]     #set to firness of particle with lowest futile_iter_count
+         futile_iter_count[toberelocated] = futile_iter_count[most_recent_improved]             #copy iteration counter
+        }
 
        assign("X_lbest",X_lbest,parent.frame())       
        assign("fitness_lbest",fitness_lbest,parent.frame())
@@ -74,20 +87,20 @@ update_tasklist_dds_i <- function(loop_counter=1)
    if ((fitness_itbest-fitness_gbest                   > abstol) &                     #check improvement in absolute terms
        abs((fitness_itbest-fitness_gbest)/max(0.00001,abs(fitness_gbest)) > reltol   ))  #check improvement in relative terms
    {    #improvement achieved
-     it_last_improvent=max(iterations)    #store iteration number which achieved this improvement
+     it_last_improvent=max(function_calls)    #store iteration number which achieved this improvement
      fitness_itbest=fitness_gbest
      assign("it_last_improvent",it_last_improvent,parent.frame())
      assign("fitness_itbest",fitness_itbest,parent.frame())
    } else
    {
-      if (min(iterations) - it_last_improvent>=max_wait_iterations)
+      if (min(function_calls) - it_last_improvent>=max_wait_iterations)
         break_flag="converged"  #status=3
    }
 
-#   if (min(iterations) >= max_number_of_iterations)
-#       break_flag="max iterations reached"
+#   if (min(function_calls) >= max_number_of_iterations)
+#       break_flag="max function_calls reached"
 
-   if (!is.null(max_number_function_calls) && (sum(iterations) >= max_number_function_calls))
+   if (!is.null(max_number_function_calls) && (sum(function_calls) >= max_number_function_calls))
        break_flag="max number of function calls reached"
 
   
@@ -99,7 +112,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
       {
         col.names=c(paste("best_par_",1:ncol(X),sep=""),"best_objective_function", paste("current_par_",1:ncol(X),sep=""),
           paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
-        write.table(file = projectfile, cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, iterations), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
+        write.table(file = projectfile, cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }
@@ -114,8 +127,8 @@ update_tasklist_dds_i <- function(loop_counter=1)
    parameter_ranges=r*(parameter_bounds[,2]-parameter_bounds[,1]) #neighbourhood pertubation parameter * parameter range  
    for (i in which(completed_particles))
    {
-#    p_inclusion=1-log(iterations[i])/log(max_number_function_calls)    #probability of including a parameter in the search
-    p_inclusion=1-log(iterations[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
+#    p_inclusion=1-log(function_calls[i])/log(max_number_function_calls)    #probability of including a parameter in the search
+    p_inclusion=1-log(function_calls[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
 
     dimensions_to_search=NULL
     for (d in 1:number_of_parameters) 

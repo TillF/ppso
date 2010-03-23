@@ -66,7 +66,7 @@ computation_start=rep(Sys.time(),number_of_particles)          #start of computa
 node_id       =array(0,number_of_particles)                              #node number of worker / slave
 X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
 fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
-iterations    =array(0,number_of_particles)  # iteration counter for each particle
+function_calls    =array(0,number_of_particles)  # function_calls counter for each particle
                           
 X_gbest     =array(Inf,number_of_parameters)            #global optimum
 
@@ -96,7 +96,7 @@ while ((closed_slaves < nslaves) )
       while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
       {
           if (any(tobecomputed)) {
-            current_particle=which.min(iterations[tobecomputed])   #treat particles with low number of itereations first
+            current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
             slave_id=idle_slaves[1]                     #get free slave        
 #            browser()
@@ -139,7 +139,7 @@ while ((closed_slaves < nslaves) )
         {
           fitness_X [current_particle] = slave_message
           status    [current_particle] =1      #mark as "finished"
-          iterations[current_particle] =iterations[current_particle]+1        #increase iteration counter
+          function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter
           if (!is.null(execution_timeout)) execution_times = rbind(execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),computation_start[current_particle],units="sec"))))   #monitor execution times
           idle_slaves=c(idle_slaves,slave_id)
         }
@@ -157,7 +157,7 @@ while ((closed_slaves < nslaves) )
 if ((closed_slaves==nslaves) && is.null(break_flag))
   break_flag = "No or delayed response from slaves" 
 
-ret_val=list(value=fitness_gbest,par=X_gbest,iterations=min(iterations),break_flag=break_flag) 
+ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls),break_flag=break_flag) 
   
 close_mpi()                        #diligently close Rmpi session
 

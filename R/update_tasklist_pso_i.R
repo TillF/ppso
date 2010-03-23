@@ -58,20 +58,20 @@ update_tasklist_pso_i=function()                        #update particle positio
    if ((fitness_itbest-fitness_gbest                   > abstol) &                     #check improvement in absolute terms
        abs((fitness_itbest-fitness_gbest)/max(0.00001,abs(fitness_gbest)) > reltol   ))  #check improvement in relative terms
    {    #improvement achieved
-     it_last_improvent=max(iterations)    #store iteration number which achieved the this improvement
+     it_last_improvent=max(function_calls)    #store iteration number which achieved the this improvement
      fitness_itbest=fitness_gbest
      assign("it_last_improvent",it_last_improvent,parent.frame())
      assign("fitness_itbest",fitness_itbest,parent.frame())
    } else
    {
-      if (min(iterations) - it_last_improvent>=max_wait_iterations)
+      if (min(function_calls) - it_last_improvent>=max_wait_iterations)
         break_flag="converged"  #status=3
    }
 
-   if (min(iterations) >= max_number_of_iterations)
+   if (min(function_calls) >= max_number_of_iterations)
        break_flag="max iterations reached"
 
-   if (!is.null(max_number_function_calls) && (sum(iterations) >= max_number_function_calls))
+   if (!is.null(max_number_function_calls) && (sum(function_calls) >= max_number_function_calls))
        break_flag="max number of function calls reached"
    
 
@@ -83,7 +83,7 @@ update_tasklist_pso_i=function()                        #update particle positio
       {
         col.names=c(paste("best_par_",1:ncol(X),sep=""),"best_objective_function", paste("current_par_",1:ncol(X),sep=""),
           paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
-        write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, iterations), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
+        write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }

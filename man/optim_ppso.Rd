@@ -161,7 +161,7 @@ concerning reproducibility: setting the seed using \code{set.seed()} should make
 %%  If it is a LIST, use
   \item{value }{value of objective function at minimum}
   \item{par }{parameters of minimum found}
-  \item{iterations }{number of iterations needed}
+  \item{function_calls }{total number of function calls performed}
   \item{break_flag }{criterium that caused the termination of the algorithm (\code{c("max number of function calls reached", "max iterations reached", "converged", "all slaves gone", "user interrupt")})}
 }
 \references{

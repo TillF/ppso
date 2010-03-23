@@ -1,3 +1,10 @@
+0.9-924
+- reduced number of init calls for multiparticle DDS
+- optim-* return function_calls instead of iterations
+- docu-update
+- minor bugfixes
+- variable renaming
+
 0.9-923
 - minor fix of determining fitnessgbest and Xgbest after initialisation and in optim_dds*
 - modified parallel DDS: all particles are replaced by best (variant 2)

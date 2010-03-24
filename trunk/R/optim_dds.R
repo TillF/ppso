@@ -63,7 +63,7 @@ fitness_gbest = min(fitness_lbest);
   uninitialized_particles= which(fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
   if (any(uninitialized_particles))
   {
-    browser()
+    #browser()
     pending_preruns = max(0,init_calls  - length(uninitialized_particles))        #estimate how many more pre-runs are needed, if the files didn't contain enough
     pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=pending_preruns)) # do preruns for uninitialized particles and the number of pending preruns
 

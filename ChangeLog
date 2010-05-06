@@ -1,3 +1,6 @@
+0.9-925
+- changed dds_ver default to 2
+
 0.9-924
 - reduced number of init calls for multiparticle DDS
 - optim-* return function_calls instead of iterations

@@ -50,7 +50,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
        assign("fitness_gbest",fitness_gbest,parent.frame())
    }
 
-   if (!exists('dds_ver')) dds_ver=1        #DDS-Version (subtype for testing)
+   if (!exists('dds_ver')) dds_ver=2        #DDS-Version (subtype for testing)
 
    if (number_of_particles > 1)
    {                                                                            #relocate "astray" particles

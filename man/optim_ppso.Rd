@@ -11,12 +11,11 @@
 }
 \description{
 \code{optim_pso} optimizes a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f using Particle Swarm Optimization.
-\code{optim_ppso} and \code{optim_ppso_robust} are parallelized versions (using multiple CPUs).
+\code{optim_ppso_robust} is the parallelized versions (using multiple CPUs).
 \code{optim_dds} optimizes using a Dynamically Dimensioned Search with  \code{optim_pdds_robust} being the parallel version.
 }
 \usage{
 optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
-optim_ppso       (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE,                nslaves = -1)
 optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL, w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL)
 
 optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500, r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
@@ -42,7 +41,7 @@ Abortion criteria: Maximum number of iterations (i.e. update of particle positio
 }
 
   \item{max_number_function_calls}{
-Abortion criteria: Maximum total number of calls to the objective function, ignored when set to \code{NULL}.
+Abortion criteria: Maximum total number of calls to the objective function, ignored when set to \code{NULL}. In non-parallel mode, more function calls may actually be made to finish the last iteration.
 }
 
   \item{abstol}{
@@ -148,9 +147,8 @@ waiting for keystroke between iterations (e.g. for plotting)
 \details{
 recommended use:
 \itemize{
-\item{optim_pso}{ serial computation for fast objective functions and single core machines}
-\item{optim_ppso}{			 parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       }
-\item{optim_ppso_robust}{slightly slower than \code{optim_ppso}, but presumably more robust (to be tested), since it doesn't leave slaves in "listen" mode after crashes}
+\item{optim_pso, optim_dds}{ serial computation for fast objective functions and single core machines}
+\item{optim_ppso_robust, optim_pdds_robust}{			 parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       }
 }
 concerning reproducibility: setting the seed using \code{set.seed()} should make results reproducable. However, in the parallel versions, the randomness introduced by the order of the results returned from the slaves cannot be controlled, so this may limit reproducibility.
 }

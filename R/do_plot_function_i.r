@@ -27,6 +27,11 @@ do_plot_function_i = function() #real time plotting of 2-D surface of objective 
 
     if ("rgl" %in% do_plot)        #do rgl plotting
     {
+      if (!require(rgl))
+      {
+        warning("package rgl not found, plotting aborted")
+        return()
+      } 
       rgl.pop(id=hdl[c(completed_particles,completed_particles) & hdl!=0])     #remove outdated dots
       for (i in which(completed_particles))
       {

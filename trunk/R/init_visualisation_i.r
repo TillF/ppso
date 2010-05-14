@@ -20,15 +20,22 @@ init_visualisation_i=function()
 
     if ("rgl" %in% do_plot)                                 #set params for rgl plotting
     {
-      library(rgl)
-      open3d()
-      zlim <- range(y)
-      zlen <- zlim[2] - zlim[1] + 1
-      colorlut <- terrain.colors(zlen) # height color lookup table
-      col <- colorlut[ z-zlim[1]+1 ] # assign colors to heights for each point
-      surface3d(x, y, z, color=col)
-      hdl=array(0,2*number_of_particles)
-      assign("hdl",hdl,parent.frame())
+      if (!require(rgl))
+      {
+        warning("package rgl not found, rgl plotting disabled.")
+        assign("do_plot",do_plot[do_plot!="rgl"],parent.frame())
+      } 
+      else
+      {
+        open3d()
+        zlim <- range(y)
+        zlen <- zlim[2] - zlim[1] + 1
+        colorlut <- terrain.colors(zlen) # height color lookup table
+        col <- colorlut[ z-zlim[1]+1 ] # assign colors to heights for each point
+        surface3d(x, y, z, color=col)
+        hdl=array(0,2*number_of_particles)
+        assign("hdl",hdl,parent.frame())
+      }  
     }
 
   }

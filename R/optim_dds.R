@@ -45,6 +45,9 @@ break_flag=NULL       #flag indicating if a termination criterium has been reach
 fitness_lbest[] = Inf
 fitness_gbest = min(fitness_lbest);
 
+  if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
+    write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
@@ -55,17 +58,13 @@ fitness_gbest = min(fitness_lbest);
     max_number_function_calls=abs(max_number_function_calls)
   }
   
-  if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
-    write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
 
   status_org=status  #  store original contents
 
   uninitialized_particles= which(fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
   if (any(uninitialized_particles))
   {
-    #browser()
-    pending_preruns = max(0,init_calls  - length(uninitialized_particles))        #estimate how many more pre-runs are needed, if the files didn't contain enough
-    pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=pending_preruns)) # do preruns for uninitialized particles and the number of pending preruns
+    pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=max(0,init_calls - length(uninitialized_particles)))) # do preruns for uninitialized particles and the number of pending preruns
 
     if (length(pre_run_computations) >= max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
     status[]=1; status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
@@ -84,7 +83,8 @@ fitness_gbest = min(fitness_lbest);
     X_lbest      [uninitialized_particles] = X         [pre_run_computations[top_of_preruns]]
     calls_per_uninitialized_particle = length(pre_run_computations) %/% length(uninitialized_particles)     #distribute counting of function calls among real particles
     remaining_performed_calls = length(pre_run_computations) %% length(uninitialized_particles)
-    function_calls   [uninitialized_particles] = c (rep(calls_per_uninitialized_particle,   length(uninitialized_particles)-remaining_performed_calls),
+    function_calls_init = function_calls                     #count initialisation calls extra
+    function_calls_init[uninitialized_particles] = c (rep(calls_per_uninitialized_particle,   length(uninitialized_particles)-remaining_performed_calls),
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
   } 
 
@@ -140,7 +140,8 @@ while (is.null(break_flag))
 }      
       
    
-ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls),break_flag=break_flag) 
+
+ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls+function_calls_init),break_flag=break_flag) 
 
 return(ret_val) 
 }

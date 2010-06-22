@@ -112,7 +112,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
       {
         col.names=c(paste("best_par_",1:ncol(X),sep=""),"best_objective_function", paste("current_par_",1:ncol(X),sep=""),
           paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
-        write.table(file = projectfile, cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
+        write.table(file = projectfile, cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls + function_calls_init), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }

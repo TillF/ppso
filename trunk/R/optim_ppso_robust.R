@@ -5,7 +5,6 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL)
 # do particle swarm optimization
 {
-  
  # #algorithm parameters
 #    number_of_particles=40
 #    max_number_of_iterations=5
@@ -77,16 +76,17 @@ break_flag=NULL       #flag indicating if a termination criterium has been reach
  fitness_gbest = Inf;
  fitness_lbest[] = Inf
 
-init_particles(lhc_init)  #initialize velocities and particle positions
+if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+
+init_particles(lhc_init)  #initialize velocities and particle positions
 
  
    fitness_itbest= Inf     #best fitness in the last it_last iterations
    it_last_improvent=0               #counter for counting iterations since last improvement
 
-if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
 
 while ((closed_slaves < nslaves) )
 {
@@ -100,7 +100,8 @@ while ((closed_slaves < nslaves) )
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
             slave_id=idle_slaves[1]                     #get free slave        
 #            browser()
-            mpi.remote.exec(cmd=perform_task,task=list(fun=objective_function,parms=X[current_particle,],tryCall=tryCall),slave_id=slave_id,ret=FALSE)        #set slave to listen mode
+            mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
+              
             idle_slaves=idle_slaves[-1]                         #remove this slave from list
             status            [current_particle]=2               #mark this particle as "in progress"
             node_id           [current_particle]=slave_id        #store slave_id of this task

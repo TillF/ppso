@@ -32,7 +32,7 @@ init_visualisation()                      #prepare visualisation, if selected
 
 
 #initialisation
-init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
+init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
 number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
 
@@ -57,6 +57,9 @@ fitness_gbest = min(fitness_lbest);
 
 if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
 
+if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
+   write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
@@ -67,17 +70,13 @@ if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=work
     max_number_function_calls=abs(max_number_function_calls)
   }
 
-  if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
-    write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
-
   
 status_org=status  #  store original contents
 
   uninitialized_particles= which(fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
   if (any(uninitialized_particles))
   {
-    pending_preruns = max(0,init_calls  - length(uninitialized_particles))        #estimate how many more pre-runs are needed, if the files didn't contain enough
-    pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=pending_preruns)) # do preruns for uninitialized particles and the number of pending preruns
+    pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=max(0,init_calls - length(uninitialized_particles)))) # do preruns for uninitialized particles and the number of pending preruns
 
     if (length(pre_run_computations) >= max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
     status[]=1; status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
@@ -90,7 +89,7 @@ status_org=status  #  store original contents
 #            if (any(tobecomputed)) {
               current_particle=which(tobecomputed)[1]   
               slave_id=idle_slaves[1]                     #get free slave        
-              mpi.remote.exec(cmd=perform_task,task=list(objective_function,X[current_particle,]),slave_id=slave_id,ret=FALSE)        #set slave to listen mode
+              mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
               idle_slaves=idle_slaves[-1]                         #remove this slave from list
               status            [current_particle]=2               #mark this particle as "in progress"
               node_id           [current_particle]=slave_id        #store slave_id of this task
@@ -103,7 +102,6 @@ status_org=status  #  store original contents
         sleeptime=0
         while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #wait till there is a message
         {
-#        browser()
 #            if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
 #              break_flag="user interrupt"   
             if (!is.null(execution_timeout)) sleeptime=check_execution_timeout()
@@ -152,7 +150,8 @@ status_org=status  #  store original contents
     X_lbest      [uninitialized_particles] = X         [pre_run_computations[top_of_preruns]]
     calls_per_uninitialized_particle = length(pre_run_computations) %/% length(uninitialized_particles)     #distribute counting of function calls among real particles
     remaining_performed_calls = length(pre_run_computations) %% length(uninitialized_particles)
-   function_calls   [uninitialized_particles] = c (rep(calls_per_uninitialized_particle,   length(uninitialized_particles)-remaining_performed_calls),
+    function_calls_init = function_calls                     #count initialisation calls extra
+    function_calls_init[uninitialized_particles] = c (rep(calls_per_uninitialized_particle,   length(uninitialized_particles)-remaining_performed_calls),
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
   } 
 
@@ -193,7 +192,7 @@ while ((closed_slaves < nslaves) )
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
             slave_id=idle_slaves[1]                     #get free slave        
 
-            mpi.remote.exec(cmd=perform_task,task=list(objective_function,X[current_particle,]),slave_id=slave_id,ret=FALSE)        #set slave to listen mode
+            mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
             idle_slaves=idle_slaves[-1]                         #remove this slave from list
             status            [current_particle]=2               #mark this particle as "in progress"
             node_id           [current_particle]=slave_id        #store slave_id of this task
@@ -254,7 +253,7 @@ while ((closed_slaves < nslaves) )
 if ((closed_slaves==nslaves) && is.null(break_flag))
   break_flag = "No or delayed response from slaves" 
 
-ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls),break_flag=break_flag) 
+ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls+function_calls_init),break_flag=break_flag) 
 
   
 close_mpi()                        #diligently close Rmpi session

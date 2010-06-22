@@ -214,10 +214,6 @@ Till Francke <francke_at_uni-potsdam.de>
 
 
 #parallel application
-
-	result = optim_ppso(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)     #standard version
-	print (result)
-
 	result = optim_ppso_robust(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)    #"robust" version
 	print (result)
 
@@ -228,7 +224,7 @@ Till Francke <francke_at_uni-potsdam.de>
   c(host="default", wd="/tmp/defaultdir"),
   c(host="host1", wd="/home/me/firstthread"),
   c(host="host1", wd="/home/me/firstthread"),
-  c(host="host2", wd="/home/me/onlyonethread")
+  c(host="host2", wd="/home/me2/onlyonethread")
   )
 	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=4, working_dir_list=working_dir_list)    
 }

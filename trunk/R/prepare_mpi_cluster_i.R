@@ -36,21 +36,16 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL)
   
   #options(error=.Last)     #close rmpi on errors
 
-  perform_task <- function(task,slave_id) {
-      # Note the use of the tag for sent slave_messages:
-      #     1=ready_for_task, 2=done_task, 3=exiting
-      # Note the use of the tag for received slave_messages:
-      #     1=task, 2=done_tasks
+  perform_task <- function(params,slave_id,tryCall=FALSE) {
 
       #write.table(file=paste("slave",slave_id),"contacted")
 
       if (!(mpi.comm.rank() %in% slave_id)) return(1) #only the adressed slaves should attend the task
-      
 
       #write.table(file=paste("slave",slave_id),"task received")
-      if (!is.null(task$tryCall) && task$tryCall)
+      if (tryCall)
       {
-        results=try(task[[1]](task[[2]]),silent=TRUE)  # perform the task with the respective parameters, and create results (with error handling, slower)
+        results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
         if (!is.numeric(results))                      #an error occured during execution
         {
           mpi.send.Robj(paste("(",Sys.info()["nodename"],"):",as.character(results)),0,4)    #return the error message, tagged as "error" (4)
@@ -58,12 +53,9 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL)
         }        
       }
       else  
-        results=task[[1]](task[[2]])  # perform the task with the respective parameters, and create results (without error handling, faster)
+        results=objective_function(params)  # call the objective function with the respective parameters, and create results (without error handling, faster)
           
-      mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend
-          
-
-
+      mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?
   }
   
 

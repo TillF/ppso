@@ -1,3 +1,8 @@
+0.9-93
+- improved slave communication that led to blocking when using many slaves and large objective functions (optim_p*)
+- corrected number of initialisation calls in *dds that were slightly too high
+- added TryCatch to optim_pdds
+
 0.9-926
 - checked for existence of rgl package
 - updated docu, removed optim_ppso from docu (no further development, use optim_ppso_robust instead)

@@ -188,12 +188,13 @@ Till Francke <francke_at_uni-potsdam.de>
 	print (result)
 
 
+\dontrun{
 #simple application with visualisation
 	result = optim_pso(objective_function=rastrigin_function, projectfile=NULL, logfile=NULL, do_plot="rgl")
 	print (result)
 	result = optim_dds(objective_function=rastrigin_function, projectfile=NULL, logfile=NULL, do_plot="base")
 	print (result)
-
+}
 
 #writing and resuming from project file
 	projectfile	=tempfile()

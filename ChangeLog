@@ -1,3 +1,6 @@
+0.9-932
+- added missing initialization of function_calls_init to optim_pdds*
+
 0.9-93
 - improved slave communication that led to blocking when using many slaves and large objective functions (optim_p*)
 - corrected number of initialisation calls in *dds that were slightly too high

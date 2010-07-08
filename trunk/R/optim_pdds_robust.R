@@ -153,7 +153,8 @@ status_org=status  #  store original contents
     function_calls_init = function_calls                     #count initialisation calls extra
     function_calls_init[uninitialized_particles] = c (rep(calls_per_uninitialized_particle,   length(uninitialized_particles)-remaining_performed_calls),
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
-  } 
+ } else
+  function_calls_init = array(0,function_calls)
 
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles

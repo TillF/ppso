@@ -6,8 +6,8 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
-if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
-  stop("max_number_function_calls must be at least number_of_particles.")
+if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < number_of_particles)
+  stop("abs(max_number_function_calls) must be at least number_of_particles.")
 
 eval(parse(text=paste(c("update_tasklist_dds    =",deparse(update_tasklist_dds_i )))))  #this creates local version of the function update_tasklist_pso (see explanation there)
 eval(parse(text=paste(c("init_particles         =",deparse(init_particles_i      )))))       #this creates local version of the function init_particles (see explanation there)
@@ -32,7 +32,7 @@ init_visualisation()                      #prepare visualisation, if selected
 
 
 #initialisation
-init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise, if no value can be loaded from a project file
+init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
 number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
 
@@ -159,7 +159,7 @@ status_org=status  #  store original contents
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
   X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters)        # current optimum of each particle so far
-  fitness_lbest =       fitness_lbest[1:number_of_particles]       
+  fitness_lbest =       fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
 
   #restore array dimensions according to original number of particles
   X             =X_lbest  #X: position in parameter space                          
@@ -169,6 +169,7 @@ status_org=status  #  store original contents
   computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
   function_calls    =function_calls[1:number_of_particles]  # iteration counter for each particle
+  function_calls_init = function_calls_init[1:number_of_particles]                     #count initialisation calls extra
   status=status_org[1:number_of_particles]  #  restore original contents 
   futile_iter_count = futile_iter_count[1:number_of_particles]
  

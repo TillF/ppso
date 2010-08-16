@@ -88,7 +88,8 @@ fitness_gbest = min(fitness_lbest);
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
  } else
   function_calls_init = array(0,function_calls)
- #restore array dimensions according to original number of particles
+ 
+#restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
   X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters)        # current optimum of each particle so far
   fitness_lbest =       fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
@@ -101,6 +102,7 @@ fitness_gbest = min(fitness_lbest);
   computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
   node_id       =array(0,number_of_particles)                              #node number of worker / slave
   function_calls    =function_calls[1:number_of_particles]  # iteration counter for each particle
+  function_calls_init = function_calls_init[1:number_of_particles]                     #count initialisation calls extra
   status=status_org[1:number_of_particles]  #  restore original contents 
   futile_iter_count = futile_iter_count[1:number_of_particles]
 

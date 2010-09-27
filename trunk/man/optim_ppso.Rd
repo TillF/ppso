@@ -224,7 +224,7 @@ Till Francke <francke_at_uni-potsdam.de>
   working_dir_list=rbind( #specify working directories for four slaves
   c(host="default", wd="/tmp/defaultdir"),
   c(host="host1", wd="/home/me/firstthread"),
-  c(host="host1", wd="/home/me/firstthread"),
+  c(host="host1", wd="/home/me/secondthread"),
   c(host="host2", wd="/home/me2/onlyonethread")
   )
 	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=4, working_dir_list=working_dir_list)    

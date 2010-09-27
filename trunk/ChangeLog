@@ -1,3 +1,6 @@
+0.9-934
+- fixed faulty handling of init in DDS*
+
 0.9-933
 - handling counting of init_calls that lead to warning message
 - minor unifications dds and pdds

@@ -1,3 +1,6 @@
+0.9-935
+- added specification of initial_estimates
+
 0.9-934
 - fixed faulty handling of init in DDS*
 

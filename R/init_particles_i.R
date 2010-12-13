@@ -72,6 +72,34 @@ init_particles_i=function(lhc_init=FALSE)
       }
     }
   }
+
+  if (!is.null(initial_estimates))
+  {
+    initial_estimates = as.matrix(initial_estimates)       #reshape any vector as matrix
+    if (nrow(initial_estimates)!=number_of_parameters)
+    {
+      warning("initial_estimates must contain <number_of_parameters> rows, ignored.") 
+      initial_estimates =NULL
+    }  else
+    {
+      out_of_bounds=NULL    #initial estimates that are out of bounds
+      for (i in 1:ncol(initial_estimates))
+        if (any ((initial_estimates[i,] < parameter_bounds[,1]) | (initial_estimates[i,] > parameter_bounds[,2])))
+         out_of_bounds=c(out_of_bounds,i)
+      if (any(out_of_bounds))
+      {
+        warning(paste("initial estimates",paste(out_of_bounds,collapse=", ")," out of bounds, ignored"))
+        initial_estimates = initial_estimates[- out_of_bounds,]     #discard invalid intial estimates
+      }
+      if (ncol(initial_estimates) > noninitialised_particles)
+      {
+        warning(paste ("sufficient initial estimates loaded from project file, ", ncol(initial_estimates) - noninitialised_particles, "columns of argument <initial_estimates> ignored"))
+        initial_estimates = initial_estimates[,1:noninitialised_particles]     #discard invalid intial estimates
+      }
+    }
+  }
+  
+  
   if (noninitialised_particles>0)          #no or not sufficient particles initialized from file -> do random initialisation
   {
     if (!("lhs" %in% installed.packages()[,"Package"]))        #check existence of lhs package
@@ -90,10 +118,12 @@ init_particles_i=function(lhc_init=FALSE)
     }
   
 #    tobeinitialized=(number_of_particles-noninitialised_particles+1):number_of_particles      #index to particles that need to be initialized
-    tobeinitialized=X[,1]==Inf      #index to particles that need to be initialized
+    tobeinitialized = X[,1]==Inf      #index to particles that need to be initialized
     # Initialize the particle positions
-    #X[tobeinitialized,] = parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * random_numbers
     X[tobeinitialized,] = t(parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * t(random_numbers)) #strangely, this transposing is necessary
+    if (!is.null(initial_estimates))         #if any initial estimates have been specified as an argument, use these
+      X[which(tobeinitialized)[1:ncol(initial_estimates)],] = initial_estimates
+
     #...and their other parameters
     X_lbest       [tobeinitialized,] =  X[tobeinitialized,]
     V             [tobeinitialized,] = 0
@@ -103,7 +133,7 @@ init_particles_i=function(lhc_init=FALSE)
     function_calls    [tobeinitialized] = 0
   }
   
-  # determine the global best and its fitness from all availabel data
+  # determine the global best and its fitness from all available data
   min_fitness_index = which.min(fitness_lbest)
   fitness_gbest =min(fitness_lbest)          
   X_gbest[] = X_lbest[min_fitness_index[1],]

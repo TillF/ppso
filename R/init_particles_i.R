@@ -84,7 +84,7 @@ init_particles_i=function(lhc_init=FALSE)
     {
       out_of_bounds=NULL    #initial estimates that are out of bounds
       for (i in 1:ncol(initial_estimates))
-        if (any ((initial_estimates[i,] < parameter_bounds[,1]) | (initial_estimates[i,] > parameter_bounds[,2])))
+        if (any ((initial_estimates[,i] < parameter_bounds[,1]) | (initial_estimates[,i] > parameter_bounds[,2])))
          out_of_bounds=c(out_of_bounds,i)
       if (any(out_of_bounds))
       {

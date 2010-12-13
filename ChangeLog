@@ -1,3 +1,6 @@
+0.9-936
+- fixed bug in initial_estimates (column vs. rows)
+
 0.9-935
 - added specification of initial_estimates
 

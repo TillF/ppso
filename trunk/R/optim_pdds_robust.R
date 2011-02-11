@@ -57,7 +57,7 @@ fitness_lbest[] = Inf
 fitness_gbest = min(fitness_lbest);
 
 if (verbose) print(paste(Sys.time(),"initializing slaves..."))
-if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
+if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list,verbose=verbose) else nslaves=NULL             #initiate cluster, if enabled
 if (verbose) print(paste(Sys.time(),"...slaves initialized."))
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist

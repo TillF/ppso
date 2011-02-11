@@ -1,5 +1,9 @@
+0.9-938
+- added verbose-option for pdds_optim_robust- slaves (untested)
+- fixed bug of possible duplicate sending of results to master
+
 0.9-937
-- added verbose-option for pdds (untested)
+- added verbose-option for pdds_optim_robust (untested)
 
 0.9-936
 - fixed bug in initial_estimates (column vs. rows)

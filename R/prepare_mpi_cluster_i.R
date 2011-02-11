@@ -4,7 +4,7 @@
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 #for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
 
-prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL)
+prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose=FALSE)
 {
   if (!is.loaded("mpi_initialize")) {         
   library("Rmpi")
@@ -38,29 +38,45 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL)
 
   perform_task <- function(params,slave_id,tryCall=FALSE) {
 
+      if (verbose) print(paste(Sys.time(),"received message for slave",slave_id))
       #write.table(file=paste("slave",slave_id),"contacted")
 
       if (!(mpi.comm.rank() %in% slave_id)) return(1) #only the adressed slaves should attend the task
+      if (verbose) print(paste(Sys.time(),"task received"))
+
 
       #write.table(file=paste("slave",slave_id),"task received")
       if (tryCall)
       {
+        if (verbose) print(paste(Sys.time(),"calling objective function..."))
         results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
+        if (verbose) print(paste(Sys.time(),"...objective function evaluation completed"))
+
         if (!is.numeric(results))                      #an error occured during execution
         {
+          if (verbose) print(paste(Sys.time(),"returning results to master..."))
           mpi.send.Robj(paste("(",Sys.info()["nodename"],"):",as.character(results)),0,4)    #return the error message, tagged as "error" (4)
+          if (verbose) print(paste(Sys.time(),"...results returned, back to idle mode."))
           return()
         }        
       }
-      else  
+      else
+      {  
+        if (verbose) print(paste(Sys.time(),"calling objective function..."))
         results=objective_function(params)  # call the objective function with the respective parameters, and create results (without error handling, faster)
-          
-      mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?
+        if (verbose) print(paste(Sys.time(),"...objective function evaluation completed"))   
+        if (verbose) print(paste(Sys.time(),"returning results to master..."))
+        mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?
+        if (verbose) print(paste(Sys.time(),"...results returned, back to idle mode."))    
+        return()
+      }
+        
   }
   
 
-  mpi.bcast.Robj2slave(objective_function)         #send objective function to slave
-  mpi.bcast.Robj2slave(perform_task)               #send activation function to slave
+  mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
+  mpi.bcast.Robj2slave(verbose)                   #send verbose-flags to slaves
+  mpi.bcast.Robj2slave(perform_task)               #send activation function to slaves
 
   closed_slaves=0
   nslaves=nslaves

@@ -4,16 +4,23 @@
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 #for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
 
-prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose=FALSE)
+prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_slave=FALSE)
 {
   if (!is.loaded("mpi_initialize")) {         
   library("Rmpi")
   }
  
-  if (nslaves==-1) nslaves=mpi.universe.size() else  # Spawn as many slaves as possible
-  if (nslaves>mpi.universe.size()) warning("Number of specified slaves exceeds number of available slaves.")
+  if (nslaves == -1) nslaves=mpi.universe.size() else  # Spawn as many slaves as possible
+  if (nslaves > mpi.universe.size()) warning("Number of specified slaves exceeds number of available slaves.")
 
-  mpi.spawn.Rslaves(nslaves=nslaves)
+  if (mpi.comm.size()>0)
+  {
+    nslaves=mpi.comm.size()-1
+	  print(paste(nslaves,"running slaves detected, no spawning."))
+  } else {
+	mpi.spawn.Rslaves(nslaves=nslaves)
+	print(paste(mpi.comm.size(),"slaves spawned."))
+  }
   
   while(mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #empty MPI queue if there is still something in there
     slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
@@ -30,44 +37,45 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose=F
       }
     }
   
-   print(paste(mpi.comm.size()-1,"slaves spawned"))
    options(error=.Last)     #close rmpi on errors
 
   
-  #options(error=.Last)     #close rmpi on errors
-
   perform_task <- function(params,slave_id,tryCall=FALSE) {
 
-      if (verbose) print(paste(Sys.time(),"received message for slave",slave_id))
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": received message for slave",slave_id))
       #write.table(file=paste("slave",slave_id),"contacted")
 
       if (!(mpi.comm.rank() %in% slave_id)) return(1) #only the adressed slaves should attend the task
-      if (verbose) print(paste(Sys.time(),"task received"))
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": task received"))
 
 
       #write.table(file=paste("slave",slave_id),"task received")
       if (tryCall)
       {
-        if (verbose) print(paste(Sys.time(),"calling objective function..."))
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
         results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
-        if (verbose) print(paste(Sys.time(),"...objective function evaluation completed"))
+        if (verbose_slave)
+		{
+			print(paste(Sys.time(),"slave",mpi.comm.rank(),":  ...objective function evaluation completed"))
+			flush.console()
+		}
 
         if (!is.numeric(results))                      #an error occured during execution
         {
-          if (verbose) print(paste(Sys.time(),"returning results to master..."))
+          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning results to master..."))
           mpi.send.Robj(paste("(",Sys.info()["nodename"],"):",as.character(results)),0,4)    #return the error message, tagged as "error" (4)
-          if (verbose) print(paste(Sys.time(),"...results returned, back to idle mode."))
+          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...results returned, back to idle mode."))
           return()
         }        
       }
       else
       {  
-        if (verbose) print(paste(Sys.time(),"calling objective function..."))
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
         results=objective_function(params)  # call the objective function with the respective parameters, and create results (without error handling, faster)
-        if (verbose) print(paste(Sys.time(),"...objective function evaluation completed"))   
-        if (verbose) print(paste(Sys.time(),"returning results to master..."))
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...objective function evaluation completed"))   
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning results to master..."))
         mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?
-        if (verbose) print(paste(Sys.time(),"...results returned, back to idle mode."))    
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...results returned, back to idle mode."))    
         return()
       }
         
@@ -75,7 +83,11 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose=F
   
 
   mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
-  mpi.bcast.Robj2slave(verbose)                   #send verbose-flags to slaves
+  
+  mpi.bcast.Robj2slave(verbose_slave)                   #send verbose-flags to slaves
+  if (verbose_slave)
+    mpi.bcast.cmd(sink(paste("slave",mpi.comm.rank(),sep="")))               #put output of slaves into files, if desired
+
   mpi.bcast.Robj2slave(perform_task)               #send activation function to slaves
 
   closed_slaves=0
@@ -123,7 +135,6 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose=F
 
  
   assign("closed_slaves",closed_slaves,parent.frame())        #set globals
-  nslaves = mpi.comm.size()-1
   assign("nslaves",         nslaves,   parent.frame())        #  
   assign("idle_slaves", idle_slaves,   parent.frame())        #
 }

@@ -1,5 +1,5 @@
 optim_pdds_robust <-
-function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
+function (objective_function=sample_function, number_of_parameters=2, number_of_particles=1, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, lhc_init=FALSE,
   #runtime & display parameters
     do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, 
@@ -36,7 +36,8 @@ init_visualisation()                      #prepare visualisation, if selected
 init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
 number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
-
+verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
+verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
 
 X             =array(Inf,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
 V             =array(0,c(           number_of_particles,number_of_parameters))  #V: velocity in parameter space
@@ -56,9 +57,9 @@ break_flag=NULL       #flag indicating if a termination criterium has been reach
 fitness_lbest[] = Inf
 fitness_gbest = min(fitness_lbest);
 
-if (verbose) print(paste(Sys.time(),"initializing slaves..."))
-if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list,verbose=verbose) else nslaves=NULL             #initiate cluster, if enabled
-if (verbose) print(paste(Sys.time(),"...slaves initialized."))
+if (verbose_master) print(paste(Sys.time(),"initializing slaves..."))
+if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list,verbose_slave=verbose_slave) else nslaves=NULL             #initiate cluster, if enabled
+if (verbose_master) print(paste(Sys.time(),"...slaves initialized."))
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
    write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
@@ -66,7 +67,7 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
-if (verbose) print(paste(Sys.time(),"initializing particle positions..."))
+if (verbose_master) print(paste(Sys.time(),"initializing particle positions..."))
   init_particles(lhc_init)  #initialize particle positions
   if (max_number_function_calls < 0)
   {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
@@ -74,7 +75,8 @@ if (verbose) print(paste(Sys.time(),"initializing particle positions..."))
     max_number_function_calls=abs(max_number_function_calls)
   }
 
-if (verbose) print(paste(Sys.time(),"starting initialization runs..."))
+if (verbose_master)  print(paste(Sys.time(),"starting initialization runs..."))
+
 status_org=status  #  store original contents
 
   uninitialized_particles= which(fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
@@ -93,9 +95,9 @@ status_org=status  #  store original contents
 #            if (any(tobecomputed)) {
               current_particle=which(tobecomputed)[1]   
               slave_id=idle_slaves[1]                     #get free slave        
-              if (verbose) print(paste(Sys.time()," ...sending task to slave",slave_id))  
+              if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
               mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
-              if (verbose) print(paste(Sys.time()," ...task sent"))  
+              if (verbose_master) print(paste(Sys.time()," ...task sent"))  
               idle_slaves=idle_slaves[-1]                         #remove this slave from list
               status            [current_particle]=2               #mark this particle as "in progress"
               node_id           [current_particle]=slave_id        #store slave_id of this task
@@ -104,9 +106,9 @@ status_org=status  #  store original contents
             tobecomputed=status==0
         } 
   
-        if (!is.null(break_flag)) break
+        if (!is.null(break_flag) | all(status==1)) break
         sleeptime=0
-        if (verbose) print(paste(Sys.time()," ...wait for message from slaves..."))  
+        if (verbose_master) print(paste(Sys.time()," ...wait for message from slaves..."))  
         while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #wait till there is a message
         {
 #            if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
@@ -114,13 +116,13 @@ status_org=status  #  store original contents
             if (!is.null(execution_timeout)) sleeptime=check_execution_timeout()
             Sys.sleep(sleeptime)                                           #this prevents this loop to consume too much ressources
         }        
-        if (verbose) print(paste(Sys.time()," ...message detected"))  
+        if (verbose_master) print(paste(Sys.time()," ...message detected"))  
         slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
  
         slave_message_info <- mpi.get.sourcetag()
         slave_id <- slave_message_info[1]
         tag      <- slave_message_info[2]
-        if (verbose) print(paste(Sys.time()," ...message received from slave",slave_id))          
+        if (verbose_master) print(paste(Sys.time()," ...message received from slave",slave_id))          
       
         if (tag == 2) {      #retrieve result
           current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
@@ -148,7 +150,7 @@ status_org=status  #  store original contents
           }
        }
         else if (tag == 3) {    # A slave has closed down.
-            if (verbose) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
+            if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
             closed_slaves <- closed_slaves + 1
         }
   }   
@@ -166,7 +168,8 @@ status_org=status  #  store original contents
  } else
   function_calls_init = 0*function_calls
 
-  if (verbose) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
+if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
+
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
   X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters)        # current optimum of each particle so far
@@ -196,32 +199,32 @@ it_last_improvent=0               #counter for counting iterations since last im
 while ((closed_slaves < nslaves) )
 {
       update_tasklist_dds()   #update particle positions based on available results
-      if (!is.null(break_flag)) break
       tobecomputed=status==0
+
       while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
       {
           if (any(tobecomputed)) {
             current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
             slave_id=idle_slaves[1]                     #get free slave        
-            if (verbose) print(paste(Sys.time()," ...sending task to slave",slave_id))  
+            if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
             mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
-            if (verbose) print(paste(Sys.time()," ...task sent"))  
+            if (verbose_master) print(paste(Sys.time()," ...task sent"))  
             idle_slaves=idle_slaves[-1]                         #remove this slave from list
             status            [current_particle]=2               #mark this particle as "in progress"
             node_id           [current_particle]=slave_id        #store slave_id of this task
             computation_start [current_particle]=Sys.time()      #store time of start of this computation
           }   
-          if (verbose) print(paste(Sys.time()," ...updating task list"))  
+          if (verbose_master) print(paste(Sys.time()," ...updating task list"))  
           update_tasklist_dds()   #update particle speeds and positions based on available results
           
           tobecomputed=status==0
       } 
 
-      if (!is.null(break_flag)) break
+        if (!is.null(break_flag) | all(status==1)) break
 
         sleeptime=0
-        if (verbose) print(paste(Sys.time()," ...wait for message from slaves..."))          
+        if (verbose_master) print(paste(Sys.time()," ...wait for message from slaves..."))          
         while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #wait till there is a message
         {
 #            if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
@@ -229,12 +232,12 @@ while ((closed_slaves < nslaves) )
             if (!is.null(execution_timeout)) sleeptime=check_execution_timeout()
             Sys.sleep(sleeptime)                                           #this prevents this loop to consume too much ressources
         }        
-      if (verbose) print(paste(Sys.time()," ...message detected"))          
+      if (verbose_master) print(paste(Sys.time()," ...message detected"))          
       slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
       slave_message_info <- mpi.get.sourcetag()
       slave_id <- slave_message_info[1]
       tag      <- slave_message_info[2]
-      if (verbose) print(paste(Sys.time()," ...message received from slave",slave_id))          
+      if (verbose_master) print(paste(Sys.time()," ...message received from slave",slave_id))          
       
       if (tag == 2) {      #retrieve result
         current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
@@ -260,7 +263,7 @@ while ((closed_slaves < nslaves) )
         }
       }
       else if (tag == 3) {    # A slave has closed down.
-          if (verbose) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
+          if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
           closed_slaves <- closed_slaves + 1
       }
       else if (tag == 4) {    # error occured during the execution of the objective function
@@ -269,16 +272,16 @@ while ((closed_slaves < nslaves) )
       }
 }      
 
-if (verbose) print(paste(Sys.time(),"finished actual runs."))  
+if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 
 if ((closed_slaves==nslaves) && is.null(break_flag))
   break_flag = "No or delayed response from slaves" 
 
 ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls+function_calls_init),break_flag=break_flag) 
 
-if (verbose) print(paste(Sys.time(),"closing MPI..."))    
+if (verbose_master) print(paste(Sys.time(),"closing MPI..."))    
 close_mpi()                        #diligently close Rmpi session
-if (verbose) print(paste(Sys.time(),"...closed."))    
+if (verbose_master) print(paste(Sys.time(),"...closed."))    
 
 return(ret_val) 
 }

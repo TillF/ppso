@@ -1,3 +1,8 @@
+0.9-939
+- fixed bug of pdds-hangup after initialisation phase (caused by addressing nonexistent slaves)
+- improved pdds-verbose mode
+- minor formatting in optim_dds and docu
+
 0.9-938
 - added verbose-option for pdds_optim_robust- slaves (untested)
 - fixed bug of possible duplicate sending of results to master

@@ -1,3 +1,6 @@
+0.9-940
+- yet another bug in slave communications affection option try-call
+
 0.9-939
 - fixed bug of pdds-hangup after initialisation phase (caused by addressing nonexistent slaves)
 - improved pdds-verbose mode

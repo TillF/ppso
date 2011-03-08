@@ -55,32 +55,34 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
         results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
         if (verbose_slave)
-		{
-			print(paste(Sys.time(),"slave",mpi.comm.rank(),":  ...objective function evaluation completed"))
-			flush.console()
-		}
+    		{
+    			print(paste(Sys.time(),"slave",mpi.comm.rank(),":  ...objective function evaluation completed"))
+    			flush.console()
+    		}
 
-        if (!is.numeric(results))                      #an error occured during execution
+        if (is.numeric(results))
         {
           if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning results to master..."))
+          mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            
+        } else                             #an error occured during execution
+        {
+          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning error message to master..."))
           mpi.send.Robj(paste("(",Sys.info()["nodename"],"):",as.character(results)),0,4)    #return the error message, tagged as "error" (4)
-          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...results returned, back to idle mode."))
-          return()
         }        
-      }
-      else
+      } else        #non-try-call option
       {  
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
         results=objective_function(params)  # call the objective function with the respective parameters, and create results (without error handling, faster)
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...objective function evaluation completed"))   
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning results to master..."))
         mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?
-        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...results returned, back to idle mode."))    
-        return()
       }
+
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...results returned, back to idle mode."))    
+      return()
+
         
   }
-  
 
   mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
   

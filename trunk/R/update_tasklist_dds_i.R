@@ -159,7 +159,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
    fitness_X[completed_particles]=Inf
    node_id  [completed_particles] =0
 
-  if (!is.null(max_number_function_calls)
+  if (!is.null(max_number_function_calls))
    {
 		scheduled_calls = sum(status==0 | status==2)	#count how many tasks are scheduled or still running
         overcomitted_calls = max_number_function_calls - (scheduled_calls +  sum(function_calls)) #how many calls are scheduled that exceed max_number_function_calls

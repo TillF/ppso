@@ -5,6 +5,7 @@ close_mpi_i=function()
 #for that purpose, this function is locally re-declared in optim_* to allow accessing the same globals  (clumsy, but I don't know better)
 
 {
+#  mpi.abort() #abort all open threads
   i=0
   while(mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #empty MPI queue if there is still something in there
   {

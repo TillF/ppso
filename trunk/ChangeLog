@@ -1,5 +1,8 @@
+0.9-941
+- fixed bug in initialisation of DDS: best starting values were not kept correctly
+
 0.9-940
-- yet another bug in slave communications affection option try-call
+- yet another bug in slave communications affecting option try-call
 
 0.9-939
 - fixed bug of pdds-hangup after initialisation phase (caused by addressing nonexistent slaves)

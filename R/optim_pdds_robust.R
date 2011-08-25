@@ -152,6 +152,11 @@ status_org=status  #  store original contents
         else if (tag == 3) {    # A slave has closed down.
             if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
             closed_slaves <- closed_slaves + 1
+			}
+        else if (tag == 4) {    # error occured during the execution of the objective function
+          if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has produced an error:",slave_message))  
+		  break_flag=paste("Abort, slave",slave_id,":",slave_message)
+          closed_slaves=nslaves			
         }
   }   
   
@@ -159,7 +164,7 @@ status_org=status  #  store original contents
 
     top_of_preruns=sort(fitness_X[pre_run_computations],index.return=TRUE)$ix[1:length(uninitialized_particles)]   #sort according to best fitness
     fitness_lbest[uninitialized_particles] = fitness_X [pre_run_computations[top_of_preruns]]
-    X_lbest      [uninitialized_particles] = X         [pre_run_computations[top_of_preruns]]
+    X_lbest      [uninitialized_particles,] = X         [pre_run_computations[top_of_preruns,]]
     calls_per_uninitialized_particle = length(pre_run_computations) %/% length(uninitialized_particles)     #distribute counting of function calls among real particles
     remaining_performed_calls = length(pre_run_computations) %% length(uninitialized_particles)
     function_calls_init = function_calls                     #count initialisation calls extra
@@ -168,7 +173,9 @@ status_org=status  #  store original contents
  } else
   function_calls_init = 0*function_calls
 
-if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
+if (is.null(break_flag))
+{
+  if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
 
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
@@ -192,87 +199,89 @@ if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual 
   X_gbest[] = X[min_fitness_index,]
 
 
-# actual search
-fitness_itbest= fitness_gbest     #best fitness in the last it_last iterations
-it_last_improvent=0               #counter for counting iterations since last improvement
-
-while ((closed_slaves < nslaves) )
-{
-      update_tasklist_dds()   #update particle positions based on available results
-      tobecomputed=status==0
-
-      while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
-      {
-          if (any(tobecomputed)) {
-            current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
-            current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
-            slave_id=idle_slaves[1]                     #get free slave        
-            if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
-            mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
-            if (verbose_master) print(paste(Sys.time()," ...task sent"))  
-            idle_slaves=idle_slaves[-1]                         #remove this slave from list
-            status            [current_particle]=2               #mark this particle as "in progress"
-            node_id           [current_particle]=slave_id        #store slave_id of this task
-            computation_start [current_particle]=Sys.time()      #store time of start of this computation
-          }   
-          if (verbose_master) print(paste(Sys.time()," ...updating task list"))  
-          update_tasklist_dds()   #update particle speeds and positions based on available results
-          
-          tobecomputed=status==0
-      } 
-
-        if (!is.null(break_flag) | all(status==1)) break
-
-        sleeptime=0
-        if (verbose_master) print(paste(Sys.time()," ...wait for message from slaves..."))          
-        while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #wait till there is a message
+  # actual search
+  fitness_itbest= fitness_gbest     #best fitness in the last it_last iterations
+  it_last_improvent=0               #counter for counting iterations since last improvement
+  
+  while ((closed_slaves < nslaves) )
+  {
+        update_tasklist_dds()   #update particle positions based on available results
+        tobecomputed=status==0
+  
+        while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
         {
-#            if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
-#              break_flag="user interrupt"   
-            if (!is.null(execution_timeout)) sleeptime=check_execution_timeout()
-            Sys.sleep(sleeptime)                                           #this prevents this loop to consume too much ressources
-        }        
-      if (verbose_master) print(paste(Sys.time()," ...message detected"))          
-      slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
-      slave_message_info <- mpi.get.sourcetag()
-      slave_id <- slave_message_info[1]
-      tag      <- slave_message_info[2]
-      if (verbose_master) print(paste(Sys.time()," ...message received from slave",slave_id))          
-      
-      if (tag == 2) {      #retrieve result
-        current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
-        if (length(current_particle) > 1)                                #rr   shouldn't occur
-          print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
-         else    
-        if (length(current_particle) ==0)                                #
-        {
-          if (node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
-             print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message))          
-          if (node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, from a terminated or reset slave
+            if (any(tobecomputed)) {
+              current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
+              current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
+              slave_id=idle_slaves[1]                     #get free slave        
+              if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
+              mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
+              if (verbose_master) print(paste(Sys.time()," ...task sent"))  
+              idle_slaves=idle_slaves[-1]                         #remove this slave from list
+              status            [current_particle]=2               #mark this particle as "in progress"
+              node_id           [current_particle]=slave_id        #store slave_id of this task
+              computation_start [current_particle]=Sys.time()      #store time of start of this computation
+            }   
+            if (verbose_master) print(paste(Sys.time()," ...updating task list"))  
+            update_tasklist_dds()   #update particle speeds and positions based on available results
+            
+            tobecomputed=status==0
+        } 
+  
+          if (!is.null(break_flag) | all(status==1)) break
+  
+          sleeptime=0
+          if (verbose_master) print(paste(Sys.time()," ...wait for message from slaves..."))          
+          while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #wait till there is a message
           {
-            idle_slaves=c(idle_slaves,slave_id)     #give the slave another chance
-            node_interruptions[slave_id,"status"] = 0
-          }   
-        } else
-        {
-          fitness_X [current_particle] = slave_message
-          status    [current_particle] =1      #mark as "finished"
-          function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter
-          if (!is.null(execution_timeout)) execution_times = rbind(execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),computation_start[current_particle],units="sec"))))   #monitor execution times
-          idle_slaves=c(idle_slaves,slave_id)
+  #            if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
+  #              break_flag="user interrupt"   
+              if (!is.null(execution_timeout)) sleeptime=check_execution_timeout()
+              Sys.sleep(sleeptime)                                           #this prevents this loop to consume too much ressources
+          }        
+        if (verbose_master) print(paste(Sys.time()," ...message detected"))          
+        slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
+        slave_message_info <- mpi.get.sourcetag()
+        slave_id <- slave_message_info[1]
+        tag      <- slave_message_info[2]
+        if (verbose_master) print(paste(Sys.time()," ...message received from slave",slave_id))          
+        
+        if (tag == 2) {      #retrieve result
+          current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
+          if (length(current_particle) > 1)                                #rr   shouldn't occur
+            print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
+           else    
+          if (length(current_particle) ==0)                                #
+          {
+            if (node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
+               print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message))          
+            if (node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, from a terminated or reset slave
+            {
+              idle_slaves=c(idle_slaves,slave_id)     #give the slave another chance
+              node_interruptions[slave_id,"status"] = 0
+            }   
+          } else
+          {
+            fitness_X [current_particle] = slave_message
+            status    [current_particle] =1      #mark as "finished"
+            function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter
+            if (!is.null(execution_timeout)) execution_times = rbind(execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),computation_start[current_particle],units="sec"))))   #monitor execution times
+            idle_slaves=c(idle_slaves,slave_id)
+          }
         }
-      }
-      else if (tag == 3) {    # A slave has closed down.
-          if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
-          closed_slaves <- closed_slaves + 1
-      }
-      else if (tag == 4) {    # error occured during the execution of the objective function
-          break_flag=paste("Abort, slave",slave_id,":",slave_message)
-          closed_slaves=nslaves
-      }
-}      
-
-if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
+        else if (tag == 3) {    # A slave has closed down.
+            if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  
+            closed_slaves <- closed_slaves + 1
+        }
+        else if (tag == 4) {    # error occured during the execution of the objective function
+            if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has produced an error:",slave_message))  
+  		  break_flag=paste("Abort, slave",slave_id,":",slave_message)
+            closed_slaves=nslaves			
+        }
+  }      
+  
+  if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
+}
 
 if ((closed_slaves==nslaves) && is.null(break_flag))
   break_flag = "No or delayed response from slaves" 

@@ -87,13 +87,13 @@ update_tasklist_dds_i <- function(loop_counter=1)
    if ((fitness_itbest-fitness_gbest                   > abstol) &                     #check improvement in absolute terms
        abs((fitness_itbest-fitness_gbest)/max(0.00001,abs(fitness_gbest)) > reltol   ))  #check improvement in relative terms
    {    #improvement achieved
-     it_last_improvent=max(function_calls)    #store iteration number which achieved this improvement
+     it_last_improvement=max(function_calls)    #store iteration number which achieved this improvement
      fitness_itbest=fitness_gbest
-     assign("it_last_improvent",it_last_improvent,parent.frame())
+     assign("it_last_improvement",it_last_improvement,parent.frame())
      assign("fitness_itbest",fitness_itbest,parent.frame())
    } else
    {
-      if (min(function_calls) - it_last_improvent>=max_wait_iterations)
+      if (min(function_calls) - it_last_improvement>=max_wait_iterations)
         break_flag="converged"  #status=3
    }
 
@@ -112,7 +112,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
       {
         col.names=c(paste("best_par_",1:ncol(X),sep=""),"best_objective_function", paste("current_par_",1:ncol(X),sep=""),
           paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
-        write.table(file = projectfile, cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls + function_calls_init), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
+        write.table(file = projectfile, cbind(X_lbest, fitness_lbest, X, V, fitness_X, round(status), format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls + function_calls_init), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }
@@ -158,6 +158,16 @@ update_tasklist_dds_i <- function(loop_counter=1)
    status   [completed_particles]=0      #mark as "to be computed"
    fitness_X[completed_particles]=Inf
    node_id  [completed_particles] =0
+
+  if (!is.null(max_number_function_calls)
+   {
+		scheduled_calls = sum(status==0 | status==2)	#count how many tasks are scheduled or still running
+        overcomitted_calls = max_number_function_calls - (scheduled_calls +  sum(function_calls)) #how many calls are scheduled that exceed max_number_function_calls
+		if (overcomitted_calls > 0)
+			status   [which(status==0)[1:overcomitted_calls]] = 0.1	#mark these as "ready to be calculated, but exceeding max_number_function_calls"
+  }
+
+   
 
    #set globals
    assign("X",         X,parent.frame())

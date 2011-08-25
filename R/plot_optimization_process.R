@@ -12,13 +12,14 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   for (i in 1:nrow(projectfile_content))  #find at which function call number the current particle positions have been achieved
      projectfile_content$function_call_number[i]=max(-1,which(apply(apply(logfile_content[,1+(1:number_of_parameters)], 1, get("-"),t(projectfile_content[i,1:number_of_parameters]))==0,2,all)))
 
+
   if (verbose)
   {
     curbest=which.min(projectfile_content$best_objective_function)
     print(paste("current optimum found: ",projectfile_content$best_objective_function[curbest]))
     print(" at parameter set:")
     print(projectfile_content[curbest,1:number_of_parameters])
-    print(paste(" found at function call ",projectfile_content$function_call_number[curbest],"from",max(projectfile_content$function_call_number),"executed calls."))
+    print(paste(" found at function call ",projectfile_content$function_call_number[curbest],"from",nrow(logfile_content),"executed calls."))
   }
 
   necessary_plots=number_of_parameters+2    #+2: one for objective function, one for legend

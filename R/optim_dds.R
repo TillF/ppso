@@ -80,7 +80,7 @@ fitness_gbest = min(fitness_lbest);
 
     top_of_preruns=sort(fitness_X[pre_run_computations],index.return=TRUE)$ix[1:length(uninitialized_particles)]   #sort according to best fitness
     fitness_lbest[uninitialized_particles] = fitness_X [pre_run_computations[top_of_preruns]]
-    X_lbest      [uninitialized_particles] = X         [pre_run_computations[top_of_preruns]]
+    X_lbest      [uninitialized_particles,] = X         [pre_run_computations[top_of_preruns],]
     calls_per_uninitialized_particle = length(pre_run_computations) %/% length(uninitialized_particles)     #distribute counting of function calls among real particles
     remaining_performed_calls = length(pre_run_computations) %% length(uninitialized_particles)
     function_calls_init = function_calls                     #count initialisation calls extra
@@ -88,6 +88,8 @@ fitness_gbest = min(fitness_lbest);
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
  } else
   function_calls_init = 0*function_calls
+
+
  
 #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
@@ -109,7 +111,6 @@ fitness_gbest = min(fitness_lbest);
   fitness_gbest = min(fitness_lbest)          #update global minimum
   min_fitness_index = which(fitness_gbest==fitness_lbest)[1]
   X_gbest[] = X[min_fitness_index,]
-
 
 # actual search
 

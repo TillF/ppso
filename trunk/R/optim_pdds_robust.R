@@ -61,14 +61,14 @@ if (verbose_master) print(paste(Sys.time(),"initializing slaves..."))
 if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list,verbose_slave=verbose_slave) else nslaves=NULL             #initiate cluster, if enabled
 if (verbose_master) print(paste(Sys.time(),"...slaves initialized."))
 
-if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
-   write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
-
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
 if (verbose_master) print(paste(Sys.time(),"initializing particle positions..."))
   init_particles(lhc_init)  #initialize particle positions
+  if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
+     write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+
   if (max_number_function_calls < 0)
   {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
     function_calls[]=0

@@ -27,6 +27,7 @@ init_particles_i=function(lhc_init=FALSE)
   {
     colnames(X)=param_names
     colnames(X_lbest)=param_names
+    names(X_gbest)=param_names
   }
   noninitialised_particles=number_of_particles      #number of particles that need to be initialized  (default:all)
   if(!exists("number_of_particles_org",parent.frame(), inherits=FALSE)) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
@@ -146,6 +147,14 @@ init_particles_i=function(lhc_init=FALSE)
   min_fitness_index = which.min(fitness_lbest)
   fitness_gbest =min(fitness_lbest)          
   X_gbest[] = X_lbest[min_fitness_index[1],]
+
+  if (length(param_names)!=0)
+  {
+    colnames(X)=param_names
+    colnames(X_lbest)=param_names
+    names(X_gbest)=param_names
+  }
+  
   assign("X_gbest",X_gbest,parent.frame())                         #write variable to scope of calling function
   assign("fitness_gbest",fitness_gbest,parent.frame())
   

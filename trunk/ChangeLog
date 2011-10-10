@@ -1,3 +1,6 @@
+0.9-943
+- If parameter_bounds (dominant) or initial_estimates has named rows, these names are used in the call to objective_function.
+
 0.9-942
 - logfile of DDS was not appended when resuming runs - fixed
 

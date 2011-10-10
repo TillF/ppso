@@ -19,6 +19,16 @@ init_particles_i=function(lhc_init=FALSE)
   computation_start=computation_start
   node_id          =node_id         
 
+  param_names=rownames(parameter_bounds)     #try to retrieve parameter names
+  if (length(param_names)==0)
+    param_names=names(initial_estimates)
+  
+  if (length(param_names)!=0)
+  {
+    colnames(X)=param_names
+    colnames(X_lbest)=param_names
+  }
+  browser()
   noninitialised_particles=number_of_particles      #number of particles that need to be initialized  (default:all)
   if(!exists("number_of_particles_org",parent.frame(), inherits=FALSE)) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
   

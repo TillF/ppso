@@ -58,10 +58,10 @@ TRUE:  Update particle velocities after function \code{objective_function} has b
 FALSE: Update particle velocities after each completed evaluation of function \code{objective_function} (suggested in parallel mode).
 }
   \item{parameter_bounds}{
-matrix containing lower (first column) and upper (second column) boundary for each parameter
+(row-named) matrix containing lower (first column) and upper (second column) boundary for each parameter. See details.
 }
   \item{initial_estimates}{
-matrix containing columns of intital estimates (column-wise). If enough initial estimates were read from the project file, excess estimates in this parameter will be ignored.
+(row-named) matrix containing columns of initial estimates (column-wise). If enough initial estimates were read from the project file, excess estimates in this parameter will be ignored. See details.
 }
  
   \item{Vmax}{
@@ -156,6 +156,8 @@ waiting for keystroke between iterations (e.g. for plotting)
 
 
 \details{
+If \item{parameter_bounds} (dominant) or \item{initial_estimates} has named rows, these names are used in the call to \item{objective_function}.
+
 recommended use:
 \itemize{
 \item{optim_pso, optim_dds}{ serial computation for fast objective functions and single core machines}

@@ -28,7 +28,6 @@ init_particles_i=function(lhc_init=FALSE)
     colnames(X)=param_names
     colnames(X_lbest)=param_names
   }
-  browser()
   noninitialised_particles=number_of_particles      #number of particles that need to be initialized  (default:all)
   if(!exists("number_of_particles_org",parent.frame(), inherits=FALSE)) number_of_particles_org=number_of_particles       #for DDS, the number of particles to be initialized (number_of_particles) due to the pre-run is larger than the actual number used for calculation (number_of_particles_org) 
   

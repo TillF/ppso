@@ -179,7 +179,7 @@ if (is.null(break_flag))
 
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
-  X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters)        # current optimum of each particle so far
+  X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters, dimnames=dimnames(X_lbest))        # current optimum of each particle so far
   fitness_lbest =       fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
 
   #restore array dimensions according to original number of particles

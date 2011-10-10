@@ -5,6 +5,8 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
     do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
+verbose=T
+
 if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < number_of_particles)
   stop("abs(max_number_function_calls) must be at least number_of_particles.")
   
@@ -90,11 +92,11 @@ if (max_number_function_calls < 0)
  } else
   function_calls_init = 0*function_calls
 
-
+  if (verbose) print("pre-search finished")
  
 #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
-  X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters)        # current optimum of each particle so far
+  X_lbest       =matrix(X_lbest      [1:number_of_particles,],ncol=number_of_parameters, dimnames=dimnames(X_lbest))        # current optimum of each particle so far
   fitness_lbest =       fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
 
   #restore array dimensions according to original number of particles
@@ -114,7 +116,7 @@ if (max_number_function_calls < 0)
   X_gbest[] = X[min_fitness_index,]
 
 # actual search
-
+  if (verbose) print("starting main search")
 fitness_itbest= fitness_gbest     #best fitness in the last it_last iterations
 it_last_improvent=0               #counter for counting iterations since last improvement
 

@@ -131,7 +131,7 @@ init_particles_i=function(lhc_init=FALSE)
     tobeinitialized = X[,1]==Inf      #index to particles that need to be initialized
     # Initialize the particle positions
     X[tobeinitialized,] = t(parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * t(random_numbers)) #strangely, this transposing is necessary
-    if (ncol(initial_estimates)>0)         #if any initial estimates have been specified as an argument, use these
+    if (!is.null(initial_estimates) && (ncol(initial_estimates)>0))         #if any initial estimates have been specified as an argument, use these
       X[which(tobeinitialized)[1:ncol(initial_estimates)],] = initial_estimates
 
     #...and their other parameters

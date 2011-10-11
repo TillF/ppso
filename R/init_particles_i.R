@@ -99,12 +99,12 @@ init_particles_i=function(lhc_init=FALSE)
       if (any(out_of_bounds))
       {
         warning(paste("initial estimates",paste(out_of_bounds,collapse=", ")," out of bounds, ignored"))
-        initial_estimates = initial_estimates[- out_of_bounds,]     #discard invalid intial estimates
+        initial_estimates = initial_estimates[,- out_of_bounds]     #discard invalid initial estimates
       }
       if (ncol(initial_estimates) > noninitialised_particles)
       {
         warning(paste ("sufficient initial estimates loaded from project file, ", ncol(initial_estimates) - noninitialised_particles, "columns of argument <initial_estimates> ignored"))
-        initial_estimates = initial_estimates[,1:noninitialised_particles]     #discard invalid intial estimates
+        initial_estimates = initial_estimates[,1:noninitialised_particles]     #discard invalid initial estimates
       }
     }
   }
@@ -131,7 +131,7 @@ init_particles_i=function(lhc_init=FALSE)
     tobeinitialized = X[,1]==Inf      #index to particles that need to be initialized
     # Initialize the particle positions
     X[tobeinitialized,] = t(parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * t(random_numbers)) #strangely, this transposing is necessary
-    if (!is.null(initial_estimates))         #if any initial estimates have been specified as an argument, use these
+    if (ncol(initial_estimates)>0)         #if any initial estimates have been specified as an argument, use these
       X[which(tobeinitialized)[1:ncol(initial_estimates)],] = initial_estimates
 
     #...and their other parameters

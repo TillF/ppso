@@ -1,3 +1,6 @@
+0.9-944
+- fixed bug in use of initial estimates specified via arguments
+
 0.9-943
 - If parameter_bounds (dominant) or initial_estimates has named rows, these names are used in the call to objective_function.
 

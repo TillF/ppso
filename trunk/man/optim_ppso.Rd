@@ -156,7 +156,7 @@ waiting for keystroke between iterations (e.g. for plotting)
 
 
 \details{
-If \item{parameter_bounds} (dominant) or \item{initial_estimates} has named rows, these names are used in the call to \item{objective_function}.
+If \code{parameter_bounds} (dominant) or \code{initial_estimates} has named rows, these names are used in the call to \code{objective_function}.
 
 recommended use:
 \itemize{

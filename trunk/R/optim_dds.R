@@ -63,7 +63,6 @@ if (max_number_function_calls < 0)
   
 
   status_org=status  #  store original contents
-
   uninitialized_particles= which(fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
   if (any(uninitialized_particles))
   {
@@ -73,7 +72,7 @@ if (max_number_function_calls < 0)
     status[]=1; status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
   
     computation_start[pre_run_computations]=Sys.time()
-    fitness_X [pre_run_computations]=apply(X[pre_run_computations,],1,objective_function)    #execute pending pre-runs
+    fitness_X [pre_run_computations]=apply(as.matrix(X[pre_run_computations,],nrow=length(pre_run_computations)),1,objective_function)    #execute pending pre-runs
     status    [pre_run_computations] =1      #mark as pre-runs "finished"
   
     if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[pre_run_computations],"%Y-%m-%d %H:%M:%S"), matrix(X[pre_run_computations,],ncol=ncol(X)), fitness_X[pre_run_computations], #write pre-runs to logfile, too

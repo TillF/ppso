@@ -1,3 +1,6 @@
+0.9-945
+- fixed bug that led to crash of optim_dds.R when optimizing for 1 parameter
+
 0.9-944
 - fixed bug in use of initial estimates specified via arguments
 

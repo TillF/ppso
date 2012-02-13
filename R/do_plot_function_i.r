@@ -17,7 +17,7 @@ do_plot_function_i = function() #real time plotting of 2-D surface of objective 
       for (i in 1: min(10,number_of_particles))
          lines(rbind(trans3d(X[i,1], X[i,2], fitness_X[i], pmat = res), trans3d(X_lbest[i,1], X_lbest[i,2], fitness_lbest[i], pmat = res)) )
 
-      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocatee during last iteration
+      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocated during last iteration
       {
         points(trans3d(relocated[,1], relocated[,2], relocated[,3], pmat = res), col="blue", pch="O")
         assign("relocated",NULL,parent.frame(n=2))
@@ -38,7 +38,7 @@ do_plot_function_i = function() #real time plotting of 2-D surface of objective 
          hdl[i]                    =points3d(X[i,1],             X[i,2], fitness_X[i],     col="red")
          hdl[i+number_of_particles]=points3d(X_lbest[i,1], X_lbest[i,2], fitness_lbest[i], col="green")
       }
-      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocatee during last iteration
+      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocated during last iteration
       {
 #        if (exists("hdl_r") && !is.null(hdl_r)) rgl.pop(id=hdl_r)
         hdl_r = points3d(relocated[,1], relocated[,2], relocated[,3], col="blue")

@@ -22,9 +22,11 @@ update_tasklist_pso_i=function()                        #update particle positio
     if (wait_for_keystroke && (!exists("ch") || ch!="c")) assign("ch",readline(),parent.frame()) 
  
 
+   if (any(fitness_X %in% c(NA, NaN)))
+      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
+
 
    # Update the local bests and their fitness
-
    improved_particles=fitness_X < fitness_lbest #mark particles that improved their fitness
    if(is.na(completed_particles & improved_particles)[1]) #
    flush.console()

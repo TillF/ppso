@@ -86,7 +86,7 @@ while (is.null(break_flag))
   {    
       if (tryCall)                  #catch error message during evaluation (slower)
       {
-        fitness_X=try(apply(X,1,objective_function),silent=TRUE)
+        fitness_X=try(apply(as.numeric(X),1,objective_function),silent=TRUE)
         if (!is.numeric(fitness_X))                      #an error occured during execution
         {
           break_flag=paste("aborted: ",as.character(fitness_X))    
@@ -94,7 +94,7 @@ while (is.null(break_flag))
         }        
       }
       else
-        fitness_X=apply(X,1,objective_function)     #no error message during evaluation (faster)
+        fitness_X=apply(as.numeric(X),1,objective_function)     #no error message during evaluation (faster)
 
       status    [] =1      #mark as "finished"
       function_calls[] =function_calls[]+1        #increase iteration counter
@@ -104,7 +104,7 @@ while (is.null(break_flag))
   {
     if (tryCall)                  #catch error message during evaluation (slower)
     {
-      fitness_X [current_particle]=try(objective_function(X[current_particle,]),silent=TRUE)
+      fitness_X [current_particle]=try(objective_function(as.numeric(X[current_particle,])),silent=TRUE)
       if (!is.numeric(fitness_X [current_particle]))                      #an error occured during execution
       {
         break_flag=paste("aborted: ",as.character(fitness_X [current_particle]))    
@@ -112,7 +112,7 @@ while (is.null(break_flag))
       }        
     }
     else
-      fitness_X [current_particle] =objective_function(X[current_particle,])     #no error message during evaluation (faster)
+      fitness_X [current_particle] =objective_function(as.numeric(X[current_particle,]))     #no error message during evaluation (faster)
   
     status    [current_particle] =1      #mark as "finished"
     function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter

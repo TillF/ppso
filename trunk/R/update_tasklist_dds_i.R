@@ -22,8 +22,10 @@ update_tasklist_dds_i <- function(loop_counter=1)
     if (wait_for_keystroke && (!exists("ch") || ch!="c")) assign("ch",readline(),parent.frame()) 
 
 
-   # Update the local bests and their fitness
+   if (any(fitness_X %in% c(NA, NaN)))
+      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
 
+   # Update the local bests and their fitness
    improved_particles=fitness_X < fitness_lbest #mark particles that improved their fitness
 
    futile_iter_count[!improved_particles]  = futile_iter_count[!improved_particles] + 1        #reset counter of futile iterations for improved particles

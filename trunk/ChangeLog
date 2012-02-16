@@ -1,3 +1,7 @@
+0.9-946
+- added error message when objective_function produced NA
+- removed (arbritrary) naming on param vector in call to objective function
+
 0.9-945
 - fixed bug that led to crash of optim_dds.R when optimizing for 1 parameter
 

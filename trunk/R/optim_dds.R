@@ -45,7 +45,7 @@ break_flag=NULL       #flag indicating if a termination criterium has been reach
 
 # Initialize the local fitness to the worst possible
 fitness_lbest[] = Inf
-fitness_gbest = min(fitness_lbest);
+fitness_gbest   = Inf;
 
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
@@ -77,6 +77,9 @@ if (max_number_function_calls < 0)
   
     if (!is.null(logfile))  write.table(file = logfile, cbind(format(computation_start[pre_run_computations],"%Y-%m-%d %H:%M:%S"), matrix(X[pre_run_computations,],ncol=ncol(X)), fitness_X[pre_run_computations], #write pre-runs to logfile, too
     node_id[pre_run_computations]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
+
+   if (any(fitness_X[pre_run_computations] %in% c(NA, NaN)))
+      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
 
     max_number_function_calls=max_number_function_calls-length(pre_run_computations)  #reduce number of available calls due to pre-search
 

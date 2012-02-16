@@ -173,6 +173,10 @@ status_org=status  #  store original contents
  } else
   function_calls_init = 0*function_calls
 
+
+   if (any(fitness_X %in% c(NA, NaN)))
+      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
+
 if (is.null(break_flag))
 {
   if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  

@@ -1,3 +1,6 @@
+0.9-947
+- fixed bug in resuming from file when computation_start was missing (strange)
+
 0.9-946
 - added error message when objective_function produced NA
 - removed (arbritrary) naming on param vector in call to objective function

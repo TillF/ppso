@@ -48,6 +48,7 @@ init_particles_i=function(lhc_init=FALSE)
       }   else
       {
         assign("load_projectfile","loaded",                parent.frame())  #indicator that the project file has successfully been loaded
+
         if (nrow(proj_file_content)>number_of_particles_org)
         {
           warning(paste(projectfile,"contains more than the specified number of",number_of_particles_org,"particles, truncated."))
@@ -68,7 +69,8 @@ init_particles_i=function(lhc_init=FALSE)
         V                 =as.matrix(proj_file_content[,(1:number_of_parameters)  +(2*number_of_parameters+1)])
         fitness_X         =as.vector(proj_file_content[, 1                        +(3*number_of_parameters+1)])
         status            =as.vector(proj_file_content$status)
-        computation_start =proj_file_content$begin_execution             #not yet used
+        computation_start =proj_file_content$begin_execution             
+        if (is.null(computation_start)) computation_start = rep(Sys.time(),number_of_parameters)+NA else#just a dummy assignment to prevent NULL
         computation_start =strptime(computation_start,"%Y-%m-%d %H:%M:%S") #convert string to POSIX
         node_id           =as.vector(proj_file_content$node_id)
         function_calls        =as.vector(proj_file_content$function_calls)

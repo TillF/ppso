@@ -59,8 +59,9 @@ init_particles_i=function(lhc_init=FALSE)
         {
           warning(paste(projectfile,"contains less than the specified number of",number_of_particles_org,", ",noninitialised_particles,"particle(s) will be initialized randomly."))
           noninitialised_particles=number_of_particles-nrow(proj_file_content)      #for DDS-initialisation, more particles (number_of_particles instead of number_of_particles_org) have to be initialized for the pre-run
-          proj_file_content=proj_file_content[c(1:nrow(proj_file_content),rep(nrow(proj_file_content),noninitialised_particles)),names(proj_file_content)!="begin_execution"]       #just to shape the dataframe and used as marker which particles have to be initialised 
+          proj_file_content=proj_file_content[c(1:nrow(proj_file_content),rep(nrow(proj_file_content),noninitialised_particles)), names(proj_file_content) != "begin_execution"]       #just to shape the dataframe and used as marker which particles have to be initialised 
           proj_file_content[(nrow(proj_file_content)-noninitialised_particles+1):nrow(proj_file_content),]=   Inf # used as marker which particles have been initialised 
+          proj_file_content$begin_execution=ISOdate(1970,1,1)+NA #discard begin_execution, as it is no longer meaningful
         }
   
         X_lbest           =as.matrix(proj_file_content[,1:number_of_parameters    +0])
@@ -70,7 +71,6 @@ init_particles_i=function(lhc_init=FALSE)
         fitness_X         =as.vector(proj_file_content[, 1                        +(3*number_of_parameters+1)])
         status            =as.vector(proj_file_content$status)
         computation_start =proj_file_content$begin_execution             
-        if (is.null(computation_start)) computation_start = rep(Sys.time(),number_of_parameters)+NA else#just a dummy assignment to prevent NULL
         computation_start =strptime(computation_start,"%Y-%m-%d %H:%M:%S") #convert string to POSIX
         node_id           =as.vector(proj_file_content$node_id)
         function_calls        =as.vector(proj_file_content$function_calls)

@@ -1,4 +1,7 @@
 0.9-947
+- now found the real culprit
+
+0.9-947
 - fixed bug in resuming from file when computation_start was missing (strange)
 
 0.9-946

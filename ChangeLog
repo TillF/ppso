@@ -1,4 +1,12 @@
-0.9-947
+0.9-949
+computationally relevant, if initial estimates are specified via arguments and potentially for all optim_pso applications
+- fixed wrong assignment (tnx 2 Dan)
+- fixed retrieval of named parameters from initial_estimates via arguments, paramnames written in logfile and projectfile
+- fixed call to objective function (tnx 2 Dan)
+- formatted docu
+- changed license to adhere to standard
+
+0.9-948
 - now found the real culprit
 
 0.9-947

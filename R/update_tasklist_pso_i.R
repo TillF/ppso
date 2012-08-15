@@ -83,8 +83,12 @@ update_tasklist_pso_i=function()                        #update particle positio
       assign("evals_since_lastsave",0,parent.frame())
       if (!is.null(projectfile))
       {
-        col.names=c(paste("best_par_",1:ncol(X),sep=""),"best_objective_function", paste("current_par_",1:ncol(X),sep=""),
-          paste("current_velocity_par_",1:ncol(X),sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
+		if (!is.null(colnames(X)))
+		  par_names=colnames(X) else
+		  par_names=paste(rep("par",number_of_parameters),seq(1,number_of_parameters),sep="_") #simple numbering of parameters
+
+		  col.names=c(paste("best_",par_names,sep=""),"best_objective_function", paste("current_",par_names,sep=""),
+          paste("current_velocity_",par_names,sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
         write.table(cbind(X_lbest, fitness_lbest, X, V, fitness_X, status, format(computation_start, "%Y-%m-%d %H:%M:%S"), node_id, function_calls), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress

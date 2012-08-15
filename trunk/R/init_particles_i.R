@@ -21,7 +21,7 @@ init_particles_i=function(lhc_init=FALSE)
 
   param_names=rownames(parameter_bounds)     #try to retrieve parameter names
   if (length(param_names)==0)
-    param_names=names(initial_estimates)
+    param_names=rownames(initial_estimates)
   
   if (length(param_names)!=0)
   {
@@ -134,7 +134,7 @@ init_particles_i=function(lhc_init=FALSE)
     # Initialize the particle positions
     X[tobeinitialized,] = t(parameter_bounds[,1] + (parameter_bounds[,2] - parameter_bounds[,1]) * t(random_numbers)) #strangely, this transposing is necessary
     if (!is.null(initial_estimates) && (ncol(initial_estimates)>0))         #if any initial estimates have been specified as an argument, use these
-      X[which(tobeinitialized)[1:ncol(initial_estimates)],] = initial_estimates
+      X[which(tobeinitialized)[1:ncol(initial_estimates)],] = t(initial_estimates)
 
     #...and their other parameters
     X_lbest       [tobeinitialized,] =  X[tobeinitialized,]

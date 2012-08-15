@@ -73,8 +73,12 @@ init_particles(lhc_init)  #initialize velocities and particle positions
 
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
-  write.table(paste("time",paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t"),"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
-
+  {
+    if (!is.null(colnames(X)))
+      par_names=paste(colnames(X),collapse="\t") else
+      par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters
+    write.table(paste("time",par_names,"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+  }
 
  fitness_itbest= fitness_gbest     #best fitness in the last it_last iterations
  it_last_improvent=0               #counter for counting iterations since last improvement
@@ -86,7 +90,7 @@ while (is.null(break_flag))
   {    
       if (tryCall)                  #catch error message during evaluation (slower)
       {
-        fitness_X=try(apply(as.numeric(X),1,objective_function),silent=TRUE)
+        fitness_X=try(apply(X,1,objective_function),silent=TRUE)
         if (!is.numeric(fitness_X))                      #an error occured during execution
         {
           break_flag=paste("aborted: ",as.character(fitness_X))    
@@ -94,7 +98,7 @@ while (is.null(break_flag))
         }        
       }
       else
-        fitness_X=apply(as.numeric(X),1,objective_function)     #no error message during evaluation (faster)
+        fitness_X=apply(X,1,objective_function)     #no error message during evaluation (faster)
 
       status    [] =1      #mark as "finished"
       function_calls[] =function_calls[]+1        #increase iteration counter

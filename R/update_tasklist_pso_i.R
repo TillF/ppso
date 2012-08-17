@@ -113,8 +113,10 @@ update_tasklist_pso_i=function()                        #update particle positio
      V[i,] = V[i,] * min(1,abs(Vmax/V[i,]))        #limit to maximum velocity
      X[i,] = X[i,] + V[i,]
    }
-   X[completed_particles,]=pmax(X[completed_particles,],parameter_bounds[,1])    #restrain by specified boundaries
-   X[completed_particles,]=pmin(X[completed_particles,],parameter_bounds[,2])
+   X[completed_particles, ] = t(pmax(t(X[completed_particles, ]),
+        parameter_bounds[, 1]))
+   X[completed_particles, ] = t(pmin(t(X[completed_particles, ]),
+        parameter_bounds[, 2]))
    
    status   [completed_particles]=0      #mark as "to be computed"
    fitness_X[completed_particles]=Inf

@@ -1,3 +1,7 @@
+0.9-950
+computationally relevant, for pso and complete_iteration=TRUE
+- fixed wrong correction of parameter bounds (tnx 2 Dan)
+
 0.9-949
 computationally relevant, if initial estimates are specified via arguments and potentially for all optim_pso applications
 - fixed wrong assignment (tnx 2 Dan)

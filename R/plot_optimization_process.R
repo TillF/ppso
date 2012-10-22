@@ -13,13 +13,15 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
      projectfile_content$function_call_number[i]=max(-1,which(apply(apply(logfile_content[,1+(1:number_of_parameters)], 1, get("-"),t(projectfile_content[i,1:number_of_parameters]))==0,2,all)))
 
 
+  curbest=which.min(projectfile_content$best_objective_function)
+  curbest_val=projectfile_content[curbest,1:number_of_parameters] #returr value
   if (verbose)
   {
     curbest=which.min(projectfile_content$best_objective_function)
     print(paste("current optimum found: ",projectfile_content$best_objective_function[curbest]))
     print(" at parameter set:")
     print(projectfile_content[curbest,1:number_of_parameters])
-    print(paste(" found at function call ",projectfile_content$function_call_number[curbest],"from",nrow(logfile_content),"executed calls."))
+    print(paste(" found at function call",projectfile_content$function_call_number[curbest],"from",nrow(logfile_content),"executed calls."))
   }
 
   necessary_plots=number_of_parameters+2    #+2: one for objective function, one for legend
@@ -41,7 +43,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   
   for (i in 1:number_of_parameters)
   {
-    plot(logfile_content[,i+1],pch=20,xlab="function evaluations", ylab=paste("parameter",i))  
+    plot(logfile_content[,i+1],pch=20,xlab="function evaluations", ylab=names(logfile_content)[i+1])  
     points(projectfile_content$function_call_number,projectfile_content[,i],col="red",pch=23)
   }
   
@@ -75,7 +77,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   ylim=quantile(logfile_content$objective_function, c(0,cutoff_quantile))
   for (i in 1:number_of_parameters)
   {
-    plot(logfile_content[,i+1],logfile_content$objective_function,pch=20,ylab="objective function value", xlab=paste("parameter",i),ylim=ylim)  
+    plot(logfile_content[,i+1],logfile_content$objective_function,pch=20,ylab="objective function value", xlab=names(logfile_content)[i+1], ylim=ylim)  
     points(projectfile_content[,i],projectfile_content$best_objective_function,col="red",pch=23)
   }
   workers=sort(unique(logfile_content$worker))
@@ -147,4 +149,6 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     }
     savePlot(filename = goodness_plot_filename, type = extension, device = dev.cur())
   }
+  
+  return(curbest_val)
 }

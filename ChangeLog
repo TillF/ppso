@@ -1,3 +1,7 @@
+Version: 0.9-951
+computationally irrelevant
+- plot_optimization_progress uses parameter names and returns best solution 
+
 0.9-950
 computationally relevant, for pso and complete_iteration=TRUE
 - fixed wrong correction of parameter bounds (tnx 2 Dan)

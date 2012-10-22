@@ -53,7 +53,6 @@ fitness_gbest   = Inf;
   init_particles(lhc_init)  #initialize particle positions
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {
-    #browser()
     if (!is.null(colnames(X)))
       par_names=paste(colnames(X),collapse="\t") else
       par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters

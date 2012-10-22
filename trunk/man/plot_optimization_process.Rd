@@ -9,7 +9,7 @@ Visualisation of optimization process
 Visualisation of optimization process based on log files. \code{plot_optimization_process} is also used by {\code{\link{optim_pso}}}  & Co. when used with \code{plot_optimization_process=TRUE}.
 }
 \usage{
-plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
+plot_optimization_progress (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -48,7 +48,7 @@ The plots are saved when \code{progress_plot_filename} or \code{goodness_plot_fi
 }
 
 \value{
-None.
+vector of optimum solution so far.
 }
 
 \author{

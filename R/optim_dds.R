@@ -133,6 +133,7 @@ if (!is.null(break_flag)) break_flag=paste("nothing done; project file fulfills 
 
 while (is.null(break_flag))
 {
+    computation_start[] =Sys.time()      #store time of start of this computation loop
     if (tryCall)                  #catch error message during evaluation (slower)
     {
       fitness_X=try(apply(X,1,objective_function),silent=TRUE)

@@ -86,6 +86,7 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
 
 while (is.null(break_flag))
 {
+  computation_start[] =Sys.time()      #store time of start of this computation loop
   if (wait_complete_iteration)      #evaluate all tasks before updateing
   {    
       if (tryCall)                  #catch error message during evaluation (slower)

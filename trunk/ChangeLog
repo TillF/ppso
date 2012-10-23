@@ -1,3 +1,7 @@
+Version: 0.9-952
+computationally irrelevant
+- timestamp was not properly set in logfile of optim_dds and optim_pso 
+
 Version: 0.9-951
 computationally irrelevant
 - plot_optimization_progress uses parameter names and returns best solution 

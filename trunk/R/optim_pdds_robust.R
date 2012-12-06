@@ -98,7 +98,6 @@ status_org=status  #  store original contents
         tobecomputed=status==0
         while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
         {
-#            if (any(tobecomputed)) {
               current_particle=which(tobecomputed)[1]   
               slave_id=idle_slaves[1]                     #get free slave        
               if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
@@ -108,7 +107,6 @@ status_org=status  #  store original contents
               status            [current_particle]=2               #mark this particle as "in progress"
               node_id           [current_particle]=slave_id        #store slave_id of this task
               computation_start [current_particle]=Sys.time()      #store time of start of this computation
-#            }   
             tobecomputed=status==0
         } 
   
@@ -170,7 +168,7 @@ status_org=status  #  store original contents
 
     top_of_preruns=sort(fitness_X[pre_run_computations],index.return=TRUE)$ix[1:length(uninitialized_particles)]   #sort according to best fitness
     fitness_lbest[uninitialized_particles] = fitness_X [pre_run_computations[top_of_preruns]]
-    X_lbest      [uninitialized_particles,] = X         [pre_run_computations[top_of_preruns,]]
+    X_lbest      [uninitialized_particles,] = X        [pre_run_computations[top_of_preruns],]
     calls_per_uninitialized_particle = length(pre_run_computations) %/% length(uninitialized_particles)     #distribute counting of function calls among real particles
     remaining_performed_calls = length(pre_run_computations) %% length(uninitialized_particles)
     function_calls_init = function_calls                     #count initialisation calls extra
@@ -221,7 +219,7 @@ if (is.null(break_flag))
         while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
         {
             if (any(tobecomputed)) {
-              current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
+              current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of iterations first
               current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
               slave_id=idle_slaves[1]                     #get free slave        
               if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
@@ -284,12 +282,11 @@ if (is.null(break_flag))
             closed_slaves <- closed_slaves + 1
         }
         else if (tag == 4) {    # error occured during the execution of the objective function
-            if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has produced an error:",slave_message))  
+            if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has produced an error:",slave_message))
   		  break_flag=paste("Abort, slave",slave_id,":",slave_message)
             closed_slaves=nslaves			
         }
-  }      
-  
+  }  
   if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 }
 

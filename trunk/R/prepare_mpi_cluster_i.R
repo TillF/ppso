@@ -1,8 +1,15 @@
 #internal function: prepare MPI connection and slaves
 
-#note: this function reads and writes to non-local variables (i.e. varaibles declared in the calling function, usually optim_p*)
+#note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_p*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 #for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
+
+#tag-codes for master-slave communications:
+#1: 
+#2: results returning from slave
+#3: slave sends good-bye message
+#4: execution error from slave
+#5: object request from slave or subsequent object transfer from master to slave
 
 prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_slave=FALSE)
 {
@@ -43,13 +50,10 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
   perform_task <- function(params,slave_id,tryCall=FALSE) {
 
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": received message for slave",slave_id))
-      #write.table(file=paste("slave",slave_id),"contacted")
 
-      if (!(mpi.comm.rank() %in% slave_id)) return(1) #only the adressed slaves should attend the task
+      if (!(mpi.comm.rank() %in% slave_id)) return(1) #only the adressed slaves should attend to the task
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": task received"))
 
-
-      #write.table(file=paste("slave",slave_id),"task received")
       if (tryCall)
       {
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
@@ -80,18 +84,28 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
 
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...results returned, back to idle mode."))    
       return()
+  } #end function "perform_task"
+  
+  #request object from master 
+	request_object = function(object_name)
+	{  
+	  mpi.send.Robj(obj=object_name, dest=0, tag=5) #tag 5 demarks request for object
 
-        
-  }
+	  messge <- mpi.recv.Robj(source=0, tag=5)
+	  assign(x=object_name,value=messge,envir=parent.frame()) #set this variable in the enclosing environment
+	}
+  
 
   mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
-  
+
   mpi.bcast.Robj2slave(verbose_slave)                   #send verbose-flags to slaves
   if (verbose_slave)
     mpi.bcast.cmd(sink(paste("slave",mpi.comm.rank(),sep="")))               #put output of slaves into files, if desired
 
   mpi.bcast.Robj2slave(perform_task)               #send activation function to slaves
+  mpi.bcast.Robj2slave(request_object)               #send function for request of objects to slaves
 
+  
   closed_slaves=0
   nslaves=nslaves
   idle_slaves=1:nslaves

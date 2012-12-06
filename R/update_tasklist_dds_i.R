@@ -23,7 +23,7 @@ update_tasklist_dds_i <- function(loop_counter=1)
 
 
    if (any(fitness_X %in% c(NA, NaN)))
-      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
+      stop("Objective function mustn't yield NA nor NaN. Modify it to return very large numbers instead.")
 
    # Update the local bests and their fitness
    improved_particles=fitness_X < fitness_lbest #mark particles that improved their fitness
@@ -167,13 +167,12 @@ update_tasklist_dds_i <- function(loop_counter=1)
   if (!is.null(max_number_function_calls))
    {
 		scheduled_calls = sum(status==0 | status==2)	#count how many tasks are scheduled or still running
-        overcomitted_calls = max_number_function_calls - (scheduled_calls +  sum(function_calls)) #how many calls are scheduled that exceed max_number_function_calls
+        overcomitted_calls = (scheduled_calls +  sum(function_calls)) - max_number_function_calls #how many calls are scheduled that exceed max_number_function_calls
 		if (overcomitted_calls > 0)
 			status   [which(status==0)[1:overcomitted_calls]] = 0.1	#mark these as "ready to be calculated, but exceeding max_number_function_calls"
   }
 
    
-
    #set globals
    assign("X",         X,parent.frame())
    assign("V",         V,parent.frame())

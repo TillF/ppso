@@ -120,27 +120,29 @@ Neighbourhood size perturbation parameter . Default value: 0.2.
 }
 
 \item{for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}}{
-\itemize{
-  \item{nslaves}{
-number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
-}
-  \item{working_dir_list}{
- String matrix of working directories the slaves should change to. First column holds the hostname, the second column the directory.\\ 
- A hostname may be listed several times, if more than one slave is run on it. If a host is listed less times than it has slaves, the last entry will be recycled as necessary.\\ 
- The entry "default" denotes the directory all slaves of unlisted hosts will be change to. If missing, slaves on unlisted hosts will stay in the directory they are spawned in (don't ask me which this is).\\
- Beware: "~" apparently doesn't work, so rather use the full path. 
-}
-  \item{execution_timeout}{
-If set to a factor greater than 1, a slave whose execution time has exceeded (\code{execution_timeout} times the mean of its prior calls) for more than three times is no longer used. This also applies when the slave produces its first result very slow when comared to the other slaves. 
-}
-  \item{verbose}{ \code{c(TRUE,"master","slaves")}
-   generate screen output documenting the message passing\\
-   "master": master generates output\\
-   "slaves": slaves generate output\\
-   TRUE: master and slaves generate output\\
-}
+	\itemize{
+		 \item{\code{nslaves}{
+		number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
+		}
+		\item{\code{working_dir_list}}{
+		 String matrix of working directories the slaves should change to. First column holds the hostname, the second column the directory.\\ 
+		 A hostname may be listed several times, if more than one slave is run on it. If a host is listed less times than it has slaves, the last entry will be recycled as necessary.\\ 
+		 The entry "default" denotes the directory all slaves of unlisted hosts will be change to. If missing, slaves on unlisted hosts will stay in the directory they are spawned in (don't ask me which this is).\\
+		 Beware: "~" apparently doesn't work, so rather use the full path. 
+		}
+		\item{\code{execution_timeout}}{
+		If set to a factor greater than 1, a slave whose execution time has exceeded (\code{execution_timeout} times the mean of its prior calls) for more than three times is no longer used. This also applies when the slave produces its first result very slow when comared to the other slaves. 
+		}
+		\item{\code{verbose=c(TRUE,"master","slaves")}}
+		   generate screen output documenting the message passing
+		   \itemize{
+			   \item{master} master generates output
+			   \item{slaves} slaves generate output (into text files named "slave<nn>")
+			   \item{TRUE} master and slaves generate output
+			   }
+	}
 
-}
+	}
 }
 
 (didactical purpose, only for two-parameter search and fast objective function, non-parallelized. )

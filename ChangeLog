@@ -1,3 +1,9 @@
+Version: 0.9-953
+computationally relevant for optim_pdds:
+- fixed wrong treatment of overcomitted calls that led to stall
+- fixed wrong assignment after preruings that led to dimension error
+- updated docu
+
 Version: 0.9-952
 computationally irrelevant
 - timestamp was not properly set in logfile of optim_dds and optim_pso 

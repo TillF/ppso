@@ -286,6 +286,14 @@ if (is.null(break_flag))
   		  break_flag=paste("Abort, slave",slave_id,":",slave_message)
             closed_slaves=nslaves			
         }
+		    else if (tag == 5) {    #object request from slave 
+    			slave_message_info <- mpi.get.sourcetag() 
+    			 if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"requested object",slave_message))
+    			if(exists(x=slave_message))
+    			  obj=eval(parse(text=slave_message)) else #return requested object, if existing, otherwise NA
+    			  obj=NA
+    			mpi.send.Robj(obj=obj, dest=slave_id, tag=5) #return object to slave
+		    }      
   }  
   if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 }
@@ -294,6 +302,8 @@ if ((closed_slaves==nslaves) && is.null(break_flag))
   break_flag = "No or delayed response from slaves" 
 
 ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls+function_calls_init),break_flag=break_flag) 
+
+if (verbose_slave) mpi.bcast.cmd(sink()) #terminate file logs of slaves
 
 if (verbose_master) print(paste(Sys.time(),"closing MPI..."))    
 close_mpi()                        #diligently close Rmpi session

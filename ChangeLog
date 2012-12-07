@@ -1,3 +1,7 @@
+Version: 0.9-954
+computationally irrelevant:
+- proper namespace file, formatting of docu
+
 Version: 0.9-953
 computationally relevant for optim_pdds:
 - fixed wrong treatment of overcomitted calls that led to stall

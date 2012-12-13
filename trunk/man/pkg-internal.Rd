@@ -1,10 +1,10 @@
 \name{check_execution_timeout_i}
 \Rdversion{1.1}
-\alias{init_particles_i}
-\alias{init_visualisation_i}
-\alias{prepare_mpi_cluster_i}
-\alias{update_tasklist_dds_i}
-\alias{update_tasklist_pso_i}
+\alias{init_particles}
+\alias{init_visualisation}
+\alias{prepare_mpi_cluster}
+\alias{update_tasklist_dds}
+\alias{update_tasklist_pso}
 
 
 \title{
@@ -14,12 +14,12 @@ Internal functions, not to be called by user directly
 Internal functions,\\ not to be called by user directly
 }
 \usage{
-check_execution_timeout_i()
-init_particles_i(lhc_init = FALSE)
-init_visualisation_i()
-prepare_mpi_cluster_i(nslaves = nslaves, working_dir_list = NULL)
-update_tasklist_dds_i(loop_counter = 1)
-update_tasklist_pso_i()
+check_execution_timeout()
+init_particles(lhc_init = FALSE)
+init_visualisation()
+prepare_mpi_cluster(nslaves, working_dir_list = NULL, verbose_slave = FALSE)
+update_tasklist_dds(loop_counter = 1)
+update_tasklist_pso()
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -49,5 +49,5 @@ Till Francke
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~internal }
+\keyword{internal}
 %\keyword{ ~example }% __ONLY ONE__ keyword per line

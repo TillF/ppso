@@ -2,7 +2,6 @@
 
 #note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_p*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
-#for that purpose, this function is locally re-declared in optim_p*  (clumsy, but I don't know better)
 
 #tag-codes for master-slave communications:
 #1: 
@@ -10,11 +9,13 @@
 #3: slave sends good-bye message
 #4: execution error from slave
 #5: object request from slave or subsequent object transfer from master to slave
+#6: object pushed from slave to master
+#7: command slaves to abort everything
 
-prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_slave=FALSE)
+prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE)
 {
   if (!is.loaded("mpi_initialize")) {         
-  library("Rmpi")
+	library("Rmpi")
   }
  
   if (nslaves == -1) nslaves=mpi.universe.size() else  # Spawn as many slaves as possible
@@ -25,8 +26,8 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
     nslaves=mpi.comm.size()-1
 	  print(paste(nslaves,"running slaves detected, no spawning."))
   } else {
-	mpi.spawn.Rslaves(nslaves=nslaves)
-	print(paste(mpi.comm.size(),"slaves spawned."))
+  	mpi.spawn.Rslaves(nslaves=nslaves)
+  	print(paste(mpi.comm.size(),"slaves spawned."))
   }
   
   while(mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #empty MPI queue if there is still something in there
@@ -47,7 +48,7 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
    options(error=.Last)     #close rmpi on errors
 
   
-  perform_task <- function(params,slave_id,tryCall=FALSE) {
+  perform_task = function(params,slave_id,tryCall=FALSE) {
 
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": received message for slave",slave_id))
 
@@ -86,15 +87,7 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
       return()
   } #end function "perform_task"
   
-  #request object from master 
-	request_object = function(object_name)
-	{  
-	  mpi.send.Robj(obj=object_name, dest=0, tag=5) #tag 5 demarks request for object
-
-	  messge <- mpi.recv.Robj(source=0, tag=5)
-	  assign(x=object_name,value=messge,envir=parent.frame()) #set this variable in the enclosing environment
-	}
-  
+ 
 
   mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
 
@@ -106,9 +99,8 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
   mpi.bcast.Robj2slave(request_object)               #send function for request of objects to slaves
 
   
-  closed_slaves=0
-  nslaves=nslaves
-  idle_slaves=1:nslaves
+  globvars$closed_slaves=0
+  globvars$idle_slaves=1:nslaves
 
   if (!is.null(working_dir_list))    #change working directories of slaves, if specified
   {
@@ -143,16 +135,13 @@ prepare_mpi_cluster_i=function(nslaves=nslaves, working_dir_list=NULL, verbose_s
     {
       warning(paste("The following slave(s) could not change into the respective directory and remain unused:\n",
         paste(t(cbind(slave_hosts," : ",wd_to_be_set,"\n ")[failed_dirchanges,]),collapse="")))
-      closed_slaves=length(failed_dirchanges)         #count the slaves woth failed dirchange as "closed"
-      nslaves=nslaves-closed_slaves
-      idle_slaves=idle_slaves[-failed_dirchanges]     #remove the slaves from list of ready slaves
+      globvars$closed_slaves=length(failed_dirchanges)         #count the slaves woth failed dirchange as "closed"
+      nslaves=nslaves-globvars$closed_slaves
+      globvars$idle_slaves=globvars$idle_slaves[-failed_dirchanges]     #remove the slaves from list of ready slaves
     }
   }
 
- 
-  assign("closed_slaves",closed_slaves,parent.frame())        #set globals
-  assign("nslaves",         nslaves,   parent.frame())        #  
-  assign("idle_slaves", idle_slaves,   parent.frame())        #
+  globvars$nslaves=nslaves	
 }
 
 

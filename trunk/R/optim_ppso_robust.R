@@ -5,6 +5,10 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL)
 # do particle swarm optimization
 {
+#export r/w globals to separate environment
+globvars$nslaves=nslaves
+globvars$execution_timeout=execution_timeout 
+ 
  # #algorithm parameters
 #    number_of_particles=40
 #    max_number_of_iterations=5
@@ -29,59 +33,62 @@ do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro
 #    do_plot=NULL
 #    wait_for_keystroke=FALSE                  #waiting for keystroke between iterations
 #    logfile="log.txt"                         #logfile for optional logging of all model runs
-#    nslaves=3                                      #number of rmpi slaves to spawn (default -1: as many as possible)
+#    globvars$nslaves=3                                      #number of rmpi slaves to spawn (default -1: as many as possible)
 #  
 
 if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
   stop("max_number_function_calls must be at least number_of_particles.")
 
-eval(parse(text=paste(c("update_tasklist_pso=",deparse(update_tasklist_pso_i)))))  #this creates local version of the function update_tasklist_pso (see explanation there)
-eval(parse(text=paste(c("init_particles         =",deparse(init_particles_i      )))))       #this creates local version of the function init_particles (see explanation there)
-eval(parse(text=paste(c("init_visualisation     =",deparse(init_visualisation_i  )))))  #this creates local version of the function init_visualisation 
-eval(parse(text=paste(c("prepare_mpi_cluster    =",deparse(prepare_mpi_cluster_i )))))  #this creates local version of the function prepare_mpi_cluster_i (see explanation there)
-eval(parse(text=paste(c("check_execution_timeout=",deparse(check_execution_timeout_i)))))  #this creates local version of the function check_execution_time_i (see explanation there)
-eval(parse(text=paste(c("close_mpi              =",deparse(close_mpi_i)))))  #this creates local version of the function check_execution_time_i (see explanation there)
+environment(update_tasklist_pso)=environment() #force subroutines to have this function as parent (implicitly allowing read-only access to globals)
+environment(init_particles)=environment() 
+environment(init_visualisation)=environment() 
+environment(prepare_mpi_cluster)=environment() 
+environment(check_execution_timeout)=environment() 
+environment(close_mpi)=environment() 
+#environment(mpi_loop)=environment() 
+
+
 
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
 
-if (!is.null(execution_timeout) && execution_timeout < 1)
+if (!is.null(globvars$execution_timeout) && globvars$execution_timeout < 1)
 {
-  warning("execution_timeout must be > 1. Ignored.") 
-  execution_timeout=NULL
+  warning("globvars$execution_timeout must be > 1. Ignored.") 
+  globvars$execution_timeout=NULL
 }
 
-evals_since_lastsave=0                    #for counting function evaluations since last save of project file
+globvars$evals_since_lastsave=0                    #for counting function evaluations since last save of project file
 
 init_visualisation()                      #prepare visualisation, if selected
 
 
 #initialisation
-X             =array(Inf,c(number_of_particles,number_of_parameters))  #X: position in parameter space                          
-V             =array(0,c(number_of_particles,number_of_parameters))  #V: velocity in parameter space
-fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
-status        =array(0,number_of_particles)  #particle status: 0: to be computed; 1: finished; 2: in progress
-computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if status=2)
-node_id       =array(0,number_of_particles)                              #node number of worker / slave
-X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
-fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
-function_calls    =array(0,number_of_particles)  # function_calls counter for each particle
+globvars$X             =array(Inf,c(number_of_particles,number_of_parameters))  #globvars$X: position in parameter space                          
+globvars$V             =array(0,c(number_of_particles,number_of_parameters))  #globvars$V: velocity in parameter space
+globvars$fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
+globvars$status        =array(0,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
+globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
+globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
+globvars$X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
+globvars$fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
+globvars$function_calls    =array(0,number_of_particles)  # globvars$function_calls counter for each particle
                           
-X_gbest     =array(Inf,number_of_parameters)            #global optimum
+globvars$X_gbest     =array(Inf,number_of_parameters)            #global optimum
 
-break_flag=NULL       #flag indicating if a termination criterium has been reached
+globvars$break_flag=NULL       #flag indicating if a termination criterium has been reached
 
 
 # Initialize the global and local fitness to the worst possible
- fitness_gbest = Inf;
- fitness_lbest[] = Inf
+ globvars$fitness_gbest = Inf;
+ globvars$fitness_lbest[] = Inf
 
-if (!is.null(nslaves)) prepare_mpi_cluster(nslaves=nslaves,working_dir_list=working_dir_list) else nslaves=NULL             #initiate cluster, if enabled
+if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves,working_dir_list=working_dir_list) else globvars$nslaves=NULL             #initiate cluster, if enabled
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {
-    if (!is.null(colnames(X)))
-      par_names=paste(colnames(X),collapse="\t") else
+    if (!is.null(colnames(globvars$X)))
+      par_names=paste(colnames(globvars$X),collapse="\t") else
       par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters
     write.table(paste("time",par_names,"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
   }
@@ -89,36 +96,36 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
 init_particles(lhc_init)  #initialize velocities and particle positions
 
  
-   fitness_itbest= Inf     #best fitness in the last it_last iterations
-   it_last_improvent=0               #counter for counting iterations since last improvement
+   globvars$fitness_itbest= Inf     #best fitness in the last it_last iterations
+   globvars$it_last_improvement=0               #counter for counting iterations since last improvement
 
 
-while ((closed_slaves < nslaves) )
+while ((globvars$closed_slaves < globvars$nslaves) )
 {
       update_tasklist_pso()   #update particle speeds and positions based on available results
-      if (!is.null(break_flag)) break
-      tobecomputed=status==0
-      while ((length(idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
+      if (!is.null(globvars$break_flag)) break
+      tobecomputed=globvars$status==0
+      while ((length(globvars$idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
       {
           if (any(tobecomputed)) {
-            current_particle=which.min(function_calls[tobecomputed])   #treat particles with low number of itereations first
+            current_particle=which.min(globvars$function_calls[tobecomputed])   #treat particles with low number of itereations first
             current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
-            slave_id=idle_slaves[1]                     #get free slave        
+            slave_id=globvars$idle_slaves[1]                     #get free slave        
 #            browser()
-            mpi.remote.exec(cmd=perform_task,params=X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
+            mpi.remote.exec(cmd=perform_task,params=globvars$X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
               
-            idle_slaves=idle_slaves[-1]                         #remove this slave from list
-            status            [current_particle]=2               #mark this particle as "in progress"
-            node_id           [current_particle]=slave_id        #store slave_id of this task
-            computation_start [current_particle]=Sys.time()      #store time of start of this computation
+            globvars$idle_slaves=globvars$idle_slaves[-1]                         #remove this slave from list
+            globvars$status            [current_particle]=2               #mark this particle as "in progress"
+            globvars$node_id           [current_particle]=slave_id        #store slave_id of this task
+            globvars$computation_start [current_particle]=Sys.time()      #store time of start of this computation
           }   
           update_tasklist_pso()   #update particle speeds and positions based on available results
           
-          tobecomputed=status==0
+          tobecomputed=globvars$status==0
          flush.console()
       } 
 
-      if (!is.null(break_flag)) break
+      if (!is.null(globvars$break_flag)) break
       
       slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
       #ii: there should be some timeout here
@@ -128,42 +135,42 @@ while ((closed_slaves < nslaves) )
   
      
       if (tag == 2) {      #retrieve result
-        current_particle =which(node_id==slave_id & status==2)           #find which particle this result belongs to
+        current_particle =which(globvars$node_id==slave_id & globvars$status==2)           #find which particle this result belongs to
         if (length(current_particle) > 1)                                #rr   shouldn't occur
           print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
          else    
         if (length(current_particle) ==0)                                #
         {
-          if (node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
+          if (globvars$node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
              print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message))          
-          if (node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, from a terminated or reset slave
+          if (globvars$node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, from a terminated or reset slave
           {
-            idle_slaves=c(idle_slaves,slave_id)     #give the slave another chance
-            node_interruptions[slave_id,"status"] = 0
+            globvars$idle_slaves=c(globvars$idle_slaves,slave_id)     #give the slave another chance
+            globvars$node_interruptions[slave_id,"status"] = 0
           }   
         } else
         {
-          fitness_X [current_particle] = slave_message
-          status    [current_particle] =1      #mark as "finished"
-          function_calls[current_particle] =function_calls[current_particle]+1        #increase iteration counter
-          if (!is.null(execution_timeout)) execution_times = rbind(execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),computation_start[current_particle],units="sec"))))   #monitor execution times
-          idle_slaves=c(idle_slaves,slave_id)
+          globvars$fitness_X [current_particle] = slave_message
+          globvars$status    [current_particle] =1      #mark as "finished"
+          globvars$function_calls[current_particle] =globvars$function_calls[current_particle]+1        #increase iteration counter
+          if (!is.null(globvars$execution_timeout)) globvars$execution_times = rbind(globvars$execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),globvars$computation_start[current_particle],units="sec"))))   #monitor execution times
+          globvars$idle_slaves=c(globvars$idle_slaves,slave_id)
         }
       }  
       else if (tag == 3) {    # A slave has closed down.
           #print(paste("slave",slave_id,"closed gracefully."))
-          closed_slaves <- closed_slaves + 1
+          globvars$closed_slaves <- globvars$closed_slaves + 1
       }
       else if (tag == 4) {    # error occured during the execution of the objective function
-          break_flag=paste("Abort, slave",slave_id,":",slave_message)
-          closed_slaves=nslaves
+          globvars$break_flag=paste("Abort, slave",slave_id,":",slave_message)
+          globvars$closed_slaves=globvars$nslaves
       }
 }      
       
-if ((closed_slaves==nslaves) && is.null(break_flag))
-  break_flag = "No or delayed response from slaves" 
+if ((globvars$closed_slaves==globvars$nslaves) && is.null(globvars$break_flag))
+  globvars$break_flag = "No or delayed response from slaves" 
 
-ret_val=list(value=fitness_gbest,par=X_gbest,function_calls=sum(function_calls),break_flag=break_flag) 
+ret_val=list(value=globvars$fitness_gbest,par=globvars$X_gbest, function_calls=sum(globvars$function_calls),break_flag=globvars$break_flag) 
   
 close_mpi()                        #diligently close Rmpi session
 

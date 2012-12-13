@@ -1,4 +1,6 @@
-init_visualisation_i=function()
+init_visualisation=function()
+#note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
+#although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 {
   # initialize visualisation
   if ((number_of_parameters!=2) | is.null(do_plot)) do_plot<<-FALSE           #plotting only for 2D-search

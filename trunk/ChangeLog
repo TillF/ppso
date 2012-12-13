@@ -1,3 +1,7 @@
+Version: 0.9-96
+computationally irrelevant: major code cleansing and streamlining; clarification of scoping;
+- implemented request_object (and push_object) for slave-master interactions
+
 Version: 0.9-954
 computationally irrelevant:
 - proper namespace file, formatting of docu

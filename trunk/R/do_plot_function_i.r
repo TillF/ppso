@@ -11,16 +11,16 @@ do_plot_function_i = function() #real time plotting of 2-D surface of objective 
         assign("plot_window", dev.cur(), pos=parent.frame(n=2))
       }
 
-      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
-      points(trans3d(X[,1], X[,2], fitness_X, pmat = res), col = 2, pch =16)
-      points(trans3d(X_lbest[,1], X_lbest[,2], fitness_lbest, pmat = res), col = 3, pch ="X")
+      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "globvars$X", ylab = "Y", zlab = "obj fun")
+      points(trans3d(globvars$X[,1], globvars$X[,2], globvars$fitness_X, pmat = res), col = 2, pch =16)
+      points(trans3d(globvars$X_lbest[,1], globvars$X_lbest[,2], globvars$fitness_lbest, pmat = res), col = 3, pch ="globvars$X")
       for (i in 1: min(10,number_of_particles))
-         lines(rbind(trans3d(X[i,1], X[i,2], fitness_X[i], pmat = res), trans3d(X_lbest[i,1], X_lbest[i,2], fitness_lbest[i], pmat = res)) )
+         lines(rbind(trans3d(globvars$X[i,1], globvars$X[i,2], globvars$fitness_X[i], pmat = res), trans3d(globvars$X_lbest[i,1], globvars$X_lbest[i,2], globvars$fitness_lbest[i], pmat = res)) )
 
-      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocated during last iteration
+      if (exists("globvars$relocated") && !is.null(globvars$relocated))                   #plot particles that have been globvars$relocated during last iteration
       {
-        points(trans3d(relocated[,1], relocated[,2], relocated[,3], pmat = res), col="blue", pch="O")
-        assign("relocated",NULL,parent.frame(n=2))
+        points(trans3d(globvars$relocated[,1], globvars$relocated[,2], globvars$relocated[,3], pmat = res), col="blue", pch="O")
+        assign("globvars$relocated",NULL,parent.frame(n=2))
       }
 
     }
@@ -35,14 +35,14 @@ do_plot_function_i = function() #real time plotting of 2-D surface of objective 
       rgl.pop(id=hdl[c(completed_particles,completed_particles) & hdl!=0])     #remove outdated dots
       for (i in which(completed_particles))
       {
-         hdl[i]                    =points3d(X[i,1],             X[i,2], fitness_X[i],     col="red")
-         hdl[i+number_of_particles]=points3d(X_lbest[i,1], X_lbest[i,2], fitness_lbest[i], col="green")
+         hdl[i]                    =points3d(globvars$X[i,1],             globvars$X[i,2], globvars$fitness_X[i],     col="red")
+         hdl[i+number_of_particles]=points3d(globvars$X_lbest[i,1], globvars$X_lbest[i,2], globvars$fitness_lbest[i], col="green")
       }
-      if (exists("relocated") && !is.null(relocated))                   #plot particles that have been relocated during last iteration
+      if (exists("globvars$relocated") && !is.null(globvars$relocated))                   #plot particles that have been globvars$relocated during last iteration
       {
 #        if (exists("hdl_r") && !is.null(hdl_r)) rgl.pop(id=hdl_r)
-        hdl_r = points3d(relocated[,1], relocated[,2], relocated[,3], col="blue")
-        assign("relocated",NULL,parent.frame(n=2))
+        hdl_r = points3d(globvars$relocated[,1], globvars$relocated[,2], globvars$relocated[,3], col="blue")
+        assign("globvars$relocated",NULL,parent.frame(n=2))
         assign("hdl_r",hdl_r,parent.frame(n=2))
       }
 

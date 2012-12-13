@@ -30,13 +30,13 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 
 
 #do progress plot
-  if (exists("progress_window") && (progress_window %in% dev.list()))     #activate progress_plot window, if already open
+  if (exists("progress_window", where=globvars) && (globvars$progress_window %in% dev.list()))     #activate progress_plot window, if already open
   {
-    dev.set(progress_window)
+    dev.set(globvars$progress_window)
   }  else
   {
     x11()
-    assign("progress_window", dev.cur(), pos=parent.frame())
+    globvars$progress_window = dev.cur()
   }
 
   par(mfcol=c(mfrow,mfcol))
@@ -64,13 +64,13 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   }
 
 #do goodness plot
-  if (exists("goodness_window") && (goodness_window %in% dev.list()))     #activate goodness_plot window, if already open
+  if (exists("goodness_window", where=globvars) && (globvars$goodness_window %in% dev.list()))     #activate goodness_plot window, if already open
   {
-    dev.set(goodness_window)
+    dev.set(globvars$goodness_window)
   }  else
   {
     x11()
-    assign("goodness_window", dev.cur(), pos=parent.frame())
+    globvars$goodness_window=dev.cur()
   }
   par(mfcol=c(mfrow,mfcol))
   

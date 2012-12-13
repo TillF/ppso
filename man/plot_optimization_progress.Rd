@@ -1,12 +1,12 @@
-\name{plot_optimization_process}
+\name{plot_optimization_progress}
 \Rdversion{1.1}
-\alias{plot_optimization_process}
+\alias{plot_optimization_progress}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Visualisation of optimization process
 }
 \description{
-Visualisation of optimization process based on log files. \code{plot_optimization_process} is also used by {\code{\link{optim_pso}}}  & Co. when used with \code{plot_optimization_process=TRUE}.
+Visualisation of optimization process based on log files. \code{plot_optimization_progress} is also used by {\code{\link{optim_pso}}}  & Co. when used with \code{plot_optimization_progress=TRUE}.
 }
 \usage{
 plot_optimization_progress (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
@@ -34,7 +34,7 @@ print information on current optimum, the respective parameters and its function
 }
 
 \details{
-\code{plot_optimization_process} can be used to inspect an ongoing optimization progress if its recording of log file and project file are enabled.
+\code{plot_optimization_progress} can be used to inspect an ongoing optimization progress if its recording of log file and project file are enabled.
 It produces two windows:
 \itemize{
   \item{progress_plot}{

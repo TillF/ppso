@@ -15,11 +15,19 @@
 \code{optim_dds} optimizes using a Dynamically Dimensioned Search with  \code{optim_pdds_robust} being the parallel version.
 }
 \usage{
-optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL,\cr  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),\cr   rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)\cr
-optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL,\cr  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),\cr   rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL)\cr
+optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL,
+  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),
+  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
+optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL,
+  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),
+  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL)
 
-optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500,\cr  r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),\cr    rep(1, number_of_parameters)), initial_estimates=NULL,                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)\cr
-optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 1,                               max_number_function_calls= 500,\cr  r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),\cr    rep(1, number_of_parameters)), initial_estimates=NULL,                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, verbose=FALSE)\cr
+optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500,
+  r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
+  rep(1, number_of_parameters)), initial_estimates=NULL,                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
+optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 1,                               max_number_function_calls= 500,
+  r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
+  rep(1, number_of_parameters)), initial_estimates=NULL,                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, verbose=FALSE)
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -91,7 +99,7 @@ Name of a file file that will cause the termination of the optimization when it 
 }
 
   \item{plot_progress}{
-If set to TRUE, corresponds to repeated call of \code{\link{plot_optimization_process}} with default parameters in an interval of \code{save_interval}. If \code{plot_progress} is a named list, it is parsed as paraemters to \code{\link{plot_optimization_process}}.
+If set to TRUE, corresponds to repeated call of \code{\link{plot_optimization_progress}} with default parameters in an interval of \code{save_interval}. If \code{plot_progress} is a named list, it is parsed as paraemters to \code{\link{plot_optimization_progress}}.
 }
 
   \item{tryCall}{
@@ -118,23 +126,23 @@ Neighbourhood size perturbation parameter . Default value: 0.2.
 }
 
 for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
-		 \item{\code{nslaves}}{
+		 \item{nslaves}{
 		number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
 		}
-		\item{\code{working_dir_list}}{
+		\item{working_dir_list}{
 		 String matrix of working directories the slaves should change to. First column holds the hostname, the second column the directory.\\ 
 		 A hostname may be listed several times, if more than one slave is run on it. If a host is listed less times than it has slaves, the last entry will be recycled as necessary.\\ 
 		 The entry "default" denotes the directory all slaves of unlisted hosts will be change to. If missing, slaves on unlisted hosts will stay in the directory they are spawned in (don't ask me which this is).\\
 		 Beware: "~" apparently doesn't work, so rather use the full path. 
 		}
-		\item{\code{execution_timeout}}{
+		\item{execution_timeout}{
 		If set to a factor greater than 1, a slave whose execution time has exceeded (\code{execution_timeout} times the mean of its prior calls) for more than three times is no longer used. This also applies when the slave produces its first result very slow when comared to the other slaves. 
 		}
-		\item{\code{verbose=c(TRUE,"master","slaves")}}{
+		\item{verbose}{
 		   generate screen output documenting the message passing}
 		   \itemize{
-			   \item{master}{master generates output}
-			   \item{slaves}{ slaves generate output (into text files named "slave<nn>")}
+			   \item{"master"}{master generates output}
+			   \item{"slaves"}{ slaves generate output (into text files named "slave<nn>")}
 			   \item{TRUE}{ master and slaves generate output}
 			   }
 
@@ -179,11 +187,14 @@ Till Francke <francke_at_uni-potsdam.de>
 }
 \note{
 - still in development, use with care, all comments welcome -
+
+Parallelization is a great thing, especially when it works. On its dark side, you just parallelize errors and multiply debugging effort. Enabling \code{verbose=TRUE} and  \code{tryCall=TRUE} may help to find the error.\cr
+Master or slave crashes can cause the entire session to stall, so restarting R may be necessary. Under Windows, orphaned mpi-sessions and slaves may have to be killed manually to prevent stalling the entire system: Use "Process Explorer" (free) and kill the smpd.exe-tree and mpiexec.exe.
 }
 
 
 \seealso{
- \code{\link{plot_optimization_process}}, \code{\link{sample_function}}
+ \code{\link{plot_optimization_progress}}, \code{\link{sample_function}}
 }
 
 \examples{

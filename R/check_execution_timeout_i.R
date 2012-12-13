@@ -1,52 +1,48 @@
 #internal function: check if any of the nodes exceeds the allowed execution time
-check_execution_timeout_i = function()
+check_execution_timeout = function()
+#note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
+#although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 {
   maxtries=3        #maximum number of attempts to run on a slave before it is no longer used
   
-  nodes=unique(node_id[status==2])                         #check all nodes that are currently employed
+  nodes=unique(globvars$node_id[globvars$status==2])                         #check all nodes that are currently employed
 
   for (i in nodes)
   {
-    current_particle = node_id==i & (status==2)
+    current_particle = globvars$node_id==i & (globvars$status==2)
 
-    current_time_execution=difftime(Sys.time(),computation_start[current_particle],units="secs")       #get the time this node has been processing the current call so far
+    current_time_execution=difftime(Sys.time(),globvars$computation_start[current_particle],units="secs")       #get the time this node has been processing the current call so far
  
-    calls_so_far=execution_times$slave_id==i                                 #calls performed by this node so far
+    calls_so_far=globvars$execution_times$slave_id==i                                 #calls performed by this node so far
     if(sum(calls_so_far)==0)                                             #no completed calls so far
-      if (nrow(execution_times)>=3*length(nodes))                           #have there been sufficiently many other calls?
-        mean_execution_time=mean(execution_times$secs)                      #use overall mean as benchmark
+      if (nrow(globvars$execution_times)>=3*length(nodes))                           #have there been sufficiently many other calls?
+        mean_execution_time=mean(globvars$execution_times$secs)                      #use overall mean as benchmark
       else      
         next                                                                #no calls so far, simply wait
     else
-      mean_execution_time=mean(execution_times$secs[calls_so_far])    #calculate the mean execution time of this node so far
+      mean_execution_time=mean(globvars$execution_times$secs[calls_so_far])    #calculate the mean execution time of this node so far
 
   
-    if (current_time_execution > mean_execution_time*execution_timeout)     #current call takes too long?
+    if (current_time_execution > mean_execution_time*globvars$execution_timeout)     #current call takes too long?
     {
-       node_id[current_particle] = 0          #reset particle
-       status [current_particle] = 0  
-       node_interruptions[i,"counter"] = node_interruptions[i,"counter"] +1   #increase counter of interruptions
-       if (node_interruptions[i] > maxtries)
+       globvars$node_id[current_particle] = 0          #reset particle
+       globvars$status [current_particle] = 0  
+       globvars$node_interruptions[i,"counter"] = globvars$node_interruptions[i,"counter"] +1   #increase counter of interruptions
+       if (globvars$node_interruptions[i] > maxtries)
        {
-        closed_slaves <- closed_slaves + 1
+        globvars$closed_slaves <- globvars$closed_slaves + 1
         warning(paste("Excluded node",i,"because of failing to produce results within",mean_execution_time,"s for",maxtries,"attempts."))
-        node_interruptions[i,"status" ] = 2  #flag as "terminated permanently"
+        globvars$node_interruptions[i,"status" ] = 2  #flag as "terminated permanently"
        } else
-       node_interruptions[i,"status" ] = 1  #flag as "terminated once"
+       globvars$node_interruptions[i,"status" ] = 1  #flag as "terminated once"
                               
     }
   }
 
-  #"export" the variables
-  assign("status",             status,           parent.frame())
-  assign("node_id",            node_id,          parent.frame())
-  assign("idle_slaves",       idle_slaves,       parent.frame())       
-  assign("node_interruptions",node_interruptions,parent.frame())
-  assign("closed_slaves",closed_slaves,          parent.frame())
 
-  if (length(execution_times$secs)==0)
+  if (length(globvars$execution_times$secs)==0)
     return(0.1)
   else
-    return(min(c(1,execution_times$secs)))
+    return(min(c(1,globvars$execution_times$secs)))
 #return(0)     #rr
 }

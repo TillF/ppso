@@ -8,7 +8,7 @@ Pushing an object to the master.
 push an object to the master.
 }
 \usage{
-push_object (object_name, value)
+push_object (object_name, value, verbose_slave=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,9 @@ name of object to be pushed to master.
 }
 \item{value}{
 value of object to be set on the master.
+}
+\item{verbose_slave}{
+enable diagnostic messages.
 }
 }
 \details{

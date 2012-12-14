@@ -8,13 +8,17 @@ Requesting an object from the master.
 Request an object from the master.
 }
 \usage{
-request_object (object_name)
+request_object (object_name, verbose_slave=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object_name}{
 name of object to be requested from master.
 }
+\item{verbose_slave}{
+enable diagnostic messages.
+}
+
 }
 \details{
   This function requests an object from the master. This is not necessary for ordinary optimizations! However, it enables the slave to react specifically on the overall conditions of the optimization.\cr

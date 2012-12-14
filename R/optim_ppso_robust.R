@@ -2,7 +2,8 @@ optim_ppso_robust <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=5, max_number_function_calls=NULL, w=1,  C1=2, C2=2, abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
   #runtime & display parameters
-do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL)
+do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, 
+tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
 # do particle swarm optimization
 {
 #export r/w globals to separate environment
@@ -47,6 +48,8 @@ environment(check_execution_timeout)=environment()
 environment(close_mpi)=environment() 
 #environment(mpi_loop)=environment() 
 
+verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
+verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
 
 
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent

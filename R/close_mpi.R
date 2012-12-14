@@ -9,7 +9,7 @@ close_mpi=function()
       slave_message <- mpi.recv.Robj(mpi.any.source(), 5)
       slave_message_info <- mpi.get.sourcetag()
       slave_id <- slave_message_info[1]
-     	mpi.send.Robj(obj="dummy", dest=slave_id, tag=7)         #send kill signal
+     	mpi.send.Robj(obj="kill", dest=slave_id, tag=7)         #send kill signal
   }
 
   i=0
@@ -26,6 +26,7 @@ close_mpi=function()
   }
 
   #mpi.abort() #causes hangup
+  #browser()
   if (!is.null(globvars$nslaves) &                                                    #there are slaves
         ((globvars$closed_slaves ==0) || (globvars$closed_slaves == globvars$nslaves))) #all (or none) are still available
 #        & all(globvars$status==1)) 

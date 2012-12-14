@@ -1,4 +1,4 @@
-\name{check_execution_timeout_i}
+\name{check_execution_timeout}
 \Rdversion{1.1}
 \alias{init_particles}
 \alias{init_visualisation}
@@ -14,7 +14,7 @@ Internal functions, not to be called by user directly
 Internal functions,\\ not to be called by user directly
 }
 \usage{
-check_execution_timeout()
+check_execution_timeout(maxtries=10)
 init_particles(lhc_init = FALSE)
 init_visualisation()
 prepare_mpi_cluster(nslaves, working_dir_list = NULL, verbose_slave = FALSE)

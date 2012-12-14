@@ -1,7 +1,7 @@
 #optional functions for additional master-slave interaction
 
 #request object from master
-request_object = function(object_name)
+request_object = function(object_name, verbose_slave=FALSE)
 {
   if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...requesting object '",object_name,"'"))
   mpi.send.Robj(obj=object_name, dest=0, tag=5) #tag 5 demarks request for object
@@ -15,6 +15,11 @@ request_object = function(object_name)
     tag      = messge_info[2]
     if (tag == 7)
     {
+        if (messge != "kill") #dunno why, but this happens!
+        {
+          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  received erroneous kill message, Ignored. Message: ",messge))        
+          next
+        }
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  received kill message, aborting. Message: ",messge))
         stop("slave stopped.")    #abort current evaluation of functions on this slave
         return("xstopped")
@@ -25,7 +30,7 @@ request_object = function(object_name)
 }
 
 #push object to master
-push_object = function(object_name, value)
+push_object = function(object_name, value, verbose_slave=FALSE)
 {
   if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...pushing object '",object_name,"'"))
   attr(value, "object_name")=object_name #attach name of object

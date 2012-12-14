@@ -2,7 +2,7 @@
 \Rdversion{1.1}
 \alias{request_object}
 \title{
-request_object
+Requesting an object from the master.
 }
 \description{
 Request an object from the master.

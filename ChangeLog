@@ -1,3 +1,7 @@
+Version: 0.9-961
+- fixed non-working consideration of break_file
+- improved docu formatting
+
 Version: 0.9-96
 computationally irrelevant: major code cleansing and streamlining; clarification of scoping;
 - implemented request_object (and push_object) for slave-master interactions

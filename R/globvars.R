@@ -58,7 +58,7 @@ z = NULL
 #globvars$it_last_improvement
 #globvars$it_last_improvement
 #globvars$node_id
-#globvars$node_interruptions
+#globvars$slave_status
 #globvars$nslaves
 #globvars$relocated
 #globvars$progress_window

@@ -141,17 +141,13 @@ while ((globvars$closed_slaves < globvars$nslaves) )
         current_particle =which(globvars$node_id==slave_id & globvars$status==2)           #find which particle this result belongs to
         if (length(current_particle) > 1)                                #rr   shouldn't occur
           print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
-         else    
-        if (length(current_particle) ==0)                                #
-        {
-          if (globvars$node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
-             print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message))          
-          if (globvars$node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, from a terminated or reset slave
-          {
-            globvars$idle_slaves=c(globvars$idle_slaves,slave_id)     #give the slave another chance
-            globvars$node_interruptions[slave_id,"status"] = 0
-          }   
-        } else
+        else if (length(current_particle) ==0)                                #
+		{
+			if (verbose_master) 
+				if (globvars$slave_status[slave_id,"timeouts_in_row"] == 0)        #rr shouldn't occur
+				   print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message)) else
+				   print(paste("slave",slave_id,"returned overdue result"))
+		} else
         {
           globvars$fitness_X [current_particle] = slave_message
           globvars$status    [current_particle] =1      #mark as "finished"

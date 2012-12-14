@@ -81,8 +81,9 @@ update_tasklist_pso=function()                        #update particle positions
 		  par_names=paste(rep("par",number_of_parameters),seq(1,number_of_parameters),sep="_") #simple numbering of parameters
 
 		  col.names=c(paste("best_",par_names,sep=""),"best_objective_function", paste("current_",par_names,sep=""),
-          paste("current_velocity_",par_names,sep=""),"current_objective_function", "status", "begin_execution", "globvars$node_id","globvars$function_calls")
-        write.table(cbind(globvars$X_lbest, globvars$fitness_lbest, globvars$X, globvars$V, globvars$fitness_X, globvars$status, format(globvars$computation_start, "%Y-%m-%d %H:%M:%S"), globvars$node_id, globvars$function_calls), file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
+          paste("current_velocity_",par_names,sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
+        write.table(cbind(globvars$X_lbest, globvars$fitness_lbest, globvars$X, globvars$V, globvars$fitness_X,globvars$status, format(globvars$computation_start, "%Y-%m-%d %H:%M:%S"), globvars$node_id, globvars$function_calls),
+          file = projectfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress
     }

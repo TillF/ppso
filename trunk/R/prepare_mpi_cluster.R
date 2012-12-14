@@ -26,7 +26,9 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
     nslaves=mpi.comm.size()-1
 	  print(paste(nslaves,"running slaves detected, no spawning."))
   } else {
-  	mpi.spawn.Rslaves(nslaves=nslaves)
+ 	  if (verbose_master) {print("spawning slaves..."); flush.console()}
+
+    mpi.spawn.Rslaves(nslaves=nslaves)
   	print(paste(mpi.comm.size(),"slaves spawned."))
   }
   
@@ -49,6 +51,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
 
   
   perform_task = function(params,slave_id,tryCall=FALSE) {
+
 
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": received message for slave",slave_id))
 
@@ -97,6 +100,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
 
   mpi.bcast.Robj2slave(perform_task)               #send activation function to slaves
   mpi.bcast.Robj2slave(request_object)               #send function for request of objects to slaves
+  mpi.bcast.Robj2slave(push_object)               #send function for request of objects to slaves
 
   
   globvars$closed_slaves=0

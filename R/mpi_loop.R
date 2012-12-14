@@ -43,14 +43,27 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
   
           if (!is.null(globvars$break_flag) | all(globvars$status==1)) break
   
-          sleeptime=0
+          sleeptime=0.1
+          output_time=Sys.time()
           if (verbose_master) print(paste(Sys.time()," ...wait for messages from slaves..."))          
           while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #wait till there is a message
           {
+              #browser()
               if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
+              {
                 globvars$break_flag="user interrupt"   
+                return()
+              }  
               if (!is.null(globvars$execution_timeout)) sleeptime=check_execution_timeout()
-              Sys.sleep(sleeptime)                                           #this prevents this loop to consume too much ressources
+              Sys.sleep(sleeptime) 
+              if (verbose_master)
+              {
+                 if (difftime(Sys.time(), output_time, units="sec") > 10)
+                 {
+                  print(" ...still waiting...")
+                  output_time=Sys.time()
+                 }
+              }
           }        
         if (verbose_master) {print(paste(Sys.time()," ...message detected")); flush.console()}
         slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())

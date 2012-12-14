@@ -2,7 +2,7 @@
 \Rdversion{1.1}
 \alias{push_object}
 \title{
-push_object
+Pushing an object to the master.
 }
 \description{
 push an object to the master.

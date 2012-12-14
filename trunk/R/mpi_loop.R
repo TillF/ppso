@@ -13,6 +13,9 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
           update_tasklist_dds()    #update particle positions based on available results
 
         tobecomputed=globvars$status==0
+        
+        sort_index=sort(globvars$slave_status[globvars$idle_slaves, "counter"], index.return = TRUE)$ix  #sort idle slaves by number of interruptions
+        globvars$idle_slaves = globvars$idle_slaves[sort_index]
   
         while ((length(globvars$idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
         {
@@ -82,14 +85,15 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
            else    
           if (length(current_particle) ==0)                                #
           {
-            if (globvars$node_interruptions[slave_id,"status"] == 0)        #rr shouldn't occur
-               print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message))          
-            if (globvars$node_interruptions[slave_id,"status"] == 1)        #this is an obsolete result, probably from a slave run that was overdue
-              globvars$node_interruptions[slave_id,"status"] = 0             #give the slave another chance (though this failure was noted in globvars$node_interruptions[slave_id,"counter"])
+            if (verbose_master) 
+				if (globvars$slave_status[slave_id,"timeouts_in_row"] == 0)        #rr shouldn't occur
+				   print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message)) else
+				   print(paste("slave",slave_id,"returned overdue result"))
           } else
           {
             globvars$fitness_X [current_particle] = slave_message
             globvars$status    [current_particle] =1      #mark as "finished"
+            globvars$slave_status[slave_id,"timeouts_in_row"] = 0             #this result was in time, so reset the counter of consecutive timeouts 
             if (!is.null(globvars$execution_timeout)) globvars$execution_times = rbind(globvars$execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),globvars$computation_start[current_particle],units="sec"))))   #monitor execution times
 
             if (init_search)
@@ -101,7 +105,7 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
             else
             globvars$function_calls[current_particle] =globvars$function_calls[current_particle]+1        #increase iteration counter
           }
-          if (globvars$node_interruptions[slave_id,"status" ]!=2) #if this slave is in excluded list, don't use it any longer
+          if (globvars$slave_status[slave_id,"timeouts_in_row" ] < maxtries) #if this slave failed too often in a row, don't use it any longer
             globvars$idle_slaves=c(globvars$idle_slaves,slave_id)
         } else if (tag == 3) {    # A slave has closed down.
             if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has gone away"))  

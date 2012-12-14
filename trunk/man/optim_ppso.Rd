@@ -139,7 +139,7 @@ for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
 		If set to a factor greater than 1, a slave whose execution time has exceeded (\code{execution_timeout} times the mean of its prior calls) for more than three times is no longer used. This also applies when the slave produces its first result very slow when comared to the other slaves. 
 		}
 		\item{maxtries}{
-		Number of times a slave may exceed \code{execution_timeout} before being excluded from further tasks. Ignored, when \code{execution_timeout} is not set.
+		Number of times a slave may exceed \code{execution_timeout} in a row before being excluded from further tasks. Ignored, when \code{execution_timeout} is not set.
 		}
 		\item{verbose}{
 		   generate screen output documenting the message passing}

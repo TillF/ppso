@@ -1,5 +1,5 @@
 #internal function: check if any of the nodes exceeds the allowed execution time
-check_execution_timeout = function(maxtries=10)
+check_execution_timeout = function()
 #note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 {
@@ -29,15 +29,14 @@ check_execution_timeout = function(maxtries=10)
               
        globvars$node_id[current_particle] = 0          #reset particle
        globvars$status [current_particle] = 0  
-       globvars$node_interruptions[i,"counter"] = globvars$node_interruptions[i,"counter"] +1   #increase counter of interruptions
-       if (globvars$node_interruptions[i] > maxtries)
+       globvars$slave_status[i,"counter"] = globvars$slave_status[i,"counter"] +1   #increase counter of total interruptions
+       globvars$slave_status[i,"timeouts_in_row"] = globvars$slave_status[i,"timeouts_in_row"] +1   #increase counter of consecutive interruptions
+       
+       if (globvars$slave_status[i,"timeouts_in_row"] > maxtries)
        {
-        globvars$closed_slaves <- globvars$closed_slaves + 1
+        globvars$closed_slaves = globvars$closed_slaves + 1
         warning(paste("Permanently excluded slave",i,"because of failing to produce results within",mean_execution_time,"s for",maxtries,"attempts."))
-        globvars$node_interruptions[i,"status" ] = 2  #flag as "terminated permanently"
-       } else
-       globvars$node_interruptions[i,"status" ] = 1  #flag as "terminated once"
-                              
+       }                               
     }
   }
 

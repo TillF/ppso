@@ -4,6 +4,8 @@
 
 globvars = new.env(hash=TRUE, parent=emptyenv())
 
+globvars$is_mpi = (is.loaded("mpi_initialize") && mpi.comm.size()>0) #flag for distinguishing serial and parallel runs
+
 #satisfying automatic checking
 #global vars read-only (implicitly used by scoping rules, no export into globvars)
 abstol = NULL

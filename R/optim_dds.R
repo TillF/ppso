@@ -12,9 +12,18 @@ verbose=FALSE
 if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < number_of_particles)
   stop("abs(max_number_function_calls) must be at least number_of_particles.")
   
+
+globvars$is_mpi = FALSE
+
+#request_object = request_object_serial #use serial version of these functions
+#push_object = push_object_serial 
+
+environment(request_object)=environment() 
 environment(update_tasklist_dds)=environment() #force subroutines to have this function as parent (implicitly allowing read-only access to globals)
 environment(init_particles)=environment() 
 environment(init_visualisation)=environment() 
+
+
 
 
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent

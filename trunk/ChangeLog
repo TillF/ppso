@@ -1,3 +1,6 @@
+Version: 0.9-964
+- request_object / push_object options implemented for serial calls
+
 Version: 0.9-963
 - improved time-out handling, 2
 

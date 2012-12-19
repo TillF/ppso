@@ -35,6 +35,8 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 
 if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
   stop("max_number_function_calls must be at least number_of_particles.")
+
+globvars$is_mpi = FALSE
   
 environment(update_tasklist_pso)=environment() #force subroutines to have this function as parent (implicitly allowing read-only access to globals)
 environment(init_particles)=environment() 

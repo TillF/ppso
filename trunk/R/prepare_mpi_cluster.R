@@ -31,6 +31,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
     mpi.spawn.Rslaves(nslaves=nslaves)
   	print(paste(mpi.comm.size(),"slaves spawned."))
   }
+  globvars$is_mpi = TRUE
   
   while(mpi.iprobe(mpi.any.source(),mpi.any.tag()))                #empty MPI queue if there is still something in there
     slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())

@@ -116,6 +116,7 @@ update_tasklist_dds <- function(loop_counter=1)
    if (!is.null(globvars$break_flag))
       return()
 
+   #if (globvars$function_calls==71) browser()
    # Update the particle position
    parameter_ranges=r*(parameter_bounds[,2]-parameter_bounds[,1]) #neighbourhood pertubation parameter * parameter range  
    for (i in which(completed_particles))
@@ -123,13 +124,13 @@ update_tasklist_dds <- function(loop_counter=1)
 #    p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls)    #probability of including a parameter in the search
     p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
 
-    dimensions_to_search=NULL
     rand_num = runif(number_of_parameters) #draw required number of parameters
     dimensions_to_search=which(rand_num<=p_inclusion) #select parameters accroding to random number and probability
-    if (is.null(dimensions_to_search)) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter in pertubation
+    if (length(dimensions_to_search)==0) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter in pertubation
     globvars$V[i,]=0
 
-    globvars$V[i,dimensions_to_search] = rnorm(length(dimensions_to_search))*parameter_ranges[dimensions_to_search] #pertubation vector to previous best
+    norm_rand_num = rnorm(length(dimensions_to_search)) #normally distributed random numbers
+    globvars$V[i,dimensions_to_search] = norm_rand_num * parameter_ranges[dimensions_to_search] #pertubation vector to previous best
     globvars$X[i,] = globvars$X_lbest[i,] + globvars$V[i,]
     #reflect parameter if out-of-bounds
     params_below_bounds = globvars$X[i,] < parameter_bounds[,1]

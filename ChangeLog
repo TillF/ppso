@@ -1,10 +1,13 @@
+Version: 0.9-97
+- fixed bug in DDS that led running redundant parameter sets, especially at end of optimization
+
 Version: 0.9-966
 - minor optimizations for DDS
 - file renaming, parsing of do_plot_function
 
 Version: 0.9-965
 - fixed bug that caused redundant function call in DDS after initialisation
-- some unification attempts between serail and parallel versions of DDS
+- some unification attempts between serial and parallel versions of DDS
 
 Version: 0.9-964
 - request_object / push_object options implemented for serial calls

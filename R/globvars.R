@@ -42,17 +42,17 @@ y = NULL
 z = NULL
 
 #global variables with read/write access need to be imported into globvars
-#globvars$break_flag
+#globvars$break_flag  #verbose indicator for interruption status
 #globvars$ch
 #globvars$closed_slaves
 #globvars$computation_start
 #globvars$evals_since_lastsave
 #globvars$execution_timeout
 #globvars$execution_times
-#globvars$fitness_lbest
-#globvars$fitness_gbest
+#globvars$fitness_lbest       #best solution for each particle so far
+#globvars$fitness_gbest       #current global optimum
 #globvars$fitness_itbest
-#globvars$fitness_X
+#globvars$fitness_X           #fitness of each particle at current iteration
 #globvars$function_calls
 #globvars$futile_iter_count
 #globvars$goodness_window
@@ -66,9 +66,9 @@ z = NULL
 #globvars$progress_window
 #globvars$status
 #globvars$V
-#globvars$X
-#globvars$X_gbest
-#globvars$X_lbest
+#globvars$X                 #current positions of particles (number_of_particles X number_of_parameters)
+#globvars$X_gbest           #position of global best solution so far (number_of_parameters)
+#globvars$X_lbest           #position of current optimum of each particle so far  (number_of_particles X number_of_parameters)
 
 
 #mpi.any.source = function()

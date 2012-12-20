@@ -46,23 +46,24 @@ number_of_particles=max(number_of_particles,init_calls)          #increase numbe
 verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
 verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
 
+#see variable explanations in globvars.R
 globvars$X             =array(Inf,c(number_of_particles,number_of_parameters))  #globvars$X: position in parameter space                          
 globvars$V             =array(0,c(           number_of_particles,number_of_parameters))  #globvars$V: velocity in parameter space
-globvars$fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
+globvars$fitness_X     =array(Inf,number_of_particles)            
 globvars$status        =array(0,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
 globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
 globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
 globvars$X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
-globvars$fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
+globvars$fitness_lbest =array(Inf,number_of_particles)  
 globvars$function_calls    =array(0,number_of_particles)  # iteration counter for each particle
                           
-globvars$X_gbest     =array(Inf,number_of_parameters)            #global optimum
+globvars$X_gbest     =array(Inf,number_of_parameters)            
 
 globvars$break_flag=NULL       #flag indicating if a termination criterium has been reached
 
-# Initialize the local fitness to the worst possible
+# Initialize the local and global fitness to the worst possible
 globvars$fitness_lbest[] = Inf
-globvars$fitness_gbest = min(globvars$fitness_lbest);
+globvars$fitness_gbest = Inf
 
 if (verbose_master) print(paste(Sys.time(),"initializing slaves..."))
 if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves, working_dir_list=working_dir_list,verbose_slave=verbose_slave) else globvars$nslaves=NULL             #initiate cluster, if enabled
@@ -132,12 +133,13 @@ if (is.null(globvars$break_flag))
   globvars$X             =globvars$X_lbest  #globvars$X: position in parameter space                          
   globvars$V             =matrix(globvars$V[1:number_of_particles,],ncol=number_of_parameters)   #globvars$V: velocity in parameter space
   globvars$fitness_X     =globvars$fitness_X[1:number_of_particles]            #optimum of each particle at current iteration
-#  globvars$status        =array(1,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
+
   globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
   globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
   globvars$function_calls    =globvars$function_calls[1:number_of_particles]  # iteration counter for each particle
   function_calls_init = function_calls_init[1:number_of_particles]                     #count initialisation calls extra
   globvars$status=globvars$status_org[1:number_of_particles]  #  restore original contents 
+  globvars$status[uninitialized_particles] = 1 #formerly unitialized particles have been treated by pre-run, so set status to "finished"
   globvars$futile_iter_count = globvars$futile_iter_count[1:number_of_particles]
  
   globvars$fitness_gbest = min(globvars$fitness_lbest)          #update global minimum
@@ -146,6 +148,7 @@ if (is.null(globvars$break_flag))
 
 
   # actual search
+  if (verbose) print("starting main search")
   globvars$fitness_itbest= globvars$fitness_gbest     #best fitness in the last it_last iterations
   globvars$it_last_improvement=0               #counter for counting iterations since last improvement
   

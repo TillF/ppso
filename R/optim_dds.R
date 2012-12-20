@@ -2,10 +2,10 @@ optim_dds <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles= 1, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, lhc_init=FALSE,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE)
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
-verbose=FALSE
+
 
 
 
@@ -15,8 +15,6 @@ if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < numb
 
 globvars$is_mpi = FALSE
 
-#request_object = request_object_serial #use serial version of these functions
-#push_object = push_object_serial 
 
 environment(request_object)=environment() 
 environment(update_tasklist_dds)=environment() #force subroutines to have this function as parent (implicitly allowing read-only access to globals)
@@ -38,30 +36,33 @@ init_visualisation()                      #prepare visualisation, if selected
 init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
 number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
+verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
+verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
 
-
+#see variable explanations in globvars.R
 globvars$nslaves = 1
 globvars$X             =array(Inf,c(number_of_particles,number_of_parameters))  #globvars$X: position in parameter space                          
 globvars$V             =array(0,c(           number_of_particles,number_of_parameters))  #globvars$V: velocity in parameter space
-globvars$fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
+globvars$fitness_X     =array(Inf,number_of_particles)            
 globvars$status        =array(0,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
 globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
 globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
 globvars$X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
-globvars$fitness_lbest =array(Inf,number_of_particles)  #best solution for each particle so far
+globvars$fitness_lbest =array(Inf,number_of_particles)  
 globvars$function_calls    =array(0,number_of_particles)  # iteration counter for each particle
                           
-globvars$X_gbest     =array(Inf,number_of_parameters)            #global optimum
+globvars$X_gbest     =array(Inf,number_of_parameters)            
 
 globvars$break_flag=NULL       #flag indicating if a termination criterium has been reached
 
-# Initialize the local fitness to the worst possible
+# Initialize the local and global fitness to the worst possible
 globvars$fitness_lbest[] = Inf
-globvars$fitness_gbest   = Inf;
+globvars$fitness_gbest   = Inf
 
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
+if (verbose_master) print(paste(Sys.time(),"initializing particle positions..."))
   init_particles(lhc_init)  #initialize particle positions
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {
@@ -77,6 +78,7 @@ if (max_number_function_calls < 0)
     max_number_function_calls=abs(max_number_function_calls)
   }
   
+if (verbose_master)  print(paste(Sys.time(),"starting initialization runs..."))
 
   globvars$status_org=globvars$status  #  store original contents
   uninitialized_particles= which(globvars$fitness_lbest[1:number_of_particles_org]==Inf)                      #"real" particles that still need to be initialized with a function value
@@ -110,23 +112,25 @@ if (max_number_function_calls < 0)
  } else
   function_calls_init = 0*globvars$function_calls
 
-  if (verbose) print("pre-search finished")
+
+  if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
  
 #restore array dimensions according to original number of particles
-  number_of_particles=number_of_particles_org         #back to original number of particles
-  globvars$X_lbest       =matrix(globvars$X_lbest      [1:number_of_particles,],ncol=number_of_parameters, dimnames=dimnames(globvars$X_lbest))        # current optimum of each particle so far
+
+number_of_particles=number_of_particles_org         #back to original number of particles
+  globvars$X_lbest       =matrix(globvars$X_lbest      [1:number_of_particles,],ncol=number_of_parameters, dimnames=dimnames(globvars$X_lbest))        
   globvars$fitness_lbest =       globvars$fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
 
   #restore array dimensions according to original number of particles
   globvars$X             =globvars$X_lbest  #globvars$X: position in parameter space                          
   globvars$V             =matrix(globvars$V[1:number_of_particles,],ncol=number_of_parameters)   #globvars$V: velocity in parameter space
   globvars$fitness_X     =globvars$fitness_X[1:number_of_particles]            #optimum of each particle at current iteration
-#  globvars$status        =array(1,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
   globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
   globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
   globvars$function_calls    =globvars$function_calls[1:number_of_particles]  # iteration counter for each particle
   function_calls_init = function_calls_init[1:number_of_particles]                     #count initialisation calls extra
   globvars$status=globvars$status_org[1:number_of_particles]  #  restore original contents 
+  globvars$status[uninitialized_particles] = 1 #formerly unitialized particles have been treated by pre-run, so set status to "finished"
   globvars$futile_iter_count = globvars$futile_iter_count[1:number_of_particles]
 
   globvars$fitness_gbest = min(globvars$fitness_lbest)          #update global minimum

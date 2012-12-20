@@ -1,3 +1,7 @@
+Version: 0.9-965
+- fixed bug that caused redundant function call in DDS after initialisation
+- some unification attempts between serail and parallel versions of DDS
+
 Version: 0.9-964
 - request_object / push_object options implemented for serial calls
 

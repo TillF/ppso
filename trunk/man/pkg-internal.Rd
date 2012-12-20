@@ -37,7 +37,7 @@ None.}
 Till Francke
 }
 \note{
-
+   This is an incomplete list of internal functions, which are not to be called by the package user.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

@@ -4,7 +4,7 @@ update_tasklist_pso=function()                        #update particle positions
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 {
-   eval(parse(text=paste(c("do_plot_function=",     deparse(do_plot_function_i)))))  #this creates local version of the function do_plot_function 
+   environment(do_plot_function)=environment()  #this creates local version of the function do_plot_function 
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       globvars$break_flag="user interrupt"  
    

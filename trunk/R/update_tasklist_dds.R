@@ -4,7 +4,9 @@ update_tasklist_dds <- function(loop_counter=1)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 {
-   eval(parse(text=paste(c("do_plot_function=",     deparse(do_plot_function_i)))))  #this creates local version of the function do_plot_function 
+#   browser()
+   environment(do_plot_function)=environment()  #this creates local version of the function do_plot_function 
+   #eval(parse(text=paste(c("do_plot_function=",     deparse(do_plot_function)))))  #this creates local version of the function do_plot_function 
 
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       globvars$break_flag="user interrupt"  
@@ -34,22 +36,22 @@ update_tasklist_dds <- function(loop_counter=1)
    {
      globvars$fitness_lbest[completed_particles & improved_particles] = globvars$fitness_X[completed_particles & improved_particles]            #store best fitness value
      globvars$X_lbest[completed_particles & improved_particles,1: number_of_parameters] = globvars$X[completed_particles & improved_particles,1: number_of_parameters]                  #store best parameter set
-   }
    
-   # Update the global best and its fitness
-   min_fitness_index = which.min(globvars$fitness_X[completed_particles])[1]
-   min_fitness =min(globvars$fitness_X[completed_particles])
-
-   if (min_fitness < globvars$fitness_gbest)        #new global minimum found?
-   {
+     # Update the global best and its fitness
+     min_fitness_index = which.min(globvars$fitness_X[completed_particles])[1]
+     min_fitness =min(globvars$fitness_X[completed_particles])
+     
+     if (min_fitness < globvars$fitness_gbest)        #new global minimum found?
+     {
        globvars$fitness_gbest = min_fitness          #update global minimum
        globvars$X_gbest[] = globvars$X[which(completed_particles)[min_fitness_index],]
-   }
-
-   if (!exists('dds_ver')) dds_ver=2        #DDS-version (subtype for testing)
-
+     }
+  
+  }
+   
    if (number_of_particles > 1)
    {                                                                            #relocate "astray" particles
+     if (!exists('dds_ver')) dds_ver=2        #DDS-version (subtype for testing)
      if (dds_ver==1) toberelocated = (globvars$futile_iter_count==max(globvars$futile_iter_count)) & (globvars$fitness_lbest==max(globvars$fitness_lbest)) & (globvars$fitness_lbest!=Inf)    #1. find particles that are worst in both objective function AND improvement
      if (dds_ver==2) toberelocated = (globvars$fitness_lbest > globvars$fitness_gbest)     #2. relocate all but the best particle
      if (dds_ver==3) toberelocated = which.max(globvars$futile_iter_count * (globvars$fitness_lbest!=min(globvars$fitness_lbest)))[1]     #3. find particles is worst in improvement (but not the global best) and set to best improving particle
@@ -122,13 +124,12 @@ update_tasklist_dds <- function(loop_counter=1)
     p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
 
     dimensions_to_search=NULL
-    for (d in 1:number_of_parameters) 
-    if (runif(1)<=p_inclusion)
-      dimensions_to_search=c(dimensions_to_search,d)    #add parameter to "neighbourhood" to be searched
-    if (is.null(dimensions_to_search)) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter
+    rand_num = runif(number_of_parameters) #draw required number of parameters
+    dimensions_to_search=which(rand_num<=p_inclusion) #select parameters accroding to random number and probability
+    if (is.null(dimensions_to_search)) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter in pertubation
     globvars$V[i,]=0
 
-    globvars$V[i,dimensions_to_search] = rnorm(length(dimensions_to_search))*parameter_ranges[dimensions_to_search]
+    globvars$V[i,dimensions_to_search] = rnorm(length(dimensions_to_search))*parameter_ranges[dimensions_to_search] #pertubation vector to previous best
     globvars$X[i,] = globvars$X_lbest[i,] + globvars$V[i,]
     #reflect parameter if out-of-bounds
     params_below_bounds = globvars$X[i,] < parameter_bounds[,1]

@@ -14,7 +14,6 @@ C1 = NULL
 C2 = NULL
 completed_particles = NULL
 do_plot = NULL
-do_plot_function = NULL
 function_calls_init = NULL
 load_projectfile = NULL
 logfile = NULL
@@ -71,6 +70,7 @@ z = NULL
 #globvars$X_lbest           #position of current optimum of each particle so far  (number_of_particles X number_of_parameters)
 
 
+#do_plot_function = function()
 #mpi.any.source = function()
 #mpi.any.tag = function()
 #mpi.bcast.cmd = function()

@@ -1,4 +1,4 @@
-do_plot_function_i = function() #real time plotting of 2-D surface of objective function
+do_plot_function = function() #real time plotting of 2-D surface of objective function
 {
     if (("base" %in% do_plot))       #do base plotting
     {

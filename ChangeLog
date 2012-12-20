@@ -1,3 +1,7 @@
+Version: 0.9-966
+- minor optimizations for DDS
+- file renaming, parsing of do_plot_function
+
 Version: 0.9-965
 - fixed bug that caused redundant function call in DDS after initialisation
 - some unification attempts between serail and parallel versions of DDS

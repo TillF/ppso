@@ -31,6 +31,8 @@
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  object '",object_name,"' received."))
     }  else   #serial version
     {         
+     if (verbose_slave) print(paste(Sys.time(),": ...requesting object '",object_name,"'"))
+
      if(exists(x=object_name))
       messge=get(object_name,pos=parent.frame(n=2), inherits=FALSE) else 
      if(exists(x=object_name, where=globvars))

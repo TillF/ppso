@@ -1,3 +1,6 @@
+Version: 0.9-971
+- fixed bug in request_object/push_object mpi/serial distinction
+
 Version: 0.9-97
 - fixed bug in DDS that led running redundant parameter sets, especially at end of optimization
 

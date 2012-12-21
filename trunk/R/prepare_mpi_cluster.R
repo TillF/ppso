@@ -15,7 +15,7 @@
 prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE)
 {
   if (!is.loaded("mpi_initialize")) {         
-	library("Rmpi")
+  	if (!require("Rmpi")) stop("Package Rmpi not found. Install it or use serial version of this call (optim_pso or optim_dds).")
   }
  
   if (nslaves == -1) nslaves=mpi.universe.size() else  # Spawn as many slaves as possible
@@ -99,9 +99,13 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
   if (verbose_slave)
     mpi.bcast.cmd(sink(paste("slave",mpi.comm.rank(),sep="")))               #put output of slaves into files, if desired
 
+#  mpi.bcast.cmd("globvars$is_mpi=123")               #set mpi flag on slaves
+#  mpi.bcast.Robj2slave(globvars$is_mpi)               #send MPI-flag to slaves
+
   mpi.bcast.Robj2slave(perform_task)               #send activation function to slaves
-  mpi.bcast.Robj2slave(request_object)               #send function for request of objects to slaves
-  mpi.bcast.Robj2slave(push_object)               #send function for request of objects to slaves
+  
+#  mpi.bcast.Robj2slave(request_object)               #send function for request of objects to slaves
+#  mpi.bcast.Robj2slave(push_object)               #send function for pushing objects to slaves
 
   
   globvars$closed_slaves=0

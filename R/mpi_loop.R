@@ -48,9 +48,9 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
           sleeptime=0.1
           output_time=Sys.time()
           if (verbose_master) print(paste(Sys.time()," ...wait for messages from slaves..."))          
-          while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()) && all(globvars$status!=0))                #wait till there is a message
+          while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()) &&              #wait till there is a MPI-message or...
+                      !(any(globvars$status==0) && (length(globvars$idle_slaves)>0) ) )   #...there is something to do and free slaves are available             
           {
-#              browser()
               if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
               {
                 if (verbose_master) print("...break_file detected, aborting...")
@@ -68,7 +68,7 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
                  }
               }
           }        
-        if (any(globvars$status==0)) next #the previous loop was broken because of timeout, re-issue task
+        if (!mpi.iprobe(mpi.any.source(),mpi.any.tag())) next #the previous loop was broken because of timeout, re-issue task
         if (verbose_master) {print(paste(Sys.time()," ...message detected")); flush.console()}
         slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
         slave_message_info <- mpi.get.sourcetag()

@@ -97,45 +97,47 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 #  
 # plot execution time history
   execution_time=list()
-  for (worker in workers)
+  for (i in 1:length(workers))
   {
+    worker=workers[i]
     curr_worker=logfile_content$worker==worker             #get index vector to current worker
     if (sum(curr_worker)<2) 
     {
       workers=workers[-which(workers==worker)]    #this worker has only one call so far, omit from further treatment
       next
     } else
-    execution_time[[worker]]=diff(logfile_content$time[curr_worker])
+    execution_time[[i]]=diff(logfile_content$time[curr_worker])
 
     
-    positive_times=execution_time[[worker]]>0
+    positive_times=execution_time[[i]]>0
     if (!any(positive_times))
     {
       mintime = 0  
       logplot = ""
     } else
     {
-      mintime=0.5*min(execution_time[[worker]][positive_times])
+      mintime=0.5*min(execution_time[[i]][positive_times])
       logplot = "y"
     }
-    execution_time[[worker]][!positive_times]=mintime    #set execution times that are zero to something positive to allow log plot
+    execution_time[[i]][!positive_times]=mintime    #set execution times that are zero to something positive to allow log plot
 
     if (verbose)
     {
       print(paste("execution time worker",worker,"(min,median,max):"))
-      cat("\t");print(min   (execution_time[[worker]]))
-      cat("\t");print(median(execution_time[[worker]]))     
-      cat("\t");print(max   (execution_time[[worker]]))
+      cat("\t");print(min   (execution_time[[i]]))
+      cat("\t");print(median(execution_time[[i]]))     
+      cat("\t");print(max   (execution_time[[i]]))
     }
   }
  
   if (length(workers)>0)
     plot(range(logfile_content$time),range(unlist(execution_time)),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log=logplot) #prepare plot window
 
-  for (worker in workers)
+  for (i in 1:length(workers))
   {
+    worker=workers[i]
     curr_worker=which(logfile_content$worker==worker)
-    points(logfile_content$time[curr_worker[-length(curr_worker)]],execution_time[[worker]],col=pal[worker],pch=".") #pch=(19:25)[(worker-1) %% 7 +1]
+    points(logfile_content$time[curr_worker[-length(curr_worker)]],execution_time[[i]],col=pal[worker],pch=".") #pch=(19:25)[(worker-1) %% 7 +1]
   }
 
   if (!is.null(goodness_plot_filename))

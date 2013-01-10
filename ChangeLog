@@ -1,3 +1,7 @@
+Version: 0.9-975
+- corrected user interaction (wait_for_keystroke) and option to enter debug mode
+- corrected plot_optimization_progress
+
 Version: 0.9-974
 - corrected interpretation of number of function calls from resumed runs in *DDS
 

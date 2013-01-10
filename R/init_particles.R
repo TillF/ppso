@@ -7,6 +7,7 @@ init_particles=function(lhc_init=FALSE)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 {
+  if (wait_for_keystroke) globvars$ch="" #enable user-interaction, if desired
   globvars$X[,]=Inf     #as a marker to denote non-initialized particles
 
   param_names=rownames(parameter_bounds)     #try to retrieve parameter names

@@ -140,7 +140,6 @@ globvars$fitness_itbest= globvars$fitness_gbest     #best fitness in the last it
 globvars$it_last_improvement=0               #counter for counting iterations since last improvement
 
 update_tasklist_dds(loop_counter=0)   #update particle positions based on available results
-
 if (!is.null(globvars$break_flag)) globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag)
 
 

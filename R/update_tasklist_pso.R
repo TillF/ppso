@@ -18,12 +18,12 @@ update_tasklist_pso=function()                        #update particle positions
 
     do_plot_function()
    
-	  if (wait_for_keystroke && (!exists("globvars$ch") || globvars$ch!="c")) 
-	  {
-		print("press ENTER to proceed, 'c'+ENTER to continue till end")
-		globvars$ch=readline() 
-	  }  
- 
+    if (wait_for_keystroke && (!exists("ch", where=globvars) || globvars$ch!="c")) 
+    {
+      print("press ENTER to proceed, 'b'+ENTER for debug mode, 'c'+ENTER to continue till end")
+      globvars$ch=readline() 
+      if (globvars$ch=="b")	browser()
+    }   
 
    if (any(globvars$fitness_X %in% c(NA, NaN)))
       stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")

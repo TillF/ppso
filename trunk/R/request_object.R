@@ -2,16 +2,16 @@
 
 #mpi-versions
   #request object from master
-  request_object = function(object_name, verbose_slave=FALSE)
+  request_object = function(object_names, verbose_slave=FALSE)
   {
     if (globvars$is_mpi) #mpi-version
     {
-      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...requesting object '",object_name,"'"))
-      mpi.send.Robj(obj=object_name, dest=0, tag=5) #tag 5 demarks request for object
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...requesting object(s) '",paste(object_names, collapse=",") ,"'"))
+      mpi.send.Robj(obj=object_names, dest=0, tag=5) #tag 5 demarks request for object
     
-      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...waiting for object '",object_name,"'"))
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...waiting for object(s) '",paste(object_names, collapse=","),"'"))
       tag=0
-      while(! (tag %in% c(5, 7)))                #wait till there is a message or shutdown command
+      while(! (tag %in% c(5, 7)))                #wait till there is a reply message or shutdown command
       {
         messge = mpi.recv.Robj(source=0, tag=mpi.any.tag())
         messge_info = mpi.get.sourcetag()
@@ -27,19 +27,30 @@
             stop("slave stopped.")    #abort current evaluation of functions on this slave
             return("xstopped")
         }
+        if (is.function(messge) || length(messge)!=length(object_names)) 
+        {
+          tag=2
+          next #strangely, this occurs, i.e. sometime wrongly tagged messages are received
+        }  
+          
       }
-      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  object '",object_name,"' received."))
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  object '",object_names,"' received."))
     }  else   #serial version
     {         
-     if (verbose_slave) print(paste(Sys.time(),": ...requesting object '",object_name,"'"))
+     if (verbose_slave) print(paste(Sys.time(),": ...requesting object '",paste(object_names, collapse=","),"'"))
 
-     if(exists(x=object_name))
-      messge=get(object_name,pos=parent.frame(n=2), inherits=FALSE) else 
-     if(exists(x=object_name, where=globvars))
-      messge=get(object_name,pos=globvars) else   #return requested object, if existing, otherwise NA
-  	  messge=NA
+     messge=list()
+     for (object_name in object_names) #treat multipiple requests, if required
+     {
+       if(exists(x=object_name))
+        messge[[object_name]]=get(object_name,pos=parent.frame(n=2), inherits=FALSE) else 
+       if(exists(x=object_name, where=globvars))
+        messge[[object_name]]=get(object_name,pos=globvars) else   #return requested object, if existing, otherwise NA
+    	  messge[[object_name]]=NA
+     }
     }
     
+    if (length(messge)==1) messge=messge[[1]] 	  #if only one variable was requested, resolve list 
     return(messge)
   }
   

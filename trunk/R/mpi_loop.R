@@ -47,7 +47,16 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
   
           sleeptime=0.1
           output_time=Sys.time()
+      
+          if (wait_for_keystroke && (!exists("globvars$ch") || globvars$ch!="c")) 
+          {
+            print("press ENTER to proceed, 'c'+ENTER to continue till end")
+            globvars$ch=readline() 
+          }  
+            
+
           if (verbose_master) print(paste(Sys.time()," ...wait for messages from slaves..."))          
+#          browser()
           while(!mpi.iprobe(mpi.any.source(),mpi.any.tag()) &&              #wait till there is a MPI-message or...
                       !(any(globvars$status==0) && (length(globvars$idle_slaves)>0) ) )   #...there is something to do and free slaves are available             
           {
@@ -116,19 +125,23 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
           globvars$closed_slaves=globvars$nslaves			
         } else if (tag == 5) {    #object request from slave 
     			slave_message_info <- mpi.get.sourcetag() 
-    			 if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"requested object",slave_message))
-          if(exists(x=slave_message))
-    			  obj=get(slave_message,pos=parent.frame(), inherits=FALSE) else 
-  			  if(exists(x=slave_message, where=globvars))
-    			  obj=get(slave_message,pos=globvars) else 
-            #return requested object, if existing, otherwise NA
-    			  obj=NA
-    			mpi.send.Robj(obj=obj, dest=slave_id, tag=5) #return object to slave
-    			 if (verbose_master) print(paste(Sys.time()," ...object",slave_message, "sent to slave",slave_id))
+    			 if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"requested object(s)",paste(slave_message, collapse=",")))
+          obj_list=list()
+          for (object_name in slave_message) #treat multiple requests, if required
+          {
+            if(exists(x=object_name))
+      			  obj_list[[object_name]]=get(object_name,pos=parent.frame(), inherits=FALSE) else 
+    			  if(exists(x=object_name, where=globvars))
+      			  obj_list[[object_name]]=get(object_name,pos=globvars) else 
+              #return requested object, if existing, otherwise NA
+      			  obj_list[[object_name]]=NA
+      		}	  
+    			mpi.send.Robj(obj=obj_list, dest=slave_id, tag=5) #return object list to slave
+    			 if (verbose_master) print(paste(Sys.time()," ...object(s) sent to slave",slave_id))
 		    } else if (tag == 6) {    #object pushed from slave 
     			slave_message_info <- mpi.get.sourcetag() 
     			object_name = attr(slave_message, "object_name") #name of object
-   			  if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"pushed object",object_name,"=",slave_message))
+   			  if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"pushed object",object_name,"=",paste(slave_message, collapse=", ")))
 #    			browser()
           if (!any(globvars$node_id==slave_id & globvars$status==2))
           {

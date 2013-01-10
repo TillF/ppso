@@ -18,7 +18,11 @@ update_tasklist_pso=function()                        #update particle positions
 
     do_plot_function()
    
-    if (wait_for_keystroke && (!exists("globvars$ch") || globvars$ch!="c")) globvars$ch=readline() 
+	  if (wait_for_keystroke && (!exists("globvars$ch") || globvars$ch!="c")) 
+	  {
+		print("press ENTER to proceed, 'c'+ENTER to continue till end")
+		globvars$ch=readline() 
+	  }  
  
 
    if (any(globvars$fitness_X %in% c(NA, NaN)))

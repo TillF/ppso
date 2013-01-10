@@ -1,8 +1,8 @@
 Package: ppso
 Type: Package
 Title: Particle Swarm Optimization and Dynamically Dimensioned Search, optionally using parallel computing based on Rmpi
-Version: 0.9-972
-Date: 2013-01-07
+Version: 0.9-973
+Date: 2013-01-10
 Author: Till Francke <francke@uni-potsdam.de>
 Maintainer: Till Francke <francke@uni-potsdam.de>
 Description: (Optionally parallelized) optimization using PSO (Particle Swarm Optimzation) or DDS (Dynamically Dimensioned Search) algorithms, which excell for multidimensional (multi-parameter) functions with many local extrema and a restricted number of function evaluations. The parallelized version builds on Rmpi and is intended for highly computationally intensive objective functions (>20 s evaluation time). Another focus of this package is the possibility to resume interrupted optimization runs from the intermediate project files. These features make this package useful for the automatic calibration of complex numerical models (e.g. hydrological models).\cr-- experimental version, use with care. Comments welcome --

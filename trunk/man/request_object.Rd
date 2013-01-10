@@ -8,12 +8,12 @@ Requesting an object from the master.
 Request an object from the master.
 }
 \usage{
-request_object (object_name, verbose_slave=FALSE)
+request_object (object_names, verbose_slave=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object_name}{
-name of object to be requested from master.
+  \item{object_names}{
+name(s) of object to be requested from master (string array).
 }
 \item{verbose_slave}{
 enable diagnostic messages.
@@ -21,11 +21,11 @@ enable diagnostic messages.
 
 }
 \details{
-  This function requests an object from the master. This is not necessary for ordinary optimizations! However, it enables the slave to react specifically on the overall conditions of the optimization.\cr
+  This function requests object(s) from the master. This is not necessary for ordinary optimizations! However, it enables the slave to react specifically on the overall conditions of the optimization.\cr
   Potentially useful objects are the variables listed and explained in globvars.R (see package source code).
  }
 \value{
-If existing, returns the requested object, otherwise \code{NA}}
+If existing, returns the requested object, otherwise \code{NA}. If multiple objects where requested, a named list is returned, which can conveniently be imported into the current environment (see example).}
 
 \author{
 Till Francke
@@ -45,8 +45,13 @@ In serial mode (optim_*), this function basically looks up the search tree and t
 interact_function = function(parms)
 {
   library(ppso)
-  X=request_object("X")   #request some object
+  X=request_object("X")   #request single object
   print(paste("X:",X))
+  flush.console()
+  
+  var_list=request_object(c("X", "X_gbest"))   #request multiple objects
+  list2env(var_list, envir=environment())
+  print(paste("X:",X,"X_gbest:",X_gbest))
   flush.console()
   
   print(paste("pushing object..."))

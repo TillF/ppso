@@ -6,9 +6,6 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
 
-
-
-
 if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < number_of_particles)
   stop("abs(max_number_function_calls) must be at least number_of_particles.")
   

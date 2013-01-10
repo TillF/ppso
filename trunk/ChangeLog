@@ -1,3 +1,6 @@
+Version: 0.9-974
+- corrected interpretation of number of function calls from resumed runs in *DDS
+
 Version: 0.9-973
 - computationally irrelevant, but more stable: enabled multi-object request from master
 

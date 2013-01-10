@@ -1,18 +1,20 @@
 #internal function: update list of "particle positions" that need to be recorded
 update_tasklist_dds <- function(loop_counter=1)                        
-#note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
+#note: this function reads and writes to non-local variables (i.e. variables declared in globvars or the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 {
-#   browser()
    environment(do_plot_function)=environment()  #this creates local version of the function do_plot_function 
-   #eval(parse(text=paste(c("do_plot_function=",     deparse(do_plot_function)))))  #this creates local version of the function do_plot_function 
+
+   if (!is.null(max_number_function_calls) && (sum(globvars$function_calls) >= max_number_function_calls))
+       globvars$break_flag="max number of function calls reached"
 
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       globvars$break_flag="user interrupt"  
+
    
    completed_particles=globvars$status==1                   #mark completed particles
-   if (all(completed_particles==FALSE)) return()                   #no new results available...don't update tasks
+   if (all(completed_particles==FALSE) | !is.null(globvars$break_flag)) return()                   #no new results available or break flag set...don't update tasks
 
     if (!is.null(logfile) & loop_counter!=0)        #append to logfile, when enabled and when not in very first loop
       write.table(file = logfile, cbind(format(globvars$computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(globvars$X[completed_particles, ],ncol=ncol(globvars$X))  , globvars$fitness_X[completed_particles],
@@ -94,7 +96,7 @@ update_tasklist_dds <- function(loop_counter=1)
    }
 
 #   if (min(globvars$function_calls) >= max_number_of_iterations)
-#       globvars$break_flag="max globvars$function_calls reached"
+#       globvars$break_flag="max iterations reached"
 
    if (!is.null(max_number_function_calls) && (sum(globvars$function_calls) >= max_number_function_calls))
        globvars$break_flag="max number of function calls reached"
@@ -110,7 +112,7 @@ update_tasklist_dds <- function(loop_counter=1)
     		par_names=colnames(globvars$X) else
     		par_names=paste(rep("par_",number_of_parameters),seq(1,number_of_parameters),sep="_") #simple numbering of parameters
         col.names=c(paste("best_",par_names,sep=""),"best_objective_function", paste("current_",par_names,sep=""),
-          paste("current_velocity_",par_names,sep=""),"current_objective_function", "status", "begin_execution", "globvars$node_id","globvars$function_calls")
+          paste("current_velocity_",par_names,sep=""),"current_objective_function", "status", "begin_execution", "node_id","function_calls")
         write.table(file = projectfile, cbind(globvars$X_lbest, globvars$fitness_lbest, globvars$X, globvars$V, globvars$fitness_X, round(globvars$status), format(globvars$computation_start, "%Y-%m-%d %H:%M:%S"), globvars$node_id, globvars$function_calls + function_calls_init), quote = FALSE, sep = "\t", row.names = FALSE, col.names = col.names)
       }
       if(!is.null(plot_progress)) do.call(plot_optimization_progress, plot_progress)  #produce plots of optimization progress

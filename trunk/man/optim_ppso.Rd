@@ -237,10 +237,10 @@ Master or slave crashes can cause the entire session to stall, so restarting R m
 
 
 #parallel application
-	result = optim_ppso_robust(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)    #"robust" version
+	result = optim_ppso_robust(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)
 	print (result)
 
-	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)    #"robust" version
+	result = optim_pdds_robust(objective_function=rastrigin_function, nslaves=2, max_number_function_calls=200, projectfile=NULL, logfile=NULL)
 	print (result)
 	
   working_dir_list=rbind( #specify working directories for four slaves

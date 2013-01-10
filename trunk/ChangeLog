@@ -1,3 +1,6 @@
+Version: 0.9-976
+- computationally irrelevant: merged mpi-loops of DDS and PSO
+
 Version: 0.9-975
 - corrected user interaction (wait_for_keystroke) and option to enter debug mode
 - corrected plot_optimization_progress

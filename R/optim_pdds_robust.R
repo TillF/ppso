@@ -152,7 +152,10 @@ if (is.null(globvars$break_flag))
   globvars$fitness_itbest= globvars$fitness_gbest     #best fitness in the last it_last iterations
   globvars$it_last_improvement=0               #counter for counting iterations since last improvement
   
-  mpi_loop(init_search=FALSE) #perform mpi-loop for main search
+  update_tasklist_dds()   
+  if (!is.null(globvars$break_flag)) 
+    globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag) else
+    mpi_loop(init_search=FALSE) #perform mpi-loop for main search
  
   if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 }

@@ -4,6 +4,7 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
 
 {
 
+
   while ((globvars$closed_slaves < globvars$nslaves) & is.null(globvars$break_flag))
   {
         if (verbose_master) flush.console()

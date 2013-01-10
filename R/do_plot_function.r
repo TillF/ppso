@@ -11,7 +11,7 @@ do_plot_function = function() #real time plotting of 2-D surface of objective fu
         assign("plot_window", dev.cur(), pos=parent.frame(n=2))
       }
 
-      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "globvars$X", ylab = "Y", zlab = "obj fun")
+      res = persp(x, y, z, theta = 30, phi = 30, expand = 0.5, col = "lightblue",     ltheta = 120, shade = 0.75, ticktype = "detailed",      xlab = "X", ylab = "Y", zlab = "obj fun")
       points(trans3d(globvars$X[,1], globvars$X[,2], globvars$fitness_X, pmat = res), col = 2, pch =16)
       points(trans3d(globvars$X_lbest[,1], globvars$X_lbest[,2], globvars$fitness_lbest, pmat = res), col = 3, pch ="globvars$X")
       for (i in 1: min(10,number_of_particles))

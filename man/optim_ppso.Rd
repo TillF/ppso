@@ -47,7 +47,8 @@ Abortion criteria: Maximum number of iterations (i.e. update of particle positio
 }
 
   \item{max_number_function_calls}{
-Abortion criteria: Maximum total number of calls to the objective function, ignored when set to \code{NULL}. In non-parallel mode, more function calls may actually be made to finish the last iteration.
+Abortion criteria: Maximum total number of calls to the objective function, ignored when set to \code{NULL}. In non-parallel mode, slightly more function calls may actually be made to finish the last iteration.
+when resuming from a previous run, the previously made function calls also count, i.e. only the pending number of calls to reach \code{max_number_function_calls} will be made. In contrast, if \code{max_number_function_calls} is negative, -\code{max_number_function_calls} MORE calls will be made, additionally to those of the previous run. 
 }
 
   \item{abstol}{

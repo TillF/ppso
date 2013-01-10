@@ -158,7 +158,7 @@ enable 3D-plot of response surface and search progress.
 "rgl":  use moveable rgl-plotting (requires package \code{rgl})
 }
   \item{wait_for_keystroke}{
-waiting for keystroke between iterations (e.g. for plotting)
+waiting for keystroke between iterations (e.g. for plotting). Option for changing into debug mode.
 }
 }
 

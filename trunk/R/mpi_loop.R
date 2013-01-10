@@ -49,10 +49,11 @@ mpi_loop = function(init_search)   #loop in which the master coordinates slave a
           sleeptime=0.1
           output_time=Sys.time()
       
-          if (wait_for_keystroke && (!exists("globvars$ch") || globvars$ch!="c")) 
+          if (wait_for_keystroke && (!exists("ch", where=globvars) || globvars$ch!="c")) 
           {
-            print("press ENTER to proceed, 'c'+ENTER to continue till end")
+            print("press ENTER to proceed, 'b'+ENTER for debug mode, 'c'+ENTER to continue till end")
             globvars$ch=readline() 
+            if (globvars$ch=="b")	browser()
           }  
             
 

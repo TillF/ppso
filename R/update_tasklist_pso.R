@@ -5,6 +5,9 @@ update_tasklist_pso=function()                        #update particle positions
 
 {
    environment(do_plot_function)=environment()  #this creates local version of the function do_plot_function 
+   if (!is.null(max_number_function_calls) && (sum(globvars$function_calls) >= max_number_function_calls))
+       globvars$break_flag="max number of function calls reached"
+
    if ((!is.null(break_file)) && (file.exists(break_file)))      #check if interrupt by user is requested
       globvars$break_flag="user interrupt"  
    

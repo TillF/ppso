@@ -30,6 +30,8 @@ if (!is.null(globvars$execution_timeout) && globvars$execution_timeout < 1)
   globvars$execution_timeout=NULL
 }
   
+verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
+verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
 
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   
@@ -43,8 +45,6 @@ init_visualisation()                      #prepare visualisation, if selected
 init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
 number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
-verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
-verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
 
 #see variable explanations in globvars.R
 globvars$X             =array(Inf,c(number_of_particles,number_of_parameters))  #globvars$X: position in parameter space                          
@@ -155,7 +155,7 @@ if (is.null(globvars$break_flag))
   update_tasklist_dds()   
   if (!is.null(globvars$break_flag)) 
     globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag) else
-    mpi_loop(init_search=FALSE) #perform mpi-loop for main search
+    mpi_loop(init_search=FALSE, method="dds") #perform mpi-loop for main search
  
   if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 }

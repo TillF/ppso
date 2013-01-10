@@ -46,7 +46,7 @@ environment(init_visualisation)=environment()
 environment(prepare_mpi_cluster)=environment() 
 environment(check_execution_timeout)=environment() 
 environment(close_mpi)=environment() 
-#environment(mpi_loop)=environment() 
+environment(mpi_loop)=environment() 
 
 verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
 verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
@@ -102,76 +102,23 @@ init_particles(lhc_init)  #initialize velocities and particle positions
    globvars$fitness_itbest= Inf     #best fitness in the last it_last iterations
    globvars$it_last_improvement=0               #counter for counting iterations since last improvement
 
+ update_tasklist_pso()   
+  if (!is.null(globvars$break_flag)) 
+    globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag) else
+    mpi_loop(init_search=FALSE, method="pso") #perform mpi-loop 
+ 
+  if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 
-while ((globvars$closed_slaves < globvars$nslaves) )
-{
-      update_tasklist_pso()   #update particle speeds and positions based on available results
-      if (!is.null(globvars$break_flag)) break
-      tobecomputed=globvars$status==0
-      while ((length(globvars$idle_slaves)>0) & any(tobecomputed))          #there are idle slaves available and there is work to be done
-      {
-          if (any(tobecomputed)) {
-            current_particle=which.min(globvars$function_calls[tobecomputed])   #treat particles with low number of itereations first
-            current_particle=which(tobecomputed)[current_particle[1]]     #choose the first entry
-            slave_id=globvars$idle_slaves[1]                     #get free slave        
-#            browser()
-            mpi.remote.exec(cmd=perform_task,params=globvars$X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
-              
-            globvars$idle_slaves=globvars$idle_slaves[-1]                         #remove this slave from list
-            globvars$status            [current_particle]=2               #mark this particle as "in progress"
-            globvars$node_id           [current_particle]=slave_id        #store slave_id of this task
-            globvars$computation_start [current_particle]=Sys.time()      #store time of start of this computation
-          }   
-          update_tasklist_pso()   #update particle speeds and positions based on available results
-          
-          tobecomputed=globvars$status==0
-         flush.console()
-      } 
 
-      if (!is.null(globvars$break_flag)) break
-      
-      slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
-      #ii: there should be some timeout here
-      slave_message_info <- mpi.get.sourcetag()
-      slave_id <- slave_message_info[1]
-      tag      <- slave_message_info[2]
-  
-     
-      if (tag == 2) {      #retrieve result
-        current_particle =which(globvars$node_id==slave_id & globvars$status==2)           #find which particle this result belongs to
-        if (length(current_particle) > 1)                                #rr   shouldn't occur
-          print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
-        else if (length(current_particle) ==0)                                #
-		{
-			if (verbose_master) 
-				if (globvars$slave_status[slave_id,"timeouts_in_row"] == 0)        #rr shouldn't occur
-				   print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message)) else
-				   print(paste("slave",slave_id,"returned overdue result"))
-		} else
-        {
-          globvars$fitness_X [current_particle] = slave_message
-          globvars$status    [current_particle] =1      #mark as "finished"
-          globvars$function_calls[current_particle] =globvars$function_calls[current_particle]+1        #increase iteration counter
-          if (!is.null(globvars$execution_timeout)) globvars$execution_times = rbind(globvars$execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),globvars$computation_start[current_particle],units="sec"))))   #monitor execution times
-          globvars$idle_slaves=c(globvars$idle_slaves,slave_id)
-        }
-      }  
-      else if (tag == 3) {    # A slave has closed down.
-          #print(paste("slave",slave_id,"closed gracefully."))
-          globvars$closed_slaves <- globvars$closed_slaves + 1
-      }
-      else if (tag == 4) {    # error occured during the execution of the objective function
-          globvars$break_flag=paste("Abort, slave",slave_id,":",slave_message)
-          globvars$closed_slaves=globvars$nslaves
-      }
-}      
-      
 if ((globvars$closed_slaves==globvars$nslaves) && is.null(globvars$break_flag))
   globvars$break_flag = "No or delayed response from slaves" 
 
-ret_val=list(value=globvars$fitness_gbest,par=globvars$X_gbest, function_calls=sum(globvars$function_calls),break_flag=globvars$break_flag) 
-  
+ret_val=list(value=globvars$fitness_gbest,par=globvars$X_gbest,function_calls=sum(globvars$function_calls),break_flag=globvars$break_flag) 
+
+
+if (verbose_master) print(paste(Sys.time(),"closing MPI..."))    
 close_mpi()                        #diligently close Rmpi session
+if (verbose_master) print(paste(Sys.time(),"...closed."))    
 
 return(ret_val) 
 }

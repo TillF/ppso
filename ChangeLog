@@ -1,3 +1,6 @@
+Version: 0.9-973
+- computationally irrelevant, but more stable: enabled multi-object request from master
+
 Version: 0.9-972
 - fixed bug in pdds that led to endless waiting for messages
 

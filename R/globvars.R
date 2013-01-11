@@ -56,6 +56,7 @@ z = NULL
 #globvars$idle_slaves
 #globvars$it_last_improvement
 #globvars$it_last_improvement
+#globvars$mpi_mode              #"bcast": slave are idle, tasks are broadcasted to all and attended only by one;"loop": slaves run in loop waiting for message, tasks are send to specific slaves only
 #globvars$node_id
 #globvars$slave_status
 #globvars$nslaves

@@ -25,8 +25,11 @@ close_mpi=function()
       warning(paste(sum(globvars$status==2)-i,"slave(s) may still be evaluating."))
   }
 
+  if (globvars$mpi_mode=="loop")
+    for (slave_id in 1:globvars$nslaves) mpi.send.Robj(obj="kill", dest=slave_id, tag=7)
+
   #mpi.abort() #causes hangup
-  #browser()
+  
   if (!is.null(globvars$nslaves) &                                                    #there are slaves
         ((globvars$closed_slaves ==0) || (globvars$closed_slaves == globvars$nslaves))) #all (or none) are still available
 #        & all(globvars$status==1)) 

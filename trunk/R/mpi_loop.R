@@ -32,7 +32,7 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
 
             slave_id=globvars$idle_slaves[1]                     #get free slave        
           if (verbose_master) print(paste(Sys.time()," ...sending task to slave",slave_id))  
-            mpi.remote.exec(cmd=perform_task,params=globvars$X[current_particle,],tryCall=tryCall,slave_id=slave_id,ret=FALSE)        #submit job to slave
+            send_task(params=globvars$X[current_particle,], slave_id=slave_id)        #send job to slave
           if (verbose_master) print(paste(Sys.time()," ...task sent"))  
             globvars$idle_slaves=globvars$idle_slaves[-1]                         #remove this slave from list
             globvars$status            [current_particle]=2               #mark this particle as "in progress"

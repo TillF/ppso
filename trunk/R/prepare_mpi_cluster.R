@@ -12,6 +12,8 @@
 #6: object pushed from slave to master
 #7: command slaves to abort everything
 
+globvars$mpi_mode="loop" #"loop"    ("bcast" is probably obsolete, as it is less stable and slower)
+
 prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE)
 {
   if (!is.loaded("mpi_initialize")) {         
@@ -51,7 +53,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
    options(error=.Last)     #close rmpi on errors
 
   
-  perform_task = function(params,slave_id,tryCall=FALSE) {
+  perform_task = function(params,slave_id) {
 
 
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": received message for slave",slave_id))
@@ -78,7 +80,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
           if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": error during call of objective function, returning message to master..."))
           mpi.send.Robj(paste("(",Sys.info()["nodename"],"):",as.character(results)),0,4)    #return the error message, tagged as "error" (4)
         }        
-      } else        #non-try-call option
+      } else        #non-tryCall option
       {  
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
         results=objective_function(params)  # call the objective function with the respective parameters, and create results (without error handling, faster)
@@ -93,20 +95,15 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
   
  
 
-  mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
 
   mpi.bcast.Robj2slave(verbose_slave)                   #send verbose-flags to slaves
   if (verbose_slave)
     mpi.bcast.cmd(sink(paste("slave",mpi.comm.rank(),sep="")))               #put output of slaves into files, if desired
 
-#  mpi.bcast.cmd("globvars$is_mpi=123")               #set mpi flag on slaves
-#  mpi.bcast.Robj2slave(globvars$is_mpi)               #send MPI-flag to slaves
 
+  mpi.bcast.Robj2slave(tryCall)                     #tryCall-flag
+  mpi.bcast.Robj2slave(objective_function)         #send objective function to slaves
   mpi.bcast.Robj2slave(perform_task)               #send activation function to slaves
-  
-#  mpi.bcast.Robj2slave(request_object)               #send function for request of objects to slaves
-#  mpi.bcast.Robj2slave(push_object)               #send function for pushing objects to slaves
-
   
   globvars$closed_slaves=0
   globvars$idle_slaves=1:nslaves
@@ -150,7 +147,46 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
     }
   }
 
-  globvars$nslaves=nslaves	
+  globvars$nslaves=nslaves
+  
+  if (globvars$mpi_mode=="loop")     #alternative slave-MPI-mode
+  {
+      
+    mpi_receive_loop = function()
+    {
+      tag=0
+      while (tag !=7 )
+      {
+          messge = mpi.recv.Robj(source=0, tag=mpi.any.tag())
+          messge_info = mpi.get.sourcetag()
+          tag      = messge_info[2]
+
+          if ((tag == 0) )     #task message
+            perform_task(params=messge, slave_id=mpi.comm.rank())        #do task
+            
+          if ((tag == 7) && (messge == "kill"))     #kill-message
+            mpi.send.Robj(obj="bye", dest=0, tag=4) #tag 4 demarks good-bye
+
+
+      }  
+    }
+
+    mpi.bcast.Robj2slave(mpi_receive_loop)               #transfer mpi-loop function to slaves
+    mpi.bcast.cmd(mpi_receive_loop())                    #call     mpi-loop function on slaves
+  }
+  
+  	
 }
+
+
+send_task = function(params, slave_id=slave_id)        #submit job to slave
+#this function is used to transfer a task to a slave
+#two different modi (globvars$mpi_mode="bcast" or "loop") for running the slaves are implemented, so there are two branches
+{
+  if (globvars$mpi_mode=="bcast")
+   mpi.remote.exec(cmd=perform_task, params=params, slave_id=slave_id, ret=FALSE)        #submit job to slave by broadcasting to all
+   else
+   mpi.send.Robj(obj=params, dest=slave_id, tag=0) #send params to specified slave with tag=0 (this is a task)
+}   
 
 

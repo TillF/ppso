@@ -2,7 +2,8 @@
 #I chose global variables in order to facilitate code modularisation while keeping "passing arguments to"
 # and "returning results from" functions to a minimum (speed and convenience)
 
-globvars = new.env(hash=TRUE, parent=emptyenv())
+#globvars = new.env(hash=TRUE, parent=emptyenv())
+globvars = new.env(hash=TRUE)
 
 #satisfying automatic checking
 #global vars read-only (implicitly used by scoping rules, no export into globvars)

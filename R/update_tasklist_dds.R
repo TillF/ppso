@@ -4,6 +4,8 @@ update_tasklist_dds <- function(loop_counter=1)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 {
+   #if (any(globvars$fitness_X==Inf)) browser()
+   
    environment(do_plot_function)=environment()  #this creates local version of the function do_plot_function 
 
    if (!is.null(max_number_function_calls) && (sum(globvars$function_calls) >= max_number_function_calls))

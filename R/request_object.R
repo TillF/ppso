@@ -40,39 +40,76 @@
      if (verbose_slave) print(paste(Sys.time(),": ...requesting object '",paste(object_names, collapse=","),"'"))
 
      messge=list()
-     for (object_name in object_names) #treat multipiple requests, if required
-     {
-       if(exists(x=object_name))
-        messge[[object_name]]=get(object_name,pos=parent.frame(n=2), inherits=FALSE) else 
-       if(exists(x=object_name, where=globvars))
-        messge[[object_name]]=get(object_name,pos=globvars) else   #return requested object, if existing, otherwise NA
-    	  messge[[object_name]]=NA
+     environment(get_object)=environment() 
+     for (object_name in object_names) #treat multiple requests, if required
+       messge[[object_name]]= get_object(object_name=object_name) #get variable or parts thereof       
      }
-    }
     
     if (length(messge)==1) messge=messge[[1]] 	  #if only one variable was requested, resolve list 
     return(messge)
   }
   
   #push object to master
-  push_object = function(object_name, value, verbose_slave=FALSE)
+  push_object = function(object_names, value, verbose_slave=FALSE)
   {
-    if (globvars$is_mpi) #mpi-version
+    for (object_name in object_names) #treat multiple requests, if required
     {
-      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...pushing object '",object_name,"'"))
-      attr(value, "object_name")=object_name #attach name of object
-      mpi.send.Robj(obj=value, dest=0, tag=6) #tag 6 demarks pushed object
-      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  object '",object_name,"' sent."))
-    } else #serial version
-    {
-      for (env in search())
-        if(exists(x=object_name, where=env))                 #try to set this object in an environment, where it already exists
-        {
-          assign(x=object_name, value=value, pos=env)
-          break
-        }  
-      if (!exists(x=object_name, inherits=TRUE))   #check if the object has not been found somewhere
-        assign(x=object_name, value=value, pos=globvars)    
+      if (globvars$is_mpi) #mpi-version
+      {
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...pushing object '",object_name,"'"))
+        attr(value, "object_name")=object_name #attach name of object
+        mpi.send.Robj(obj=value, dest=0, tag=6) #tag 6 demarks pushed object
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  object '",object_name,"' sent."))
+      } else #serial version
+      {
+         environment(set_object)=environment() 
+         set_object(object_name=object_name, value=value) #set variable or parts thereof       
+      }   
     }
     return()
   }
+  
+set_object = function(object_name, value)     
+#assign an object or parts thereof in the searchlist of environments
+{
+  if(!grepl("[\\[\\$]",x=object_name))     
+  {
+    for (env in search())
+      if(exists(x=object_name, where=env))                 #try to set this object in an environment, where it already exists
+      {
+        assign(x=object_name, value=value, pos=env)
+        break
+      }
+    if (!exists(x=object_name, inherits=TRUE))   #check if the object has been set somewhere
+      assign(x=object_name, value=value, pos=globvars)   #assign to globvars
+  } else   
+  {   #only part of object requested
+    res=try(eval(parse(text=paste(object_name,"=",value)), envir = parent.frame()), silent=TRUE)
+    if (class(res)=="try-error") 
+      res=try(eval(parse(text=paste(object_name,"=",value)), envir = globvars), silent=TRUE)
+    if (class(res)=="try-error") warning("Couldn't set value of 'object_name' on master.")
+  }		  
+
+}
+  
+  
+get_object = function(object_name)     
+#get value of specified object (or part thereof) by searching thru the environments
+{  
+    obj_val=NA   #return requested object, if existing, otherwise NA
+
+    if(exists(x=object_name))
+		  obj_val=get(object_name,pos=parent.frame(), inherits=FALSE) else 
+	  if(exists(x=object_name, where=globvars))
+		  obj_val=get(object_name,pos=globvars) else 
+    if(grepl("[\\[\\$]",x=object_name))                    #only part of object requested
+    {
+      obj_val=try(eval(parse(text=object_name)), silent=TRUE) 
+      if (class(obj_val)=="try-error") 
+      {
+        obj_val=try(eval(parse(text=object_name), envir = globvars), silent=TRUE) 
+        if (class(obj_val)=="try-error") obj_val=NA  
+      }  
+    }
+    return(obj_val)
+}

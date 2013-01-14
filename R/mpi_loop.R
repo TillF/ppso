@@ -54,8 +54,11 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
       
           if (wait_for_keystroke && (!exists("ch", where=globvars) || globvars$ch!="c")) 
           {
-            print("press ENTER to proceed, 'b'+ENTER for debug mode, 'c'+ENTER to continue till end")
-            globvars$ch=readline() 
+            if (is.numeric(globvars$ch) & globvars$ch > 0) globvars$ch=globvars$ch-1 else
+            {
+              print("ENTER to proceed, 'b'+ENTER for debug mode, <n> to skip <n> times, 'c'+ENTER to continue till end")
+              globvars$ch=readline() 
+            }  
             if (globvars$ch=="b")	browser()
           }  
             
@@ -132,15 +135,10 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
     			slave_message_info <- mpi.get.sourcetag() 
     			 if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"requested object(s)",paste(slave_message, collapse=",")))
           obj_list=list()
+          environment(get_object)=environment() 
           for (object_name in slave_message) #treat multiple requests, if required
-          {
-            if(exists(x=object_name))
-      			  obj_list[[object_name]]=get(object_name,pos=parent.frame(), inherits=FALSE) else 
-    			  if(exists(x=object_name, where=globvars))
-      			  obj_list[[object_name]]=get(object_name,pos=globvars) else 
-              #return requested object, if existing, otherwise NA
-      			  obj_list[[object_name]]=NA
-      		}	  
+             obj_list[[object_name]]= get_object(object_name=object_name) #get variable or parts thereof       
+
     			mpi.send.Robj(obj=obj_list, dest=slave_id, tag=5) #return object list to slave
     			 if (verbose_master) print(paste(Sys.time()," ...object(s) sent to slave",slave_id))
 		    } else if (tag == 6) {    #object pushed from slave 
@@ -153,18 +151,8 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
              if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"is overdue, push ignored"))
              next
           }
-          for (env in search())
-            if(exists(x=object_name, where=env))                 #try to set this object in an environment, where it already exists
-            {
-              assign(x=object_name, value=slave_message, pos=env)
-              if (verbose_master) print(paste(Sys.time()," ...object",object_name, "found in and assigned to",env))
-              break
-            }  
-          if (!exists(x=object_name, inherits=TRUE))   #check if the object has not been found somewhere
-          {
-              assign(x=object_name, value=slave_message, pos=globvars)          
-              if (verbose_master) print(paste(Sys.time()," ...object",object_name, "not found, assigned to globvars"))   			     
-          }
+         environment(set_object)=environment() 
+         set_object(object_name=object_name, object_value=slave_message) #set variable or parts thereof
 	      } else  {    #unknown tag
    			 if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"sent unknown tag ",tag,", ignored"))
 		    }  

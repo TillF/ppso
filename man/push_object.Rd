@@ -12,7 +12,7 @@ push_object (object_name, value, verbose_slave=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object_name}{
+  \item{object_names}{
 name of object to be pushed to master.
 }
 \item{value}{
@@ -23,7 +23,8 @@ enable diagnostic messages.
 }
 }
 \details{
-  This function pushes an object to the master. This is not necessary for ordinary optimizations! However, it enables the slave to react specifically on the overall conditions of the optimization.
+  This function pushes an object to the master. Also partial assignments like \code{a[3]=4} are possible.
+  This is not necessary for ordinary optimizations! However, it enables the slave to react specifically on the overall conditions of the optimization.
   Potentially useful objects are the variables listed and explained in globvars.R (see package source code).
  }
 \value{

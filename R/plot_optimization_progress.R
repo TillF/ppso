@@ -10,7 +10,8 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 
   #add positions of current minima of particles to dataset
   for (i in 1:nrow(projectfile_content))  #find at which function call number the current particle positions have been achieved
-     projectfile_content$function_call_number[i]=max(-1,which(apply(apply(logfile_content[,1+(1:number_of_parameters)], 1, get("-"),t(projectfile_content[i,1:number_of_parameters]))==0,2,all)))
+     projectfile_content$function_call_number[i] = 
+      max(-1,which(apply(apply(logfile_content[,1+(1:number_of_parameters)], 1, get("-"),t(projectfile_content[i,1:number_of_parameters]))==0,2,all)))
 
 
   curbest=which.min(projectfile_content$best_objective_function)
@@ -21,7 +22,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     print(paste("current optimum found: ",projectfile_content$best_objective_function[curbest]))
     print(" at parameter set:")
     print(projectfile_content[curbest,1:number_of_parameters])
-    print(paste(" found at function call",projectfile_content$function_call_number[curbest],"from",nrow(logfile_content),"executed calls."))
+    print(paste(" found at function call",projectfile_content$function_call_number[curbest],"of",nrow(logfile_content),"executed calls."))
   }
 
   necessary_plots=number_of_parameters+2    #+2: one for objective function, one for legend
@@ -97,13 +98,16 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 #  
 # plot execution time history
   execution_time=list()
+  omitted_workers=NULL
   for (i in 1:length(workers))
   {
     worker=workers[i]
     curr_worker=logfile_content$worker==worker             #get index vector to current worker
-    if (sum(curr_worker)<2) 
+    ncalls = sum(curr_worker)
+    if (ncalls < 2) 
     {
-      workers=workers[-which(workers==worker)]    #this worker has only one call so far, omit from further treatment
+      omitted_workers=c(omitted_workers, worker)    #this worker has only one call so far, omit from further treatment
+      execution_time[[i]] = NA
       next
     } else
     execution_time[[i]]=diff(logfile_content$time[curr_worker])
@@ -130,15 +134,18 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     }
   }
  
-  if (length(workers)>0)
-    plot(range(logfile_content$time),range(unlist(execution_time)),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log=logplot) #prepare plot window
-
-  for (i in 1:length(workers))
+  if (length(workers)- length(omitted_workers) > 0)
   {
-    worker=workers[i]
-    curr_worker=which(logfile_content$worker==worker)
-    points(logfile_content$time[curr_worker[-length(curr_worker)]],execution_time[[i]],col=pal[worker],pch=".") #pch=(19:25)[(worker-1) %% 7 +1]
-  }
+    plot(range(logfile_content$time),range(unlist(execution_time), na.rm=TRUE),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log=logplot) #prepare plot window
+
+    for (i in 1:length(workers))
+    {
+      worker=workers[i]
+      if (worker %in% omitted_workers) next
+      curr_worker=which(logfile_content$worker==worker)
+      points(logfile_content$time[curr_worker[-length(curr_worker)]],execution_time[[i]],col=pal[worker],pch=".") #pch=(19:25)[(worker-1) %% 7 +1]
+    }
+  }  
 
   if (!is.null(goodness_plot_filename))
   {

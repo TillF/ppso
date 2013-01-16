@@ -65,14 +65,14 @@ globvars$break_flag=NULL       #flag indicating if a termination criterium has b
 globvars$fitness_lbest[] = Inf
 globvars$fitness_gbest = Inf
 
-if (verbose_master) print(paste(Sys.time(),"initializing slaves..."))
+if (verbose_master) {print(paste(Sys.time(),"initializing slaves...")); flush.console()}
 if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves, working_dir_list=working_dir_list,verbose_slave=verbose_slave) else globvars$nslaves=NULL             #initiate cluster, if enabled
-if (verbose_master) print(paste(Sys.time(),"...slaves initialized."))
+if (verbose_master) {print(paste(Sys.time(),"...slaves initialized.")); flush.console()}
 
 #presearch / initialisation: 
 #  the particles are preferrably initialized with the data from the projectfile. If that does not exist or does not contain enough records,
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
-if (verbose_master) print(paste(Sys.time(),"initializing particle positions..."))
+if (verbose_master) {print(paste(Sys.time(),"initializing particle positions...")); flush.console()}
   init_particles(lhc_init)  #initialize particle positions
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {
@@ -89,7 +89,7 @@ if (verbose_master) print(paste(Sys.time(),"initializing particle positions...")
     max_number_function_calls=abs(max_number_function_calls)
   }
 
-if (verbose_master)  print(paste(Sys.time(),"starting initialization runs..."))
+if (verbose_master)  {print(paste(Sys.time(),"starting initialization runs...")); flush.console()}
 
 globvars$status_org=globvars$status  #  store original contents
 
@@ -98,7 +98,12 @@ globvars$status_org=globvars$status  #  store original contents
   {
     pre_run_computations = c (uninitialized_particles, seq(from=number_of_particles_org+1, length.out=max(0,init_calls - length(uninitialized_particles)))) # do preruns for uninitialized particles and the number of pending preruns
 
-    if (length(pre_run_computations) >= max_number_function_calls) stop(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
+    if (length(pre_run_computations) > max_number_function_calls)
+    {
+     print(paste("Parameter max_number_function_calls =",max_number_function_calls,"does not suffice for initialisation. Increase it or decrease number_of_particles"))
+     close_mpi()
+     stop()
+    } 
     globvars$status[]=1; globvars$status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
   
     mpi_loop(init_search=TRUE) #perform mpi-loop for pre-search
@@ -122,7 +127,7 @@ globvars$status_org=globvars$status  #  store original contents
 
 if (is.null(globvars$break_flag))
 {
-  if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
+  if (verbose_master) {print(paste(Sys.time()," pre-runs finished, starting actual runs...")); flush.console()}
 
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
@@ -148,7 +153,7 @@ if (is.null(globvars$break_flag))
 
 
   # actual search
-  if (verbose) print("starting main search")
+  if (verbose) {print("starting main search"); flush.console()}
   globvars$fitness_itbest= globvars$fitness_gbest     #best fitness in the last it_last iterations
   globvars$it_last_improvement=0               #counter for counting iterations since last improvement
   
@@ -157,7 +162,7 @@ if (is.null(globvars$break_flag))
     globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag) else
     mpi_loop(init_search=FALSE, method="dds") #perform mpi-loop for main search
  
-  if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
+  if (verbose_master) {print(paste(Sys.time(),"finished actual runs.")); flush.console()}
 }
 
 if ((globvars$closed_slaves==globvars$nslaves) && is.null(globvars$break_flag))
@@ -166,9 +171,9 @@ if ((globvars$closed_slaves==globvars$nslaves) && is.null(globvars$break_flag))
 ret_val=list(value=globvars$fitness_gbest,par=globvars$X_gbest,function_calls=sum(globvars$function_calls+function_calls_init),break_flag=globvars$break_flag) 
 
 
-if (verbose_master) print(paste(Sys.time(),"closing MPI..."))    
+if (verbose_master) {print(paste(Sys.time(),"closing MPI...")); flush.console()}
 close_mpi()                        #diligently close Rmpi session
-if (verbose_master) print(paste(Sys.time(),"...closed."))    
+if (verbose_master) {print(paste(Sys.time(),"...closed.")); flush.console()}
 
 return(ret_val) 
 }

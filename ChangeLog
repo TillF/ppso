@@ -1,3 +1,7 @@
+Version: 0.9-980
+- computationally irrelevant:  fixed bugs in plot_optimization_progress
+- improved verbose messaging of optim_pdds_robust
+
 Version: 0.9-979
 - improved partial assignments
 - corrected wait_for_keystroke issues

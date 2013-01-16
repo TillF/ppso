@@ -72,7 +72,7 @@
 set_object = function(object_name, value)     
 #assign an object or parts thereof in the searchlist of environments
 {
-  verbose_slave=TRUE
+#  verbose_slave=TRUE
   if (verbose_slave)  {print(paste(Sys.time(),"setting object ",object_name));flush.console}
   
   if(!grepl("[\\[\\$]",x=object_name))     

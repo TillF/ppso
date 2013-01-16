@@ -52,14 +52,16 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
           sleeptime=0.1
           output_time=Sys.time()
       
-          if (wait_for_keystroke && (!exists("ch", where=globvars) || globvars$ch!="c")) 
+          if (wait_for_keystroke && (!exists("ch", where=globvars) | globvars$ch!="c")) 
           {
-            if (is.numeric(globvars$ch) & globvars$ch > 0) globvars$ch=globvars$ch-1 else
+            if (is.numeric(globvars$ch) & (globvars$ch > 0)) globvars$ch=globvars$ch-1 else
             {
               print("ENTER to proceed, 'b'+ENTER for debug mode, <n> to skip <n> times, 'c'+ENTER to continue till end")
               globvars$ch=readline() 
             }  
-            if (globvars$ch=="b")	browser()
+            if (globvars$ch=="b")	browser() else
+            if (globvars$ch!="c") globvars$ch = strtoi(globvars$ch) #counter
+            if (is.na(globvars$ch)) globvars$ch=""
           }  
             
 
@@ -88,10 +90,11 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
         if (!mpi.iprobe(mpi.any.source(),mpi.any.tag())) next #the previous loop was broken because of timeout, re-issue task
         if (verbose_master) {print(paste(Sys.time()," ...message detected")); flush.console()}
       slave_message <- mpi.recv.Robj(mpi.any.source(),mpi.any.tag())
+        if (verbose_master) {print(paste(Sys.time()," ...message received")); flush.console()}
       slave_message_info <- mpi.get.sourcetag()
       slave_id <- slave_message_info[1]
       tag      <- slave_message_info[2]
-        if (verbose_master) print(paste(Sys.time()," ...message received from slave",slave_id, "(tag",tag,")"))          
+        if (verbose_master) {print(paste(Sys.time()," ...message received from slave",slave_id, "(tag",tag,")")); flush.console()}          
 #         browser()
      
       if (tag == 2) {      #retrieve result
@@ -144,17 +147,18 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
 		    } else if (tag == 6) {    #object pushed from slave 
     			slave_message_info <- mpi.get.sourcetag() 
     			object_name = attr(slave_message, "object_name") #name of object
-   			  if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"pushed object",object_name,"=",paste(slave_message, collapse=", ")))
+   			  if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"pushed object",object_name,"=",paste(slave_message, collapse=", "))); flush.console()}
 #    			browser()
           if (!any(globvars$node_id==slave_id & globvars$status==2))
           {
-             if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"is overdue, push ignored"))
+             if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"is overdue, push ignored")); flush.console()}
              next
           }
          environment(set_object)=environment() 
-         set_object(object_name=object_name, object_value=slave_message) #set variable or parts thereof
+         set_object(object_name=object_name, value=slave_message) #set variable or parts thereof
+
 	      } else  {    #unknown tag
-   			 if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"sent unknown tag ",tag,", ignored"))
+   			 if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"sent unknown tag ",tag,", ignored")); flush.console()}
 		    }  
   } 
 

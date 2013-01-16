@@ -72,6 +72,9 @@
 set_object = function(object_name, value)     
 #assign an object or parts thereof in the searchlist of environments
 {
+  verbose_slave=TRUE
+  if (verbose_slave)  {print(paste(Sys.time(),"setting object ",object_name));flush.console}
+  
   if(!grepl("[\\[\\$]",x=object_name))     
   {
     for (env in search())
@@ -84,10 +87,16 @@ set_object = function(object_name, value)
       assign(x=object_name, value=value, pos=globvars)   #assign to globvars
   } else   
   {   #only part of object requested
+    if (verbose_slave) {print(paste(Sys.time(),"partial assignment"));flush.console}
+
     res=try(eval(parse(text=paste(object_name,"=",value)), envir = parent.frame()), silent=TRUE)
     if (class(res)=="try-error") 
       res=try(eval(parse(text=paste(object_name,"=",value)), envir = globvars), silent=TRUE)
-    if (class(res)=="try-error") warning("Couldn't set value of 'object_name' on master.")
+    if (class(res)=="try-error")
+    {
+     if (verbose_slave) {print(paste(Sys.time(),"partial assignment unsuccessful"));flush.console}
+     warning("Couldn't set value of 'object_name' on master.")
+    } 
   }		  
 
 }

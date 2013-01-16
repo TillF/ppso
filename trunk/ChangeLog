@@ -1,3 +1,7 @@
+Version: 0.9-979
+- improved partial assignments
+- corrected wait_for_keystroke issues
+
 Version: 0.9-978
 - computationally irrelevant:  enabled partial assignments for push_/request_object
 

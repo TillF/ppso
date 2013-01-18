@@ -1,3 +1,9 @@
+Version: 0.9-981
+- added array for saving slave occupations
+- improved code comments and progress messaging
+- push_object: enabled pushing multiple objects
+- fixed bug in wait_for_keystroke; different key_stroke stops in MPI and update-loop
+
 Version: 0.9-980
 - computationally irrelevant:  fixed bugs in plot_optimization_progress
 - improved verbose messaging of optim_pdds_robust

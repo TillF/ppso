@@ -41,22 +41,16 @@ In serial mode (optim_*), this function basically looks up the search tree and t
 
 \examples{
 
-\dontrun{
 #objective function with additional master-slave interaction
 interact_function = function(parms)
 {
   library(ppso)
-  X=request_object("X")   #request single object
+  X=request_object("X")   #request some object
   print(paste("X:",X))
   flush.console()
   
-  var_list=request_object(c("X", "X_gbest"))   #request multiple objects
-  list2env(var_list, envir=environment())
-  print(paste("X:",X,"X_gbest:",X_gbest))
-  flush.console()
-  
   print(paste("pushing object..."))
-  push_object(object_name="fitness_gbest", value=1000)     #push some object
+  push_object(list("fitness_gbest"=1000))     #push some object
   flush.console()
   
   print("returning results...")
@@ -65,7 +59,7 @@ interact_function = function(parms)
 
 result = optim_pdds_robust(objective_function=interact_function, projectfile=NULL, logfile=NULL, load_projectfile="no",
                             max_number_function_calls=20, verbose=TRUE, tryCall=TRUE)
-}
+
 }							
 							
 							

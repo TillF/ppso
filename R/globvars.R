@@ -41,7 +41,8 @@ z = NULL
 
 #global variables with read/write access need to be imported into globvars
 #globvars$break_flag  #verbose indicator for interruption status
-#globvars$ch
+#globvars$ch        #character for reading inout in interactive mode 
+#globvars$ch_mpi    #character for reading inout in interactive mode (MPI-Loop)
 #globvars$closed_slaves
 #globvars$computation_start
 #globvars$evals_since_lastsave
@@ -59,14 +60,18 @@ z = NULL
 #globvars$it_last_improvement
 #globvars$mpi_mode              #"bcast": slave are idle, tasks are broadcasted to all and attended only by one;"loop": slaves run in loop waiting for message, tasks are send to specific slaves only
 #globvars$node_id
-#globvars$slave_status
+#globvars$slave_status	[1:nslaves]
+#               "counter"           #counts total number of timeouts produced by slave
+#               "timeouts_in_row"   #counts successive timeouts
+#               "task_particle"     # holds particle-ID that is currently treated
 #globvars$nslaves
 #globvars$relocated
 #globvars$progress_window
-#globvars$status
+#globvars$status                    # [1:nparticles]: denotes open task (0), finished (1) or computing (2)
+
 #globvars$V
 #globvars$X                 #current positions of particles (number_of_particles X number_of_parameters)
-#globvars$X_gbest           #position of global best solution so far (number_of_parameters)
+#globvars$X_gbest           #position of global best solution so far [1:number_of_parameters]
 #globvars$X_lbest           #position of current optimum of each particle so far  (number_of_particles X number_of_parameters)
 
 

@@ -107,7 +107,8 @@ globvars$status_org=globvars$status  #  store original contents
     globvars$status[]=1; globvars$status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
   
     mpi_loop(init_search=TRUE) #perform mpi-loop for pre-search
-  
+#    browser()
+    
     max_number_function_calls=max_number_function_calls-length(pre_run_computations)  #reduce number of available calls due to pre-search
 
     top_of_preruns=sort(globvars$fitness_X[pre_run_computations],index.return=TRUE)$ix[1:length(uninitialized_particles)]   #sort according to best fitness
@@ -128,7 +129,7 @@ globvars$status_org=globvars$status  #  store original contents
 if (is.null(globvars$break_flag))
 {
   if (verbose_master) {print(paste(Sys.time()," pre-runs finished, starting actual runs...")); flush.console()}
-
+#  browser()
    #restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
   globvars$X_lbest       =matrix(globvars$X_lbest      [1:number_of_particles,],ncol=number_of_parameters, dimnames=dimnames(globvars$X_lbest))        # current optimum of each particle so far

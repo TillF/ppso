@@ -154,7 +154,7 @@ init_particles=function(lhc_init=FALSE)
   
   globvars$futile_iter_count=array(0,number_of_particles_org)
   
-  globvars$slave_status=array(0,c(globvars$nslaves,2),dimnames=list(NULL,c("counter","timeouts_in_row")))         #array for recording slave fitness
+  globvars$slave_status=array(0,c(globvars$nslaves,3),dimnames=list(NULL,c("counter","timeouts_in_row","task_particle")))         #array for recording slave fitness and relation to particle
   if (!exists("globvars$execution_timeout") || !is.null(globvars$execution_timeout))                          #monitor execution times
     globvars$execution_times=data.frame(slave_id=NULL,secs=NULL)
     

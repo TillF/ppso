@@ -50,21 +50,25 @@
   }
   
   #push object to master
-  push_object = function(object_names, value, verbose_slave=FALSE)
+  push_object = function(object_list, verbose_slave=FALSE)
   {
-    for (object_name in object_names) #treat multiple requests, if required
+    if (globvars$is_mpi) #mpi-version
     {
-      if (globvars$is_mpi) #mpi-version
       {
-        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...pushing object '",object_name,"'"))
-        attr(value, "object_name")=object_name #attach name of object
-        mpi.send.Robj(obj=value, dest=0, tag=6) #tag 6 demarks pushed object
+        if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...pushing object(s) '",paste(object_names, collapse=","),"'"))
+#        attr(value, "object_name")=object_name #attach name of object
+        mpi.send.Robj(obj=object_list, dest=0, tag=6) #tag 6 demarks pushed object
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  object '",object_name,"' sent."))
-      } else #serial version
+      }
+    }  
+    else #serial version
+    {
+      environment(set_object)=environment() 
+      for (i in 1:length(object_list))
       {
-         environment(set_object)=environment() 
-         set_object(object_name=object_name, value=value) #set variable or parts thereof       
-      }   
+  			object_name = names(object_list[i]) #name of object
+        set_object(object_name=object_name, value=object_list[[i]]) #set variable or parts thereof
+      }
     }
     return()
   }

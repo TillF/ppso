@@ -24,9 +24,9 @@ update_tasklist_dds <- function(loop_counter=1)
 
     do_plot_function()
    
-    if (wait_for_keystroke && (!exists("ch", where=globvars) | globvars$ch!="c")) 
+    if (wait_for_keystroke && (!exists("ch", where=globvars) || globvars$ch!="c")) 
     {
-      if (is.numeric(globvars$ch) & (globvars$ch > 0)) globvars$ch=globvars$ch-1 else
+      if (is.numeric(globvars$ch) && (globvars$ch > 0)) globvars$ch=globvars$ch-1 else
       {
         print("ENTER to proceed, 'b'+ENTER for debug mode, <n> to skip <n> times, 'c'+ENTER to continue till end")
         globvars$ch=readline() 

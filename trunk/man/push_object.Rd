@@ -2,18 +2,18 @@
 \Rdversion{1.1}
 \alias{push_object}
 \title{
-Pushing an object to the master.
+Pushing objects to the master.
 }
 \description{
-push an object to the master.
+push objects to the master.
 }
 \usage{
-push_object (object_name, value, verbose_slave=FALSE)
+push_object (object_list, verbose_slave=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object_names}{
-name of object to be pushed to master.
+  \item{object_list}{
+named list of objects to be pushed to master.
 }
 \item{value}{
 value of object to be set on the master.
@@ -43,17 +43,17 @@ Till Francke
 
 \examples{
 
-\dontrun{
+
 #objective function with additional master-slave interaction
 interact_function = function(parms)
 {
   library(ppso)
-  X=push_object("X")   #push some object
+  X=request_object("X")   #request some object
   print(paste("X:",X))
   flush.console()
   
   print(paste("pushing object..."))
-  push_object(object_name="fitness_gbest", value=1000)     #push some object
+  push_object(list("fitness_gbest"=1000))     #push some object
   flush.console()
   
   print("returning results...")
@@ -62,7 +62,7 @@ interact_function = function(parms)
 
 result = optim_pdds_robust(objective_function=interact_function, projectfile=NULL, logfile=NULL, load_projectfile="no",
                             max_number_function_calls=20, verbose=TRUE, tryCall=TRUE)
-}
+
 }							
 							
 							

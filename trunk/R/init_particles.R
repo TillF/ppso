@@ -10,6 +10,20 @@ init_particles=function(lhc_init=FALSE)
   if (wait_for_keystroke) globvars$ch="" #enable user-interaction, if desired
   globvars$X[,]=Inf     #as a marker to denote non-initialized particles
 
+  if (length(parameter_bounds) != number_of_parameters*2) #ignore parameter_bounds, if in wrong format
+  {
+    warning("Corrupt parameter_bounds, ignored.")
+    parameter_bounds = cbind(rep(-1, number_of_parameters),
+                             rep(1, number_of_parameters))
+    assign(x="parameter_bounds", value=parameter_bounds, pos=parent.frame())
+  }
+  
+  if (!is.matrix(parameter_bounds)) #1-parameter case: parameter_bounds can be vector
+  {
+    parameter_bounds = matrix(ncol=2,parameter_bounds)
+    assign(x="parameter_bounds", value=parameter_bounds, pos=parent.frame())
+  }
+  
   param_names=rownames(parameter_bounds)     #try to retrieve parameter names
   if (length(param_names)==0)
     param_names=rownames(initial_estimates)

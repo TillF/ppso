@@ -103,7 +103,7 @@ if (verbose_master)  print(paste(Sys.time(),"starting initialization runs..."))
     globvars$X_lbest      [uninitialized_particles,] = globvars$X         [pre_run_computations[top_of_preruns],]
     calls_per_uninitialized_particle = length(pre_run_computations) %/% length(uninitialized_particles)     #distribute counting of function calls among real particles
     remaining_performed_calls = length(pre_run_computations) %% length(uninitialized_particles)
-    function_calls_init = globvars$function_calls                     #count initialisation calls extra
+    function_calls_init = array(0,number_of_particles_org)                     #count initialisation calls extra
     function_calls_init[uninitialized_particles] = c (rep(calls_per_uninitialized_particle,   length(uninitialized_particles)-remaining_performed_calls),
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
  } else
@@ -125,7 +125,6 @@ number_of_particles=number_of_particles_org         #back to original number of 
   globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
   globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
   globvars$function_calls    =globvars$function_calls[1:number_of_particles]  # iteration counter for each particle
-  function_calls_init = function_calls_init[1:number_of_particles]                     #count initialisation calls extra
   globvars$status=globvars$status_org[1:number_of_particles]  #  restore original contents 
   globvars$status[uninitialized_particles] = 1 #formerly unitialized particles have been treated by pre-run, so set status to "finished"
   globvars$futile_iter_count = globvars$futile_iter_count[1:number_of_particles]

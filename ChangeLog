@@ -1,3 +1,6 @@
+Version: 0.9-982
+- pdds: last function call was sometimes missing in logfile - fixed
+
 Version: 0.9-981
 - added array for saving slave occupations
 - improved code comments and progress messaging

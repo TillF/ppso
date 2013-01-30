@@ -41,6 +41,7 @@ In serial mode (optim_*), this function basically looks up the search tree and t
 
 \examples{
 
+\dontrun{
 #objective function with additional master-slave interaction
 interact_function = function(parms)
 {
@@ -61,6 +62,8 @@ result = optim_pdds_robust(objective_function=interact_function, projectfile=NUL
                             max_number_function_calls=20, verbose=TRUE, tryCall=TRUE)
 
 }							
+}
+							
 							
 							
 							

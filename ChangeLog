@@ -1,3 +1,6 @@
+Version: 0.9-983
+- also accept param_bounds as a vector (not matrix) for the 1-parameter case
+
 Version: 0.9-982
 - pdds: last function call was sometimes missing in logfile - fixed
 

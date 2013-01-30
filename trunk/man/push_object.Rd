@@ -15,9 +15,6 @@ push_object (object_list, verbose_slave=FALSE)
   \item{object_list}{
 named list of objects to be pushed to master.
 }
-\item{value}{
-value of object to be set on the master.
-}
 \item{verbose_slave}{
 enable diagnostic messages.
 }
@@ -43,7 +40,7 @@ Till Francke
 
 \examples{
 
-
+\dontrun{
 #objective function with additional master-slave interaction
 interact_function = function(parms)
 {
@@ -64,7 +61,7 @@ result = optim_pdds_robust(objective_function=interact_function, projectfile=NUL
                             max_number_function_calls=20, verbose=TRUE, tryCall=TRUE)
 
 }							
-							
+}							
 							
 							
 \keyword{ ~optimization }

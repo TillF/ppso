@@ -16,9 +16,9 @@ update_tasklist_dds <- function(loop_counter=1)
 
    
    completed_particles=globvars$status==1                   #mark completed particles
-   if (all(completed_particles==FALSE) | !is.null(globvars$break_flag)) return()                   #no new results available or break flag set...don't update tasks
+   if (all(completed_particles==FALSE)) return()                   #no new results available
 
-    if (!is.null(logfile) & loop_counter!=0)        #append to logfile, when enabled and when not in very first loop
+    if ((!is.null(logfile) & loop_counter!=0) | !is.null(globvars$break_flag))        #append to logfile, when enabled and when not in very first loop
       write.table(file = logfile, cbind(format(globvars$computation_start[completed_particles],"%Y-%m-%d %H:%M:%S"), matrix(globvars$X[completed_particles, ],ncol=ncol(globvars$X))  , globvars$fitness_X[completed_particles],
     globvars$node_id[completed_particles]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 

@@ -48,7 +48,9 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     points(projectfile_content$function_call_number,projectfile_content[,i],col="red",pch=23)
   }
   
-  plot(logfile_content$objective_function,pch=20,xlab="function evaluations", ylab="objective function value",ylim=c(min(logfile_content$objective_function),quantile(logfile_content$objective_function, cutoff_quantile)),col="blue")  
+  ylim=quantile(logfile_content$objective_function[is.finite(logfile_content$objective_function)],
+                c(0,cutoff_quantile))
+  plot(logfile_content$objective_function,pch=20,xlab="function evaluations", ylab="objective function value",ylim = ylim,col="blue")  
   points(projectfile_content$function_call_number,projectfile_content$best_objective_function,col="red",pch=23)
   plot.new()
   legend("left", "particles' best", pch=23, col="red")    #plot legend only once
@@ -75,7 +77,6 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   }
   par(mfcol=c(mfrow,mfcol))
   
-  ylim=quantile(logfile_content$objective_function, c(0,cutoff_quantile))
   for (i in 1:number_of_parameters)
   {
     plot(logfile_content[,i+1],logfile_content$objective_function,pch=20,ylab="objective function value", xlab=names(logfile_content)[i+1], ylim=ylim)  

@@ -4,6 +4,7 @@
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 #tag-codes for master-slave communications:
+#0: task from master
 #1: 
 #2: results returning from slave
 #3: slave sends good-bye message
@@ -165,7 +166,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
             perform_task(params=messge, slave_id=mpi.comm.rank())        #do task
             
           if ((tag == 7) && (messge == "kill"))     #kill-message
-            mpi.send.Robj(obj="bye", dest=0, tag=4) #tag 4 demarks good-bye
+            mpi.send.Robj(obj="bye", dest=0, tag=3) #tag 3 demarks good-bye
 
 
       }  

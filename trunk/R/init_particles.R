@@ -10,6 +10,7 @@ init_particles=function(lhc_init=FALSE)
   if (wait_for_keystroke) globvars$ch="" #enable user-interaction, if desired
   globvars$X[,]=Inf     #as a marker to denote non-initialized particles
 
+  if (is.data.frame(parameter_bounds)) parameter_bounds = as.matrix(parameter_bounds)     #accept dataframes, too
   if (length(parameter_bounds) != number_of_parameters*2) #ignore parameter_bounds, if in wrong format
   {
     warning("Corrupt parameter_bounds, ignored.")

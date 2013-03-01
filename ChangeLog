@@ -1,3 +1,6 @@
+Version: 0.9-986
+- improved handling of time-outed results: use them, if they come in before the substitute slave is finished
+
 Version: 0.9-985
 - computationally irrelevant: fixed minor error in reporting slave good-bye/error
 

@@ -75,14 +75,11 @@ init_particles=function(lhc_init=FALSE)
         globvars$X                 =as.matrix(proj_file_content[,(1:number_of_parameters)  +(1*number_of_parameters+1)])
         globvars$V                 =as.matrix(proj_file_content[,(1:number_of_parameters)  +(2*number_of_parameters+1)])
         globvars$fitness_X         =as.vector(proj_file_content[, 1                        +(3*number_of_parameters+1)])
-#        globvars$status            =as.vector(globvars$status)
         globvars$computation_start =proj_file_content$begin_execution             
         globvars$computation_start =strptime(globvars$computation_start,"%Y-%m-%d %H:%M:%S") #convert string to POSIX
-#        globvars$node_id           =as.vector(globvars$node_id)
-#        globvars$function_calls    =as.vector(globvars$function_calls)
         globvars$function_calls    =as.vector(proj_file_content$function_calls)
         
-        globvars$node_id[globvars$status==2]=0    #any slaves marked as "in computation" in the projectfile are reset to "to be done"
+        globvars$node_id[globvars$status==2]=0    #any particles marked as "in computation" in the projectfile are reset to "to be done"
         globvars$status [globvars$status==2]=0
         
         min_fitness_index = which.min(globvars$fitness_lbest)

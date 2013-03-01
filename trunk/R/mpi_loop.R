@@ -102,23 +102,19 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
 #        current_particle =which(globvars$node_id==slave_id & globvars$status==2)           #find which particle this result belongs to
          current_particle = globvars$slave_status[slave_id,"task_particle"]           #find which particle this result belongs to
   
-        if (length(current_particle) > 1)                                #rr   shouldn't occur
-          print(paste("strange, slave",slave_id,"returned an ambiguous result (main search):",slave_message))
-        else    
-        if (length(current_particle) ==0)                                #
-    		{
-    			if (verbose_master) 
-    				if (globvars$slave_status[slave_id,"timeouts_in_row"] == 0)        #rr shouldn't occur
-    				   print(paste("strange, slave",slave_id,"returned an unrequested result (main search):",slave_message)) else
-    				   print(paste("slave",slave_id,"returned overdue result"))
-               flush.console()
-    		} else
+        if (current_particle < 0)                                #redundant result of timeouted slave or its substitute
+ 				    {if (verbose_master) print(paste("slave",slave_id,"returned a now redundant result, ignored."))}
+        else
         {
           globvars$fitness_X [current_particle] = slave_message
           globvars$status    [current_particle] =1      #mark as "finished"
           globvars$slave_status[slave_id,"timeouts_in_row"] = 0             #this result was in time, so reset the counter of consecutive timeouts 
           globvars$slave_status[slave_id,"task_particle"] = 0                     #remove association to completed particle
-          if (!is.null(globvars$execution_timeout)) globvars$execution_times = rbind(globvars$execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),globvars$computation_start[current_particle],units="sec"))))   #monitor execution times
+          redundant_calculations = globvars$slave_status[,"task_particle"] == current_particle  #find still treating the same particle
+          if (any(redundant_calculations))
+            globvars$slave_status[redundant_calculations, "task_particle"] = -current_particle #mark these slave as performing redundant calculations
+          if (!is.null(globvars$execution_timeout)) 
+            globvars$execution_times = rbind(globvars$execution_times,data.frame(slave_id=slave_id,secs=as.numeric(difftime(Sys.time(),globvars$computation_start[current_particle],units="sec"))))   #monitor execution times
 
             if (init_search)
             {
@@ -129,8 +125,8 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
             else
             globvars$function_calls[current_particle] =globvars$function_calls[current_particle]+1        #increase iteration counter
           }
-          if (globvars$slave_status[slave_id,"timeouts_in_row" ] < maxtries) #if this slave failed too often in a row, don't use it any longer
-          globvars$idle_slaves=c(globvars$idle_slaves,slave_id)
+          if (globvars$slave_status[slave_id,"timeouts_in_row" ] < maxtries) #if this slave has not caused timeouts too often, keep on using it
+            globvars$idle_slaves=c(globvars$idle_slaves,slave_id)
         } else if (tag == 3) {    # A slave has closed down.
             if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"has gone away")); flush.console()}
             globvars$closed_slaves = globvars$closed_slaves + 1
@@ -150,19 +146,16 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
     			 if (verbose_master) {print(paste(Sys.time()," ...object(s) sent to slave",slave_id)); flush.console()}
 		    } else if (tag == 6) {    #object pushed from slave 
     			slave_message_info <- mpi.get.sourcetag() 
-
+          if (globvars$slave_status[slave_id,"task_particle"] < 0) 
+          {   #this is a now redundant call, ignore the push
+               if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"is performing redundant call, push(es) ignored.")); flush.console()}
+               next
+          }  else
           environment(set_object)=environment() 
           for (i in 1:length(slave_message))
           {
       			object_name = names(slave_message[i]) #name of object
-   			
      			  if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"pushed object",object_name,"=",paste(slave_message[[i]], collapse=", "))); flush.console()}
-  #    			browser()
-            if (!any(globvars$node_id==slave_id & globvars$status==2))
-            {
-               if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"is overdue, push ignored")); flush.console()}
-               next
-            }
             set_object(object_name=object_name, value=slave_message[[i]]) #set variable or parts thereof
           }
 	      } else  {    #unknown tag

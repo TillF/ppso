@@ -59,7 +59,7 @@ z = NULL
 #globvars$it_last_improvement
 #globvars$it_last_improvement
 #globvars$mpi_mode              #"bcast": slave are idle, tasks are broadcasted to all and attended only by one;"loop": slaves run in loop waiting for message, tasks are send to specific slaves only
-#globvars$node_id
+#globvars$node_id               #[1:number_of_particles] #node number of worker / slave currently associated to particle
 #globvars$slave_status	[1:nslaves]
 #               "counter"           #counts total number of timeouts produced by slave
 #               "timeouts_in_row"   #counts successive timeouts

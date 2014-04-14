@@ -114,7 +114,7 @@ while (is.null(globvars$break_flag))
   {
     if (tryCall)                  #catch error message during evaluation (slower)
     {
-      globvars$fitness_X [current_particle]=try(objective_function(as.numeric(globvars$X[current_particle,])),silent=TRUE)
+      globvars$fitness_X [current_particle]=try(objective_function(globvars$X[current_particle,]),silent=TRUE)
       if (!is.numeric(globvars$fitness_X [current_particle]))                      #an error occured during execution
       {
         globvars$break_flag=paste("aborted: ",as.character(globvars$fitness_X [current_particle]))    
@@ -122,8 +122,8 @@ while (is.null(globvars$break_flag))
       }        
     }
     else
-      globvars$fitness_X [current_particle] =objective_function(as.numeric(globvars$X[current_particle,]))     #no error message during evaluation (faster)
-  
+      globvars$fitness_X [current_particle] =objective_function(globvars$X[current_particle,])     #no error message during evaluation (faster)
+
     globvars$status    [current_particle] =1      #mark as "finished"
     globvars$function_calls[current_particle] =globvars$function_calls[current_particle]+1        #increase iteration counter
     update_tasklist_pso()   #update particle speeds and positions based on available results

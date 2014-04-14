@@ -25,12 +25,14 @@ init_particles=function(lhc_init=FALSE)
     assign(x="parameter_bounds", value=parameter_bounds, pos=parent.frame())
   }
   
+    
   param_names=rownames(parameter_bounds)     #try to retrieve parameter names
   if (length(param_names)==0)
-    param_names=rownames(initial_estimates)
-  
+    param_names=NULL
+
   if (length(param_names)!=0)
   {
+    
     colnames(globvars$X)=param_names
     colnames(globvars$X_lbest)=param_names
     names(globvars$X_gbest)=param_names
@@ -89,22 +91,25 @@ init_particles=function(lhc_init=FALSE)
     }
   }
 
-  if (!is.null(initial_estimates))
+
+if (!is.null(initial_estimates))
   {
-    initial_estimates = as.matrix(initial_estimates)       #reshape any vector as matrix
-    if (nrow(initial_estimates)!=number_of_parameters)
+  if ( length(initial_estimates) %% number_of_parameters != 0)
     {
       warning("initial_estimates must contain <number_of_parameters> rows, ignored.") 
       initial_estimates =NULL
     }  else
     {
+      if (is.vector(initial_estimates))  
+        initial_estimates = matrix(initial_estimates, nrow=number_of_parameters, dimnames=list(names(initial_estimates), NULL))       #reshape any vector as matrix
+      
       out_of_bounds=NULL    #initial estimates that are out of bounds
       for (i in 1:ncol(initial_estimates))
         if (any ((initial_estimates[,i] < parameter_bounds[,1]) | (initial_estimates[,i] > parameter_bounds[,2])))
          out_of_bounds=c(out_of_bounds,i)
       if (any(out_of_bounds))
       {
-        warning(paste("initial estimates",paste(out_of_bounds,collapse=", ")," out of bounds, ignored"))
+        warning(paste("initial estimates in row",paste(out_of_bounds,collapse=", "),"are out of bounds, ignored"))
         initial_estimates = initial_estimates[,- out_of_bounds]     #discard invalid initial estimates
       }
       if (ncol(initial_estimates) > noninitialised_particles)
@@ -113,7 +118,14 @@ init_particles=function(lhc_init=FALSE)
         initial_estimates = initial_estimates[,1:noninitialised_particles]     #discard invalid initial estimates
       }
     }
+  
+  if (ncol(initial_estimates) == 0)
+      warning("No valid initial_estimates found, resuming to default.")
+    
   }
+  
+if (any(param_names != rownames(initial_estimates)))
+    warning("When using named parameters in parameter_bounds or initial_estimates, ensure that they are identical")
   
   
   if (noninitialised_particles>0)          #no or not sufficient particles initialized from file -> do random initialisation

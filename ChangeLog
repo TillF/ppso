@@ -1,3 +1,6 @@
+Version: 0.9-987
+- computationally irrelevant: improved handling of named parameters with optim_pso
+
 Version: 0.9-986
 - improved handling of time-outed results: use them, if they come in before the substitute slave is finished
 

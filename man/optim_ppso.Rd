@@ -10,9 +10,9 @@
 (Parallel) optimization using Particle Swarm Optimization or Dynamically Dimensioned Search
 }
 \description{
-\code{optim_pso} optimizes a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f using Particle Swarm Optimization.
+\code{optim_pso} minimizes a given function \code{objective_function} with regard to its parameters contained in the vector \code{par} towards a minimum value of f using Particle Swarm Optimization.
 \code{optim_ppso_robust} is the parallelized versions (using multiple CPUs).
-\code{optim_dds} optimizes using a Dynamically Dimensioned Search with  \code{optim_pdds_robust} being the parallel version.
+\code{optim_dds} minimizes using a Dynamically Dimensioned Search with  \code{optim_pdds_robust} being the parallel version.
 }
 \usage{
 optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=NULL,

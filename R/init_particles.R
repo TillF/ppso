@@ -114,12 +114,12 @@ if (!is.null(initial_estimates))
       }
       if (ncol(initial_estimates) > noninitialised_particles)
       {
-        warning(paste ("sufficient initial estimates loaded from project file, ", ncol(initial_estimates) - noninitialised_particles, "columns of argument <initial_estimates> ignored"))
-        initial_estimates = initial_estimates[,1:noninitialised_particles]     #discard invalid initial estimates
+        warning(paste ("sufficient initial estimates already loaded from project file, ", ncol(initial_estimates) - noninitialised_particles, "column(s) of argument <initial_estimates> ignored"))
+        initial_estimates = initial_estimates[,0:noninitialised_particles, drop=FALSE]     #discard obsolete initial estimates
       }
     }
   
-  if (ncol(initial_estimates) == 0)
+  if (ncol(initial_estimates) == 0 & noninitialised_particles>0 )
       warning("No valid initial_estimates found, resuming to default.")
     
   }

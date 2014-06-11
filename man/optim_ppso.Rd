@@ -43,19 +43,19 @@ Number of parameters to be optimized.
 Number of particles used in the Particle Swarm Optimization / number of parallel threads in DDS.
 }
   \item{max_number_of_iterations}{
-Abortion criteria: Maximum number of iterations (i.e. update of particle positions) that are used.
+Abortion criterion: Maximum number of iterations (i.e. update of particle positions) that are used.
 }
 
   \item{max_number_function_calls}{
-Abortion criteria: Maximum total number of calls to the objective function, ignored when set to \code{NULL}. In non-parallel mode, slightly more function calls may actually be made to finish the last iteration.
+Abortion criterion: Maximum total number of calls to the objective function, ignored when set to \code{NULL}. In non-parallel mode, slightly more function calls may actually be made to finish the last iteration.
 when resuming from a previous run, the previously made function calls also count, i.e. only the pending number of calls to reach \code{max_number_function_calls} will be made. In contrast, if \code{max_number_function_calls} is negative, -\code{max_number_function_calls} MORE calls will be made, additionally to those of the previous run. 
 }
 
   \item{abstol}{
-Abortion criteria: minimum absolute improvement between iterations  (default: -Inf)
+Abortion criterion: minimum absolute improvement between iterations  (default: -Inf)
 }
   \item{reltol}{
-Abortion criteria: minimum absolute improvement between iterations (default: -Inf)
+Abortion criterion: minimum absolute relative improvement between iterations (default: -Inf)
 }
   \item{max_wait_iterations}{
 Number of iterations, within these an improvement of the above described (\code{abstol, reltol}) quality has to be achieved before abortion

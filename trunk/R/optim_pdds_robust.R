@@ -44,7 +44,8 @@ init_visualisation()                      #prepare visualisation, if selected
 #initialisation
 init_calls=ceiling(max(0.005*abs(max_number_function_calls),5)) #number of function calls used to initialise each particle, if no value can be loaded from a project file
 number_of_particles_org=number_of_particles                 #save original number of particles
-number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
+#number_of_particles=max(number_of_particles,init_calls)          #increase number of particles for pre-search
+number_of_particles=number_of_particles+init_calls          #increase number of particles for pre-search
 
 #see variable explanations in globvars.R
 globvars$X             =array(Inf,c(number_of_particles,number_of_parameters))  #globvars$X: position in parameter space                          
@@ -52,7 +53,7 @@ globvars$V             =array(0,c(           number_of_particles,number_of_param
 globvars$fitness_X     =array(Inf,number_of_particles)            
 globvars$status        =array(0,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
 globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
-globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
+globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave currently associated to particle
 globvars$X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far
 globvars$fitness_lbest =array(Inf,number_of_particles)  
 globvars$function_calls    =array(0,number_of_particles)  # iteration counter for each particle
@@ -81,7 +82,7 @@ if (verbose_master) {print(paste(Sys.time(),"initializing particle positions..."
       par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters
     write.table(paste("time",par_names,"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
   }
-	 
+ 
 	 
   if (max_number_function_calls < 0)
   {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
@@ -130,16 +131,15 @@ if (is.null(globvars$break_flag))
 {
   if (verbose_master) {print(paste(Sys.time()," pre-runs finished, starting actual runs...")); flush.console()}
 #  browser()
-   #restore array dimensions according to original number of particles
+#restore array dimensions according to original number of particles
   number_of_particles=number_of_particles_org         #back to original number of particles
-  globvars$X_lbest       =matrix(globvars$X_lbest      [1:number_of_particles,],ncol=number_of_parameters, dimnames=dimnames(globvars$X_lbest))        # current optimum of each particle so far
+  globvars$X_lbest       =       globvars$X_lbest      [1:number_of_particles,,drop=FALSE]
   globvars$fitness_lbest =       globvars$fitness_lbest[1:number_of_particles]                                    #best solution for each particle so far
 
   #restore array dimensions according to original number of particles
   globvars$X             =globvars$X_lbest  #globvars$X: position in parameter space                          
-  globvars$V             =matrix(globvars$V[1:number_of_particles,],ncol=number_of_parameters)   #globvars$V: velocity in parameter space
+  globvars$V             =globvars$V[1:number_of_particles,,drop=FALSE]   #globvars$V: velocity in parameter space
   globvars$fitness_X     =globvars$fitness_X[1:number_of_particles]            #optimum of each particle at current iteration
-
   globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
   globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
   globvars$function_calls    =globvars$function_calls[1:number_of_particles]  # iteration counter for each particle
@@ -147,13 +147,12 @@ if (is.null(globvars$break_flag))
   globvars$status=globvars$status_org[1:number_of_particles]  #  restore original contents 
   globvars$status[uninitialized_particles] = 1 #formerly unitialized particles have been treated by pre-run, so set status to "finished"
   globvars$futile_iter_count = globvars$futile_iter_count[1:number_of_particles]
- 
+
   globvars$fitness_gbest = min(globvars$fitness_lbest)          #update global minimum
   min_fitness_index = which(globvars$fitness_gbest==globvars$fitness_lbest)[1]
   globvars$X_gbest[] = globvars$X[min_fitness_index,]
 
-
-  # actual search
+# actual search
   if (verbose) {print("starting main search"); flush.console()}
   globvars$fitness_itbest= globvars$fitness_gbest     #best fitness in the last it_last iterations
   globvars$it_last_improvement=0               #counter for counting iterations since last improvement

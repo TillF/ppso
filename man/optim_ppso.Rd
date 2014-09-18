@@ -96,7 +96,7 @@ minimum number of function evaluations to compute before the \code{projectfile} 
 }
 
   \item{break_file}{
-Name of a file file that will cause the termination of the optimization when it is encountered. Useful for interrupting a running optimization gracefully. At start-up, a existing file of this name will be deleted.
+Name of a file file that will cause the termination of the optimization when it is encountered. Useful for interrupting a running optimization gracefully. At start-up, any existing file of this name will be deleted.
 }
 
   \item{plot_progress}{

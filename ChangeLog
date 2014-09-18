@@ -1,3 +1,6 @@
+Version: 0.9-988
+- computationally relevant for resuming runs with DDS and an increased number of particles: changed/fixed number of required init-runs
+
 Version: 0.9-987
 - computationally irrelevant: improved handling of named parameters with optim_pso
 

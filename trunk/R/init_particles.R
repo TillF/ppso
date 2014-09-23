@@ -52,7 +52,8 @@ init_particles=function(lhc_init=FALSE)
       if (ncol(proj_file_content)!=3*number_of_parameters+5+1) #best_par, current_par, current_velocity)*number_of_parameters + best_objective_function+current_objective_function+status+begin_execution+node_id+function_calls
       {
         warning(paste("The number of parameters in", projectfile,"doesn't seem to match, all particles will be initialized randomly."))
-#        lhc_init=FALSE
+        assign("load_projectfile","failed",                parent.frame()) 
+        #        lhc_init=FALSE
       }   else
       {
         assign("load_projectfile","loaded",                parent.frame())  #indicator that the project file has successfully been loaded

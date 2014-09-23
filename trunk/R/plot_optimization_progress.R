@@ -99,7 +99,9 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 #  
 # plot execution time history
   execution_time=list()
+  tunits=NULL
   omitted_workers=NULL
+  mintime=Inf
   for (i in 1:length(workers))
   {
     worker=workers[i]
@@ -115,17 +117,17 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 
     
     positive_times=execution_time[[i]]>0
-    if (!any(positive_times))
-    {
-      mintime = 0  
-      logplot = ""
-    } else
-    {
-      mintime=0.5*min(execution_time[[i]][positive_times])
-      logplot = "y"
-    }
-    execution_time[[i]][!positive_times]=mintime    #set execution times that are zero to something positive to allow log plot
+    mintime=min(c(mintime, execution_time[[i]][positive_times]))
+   
+    tunits=c(tunits,attr(execution_time[[i]],"units")) #collect units (may differ between slaves)
+  }
 
+  #ensure same units in time
+  most_used_unit = names(sort(table(tunits), decreasing = TRUE)[1]) #find most used units among execution times
+  for (i in 1:length(workers))
+  { 
+    units(execution_time[[i]])=most_used_unit
+    
     if (verbose)
     {
       print(paste("execution time worker",worker,"(min,median,max):"))
@@ -133,8 +135,16 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
       cat("\t");print(median(execution_time[[i]]))     
       cat("\t");print(max   (execution_time[[i]]))
     }
-  }
- 
+    
+    positive_times=execution_time[[i]]>0
+    execution_time[[i]][!positive_times]=mintime    #set execution times that are zero to something positive to allow log plot
+    
+  }  
+  if (mintime == 0)
+    logplot = "" else
+    logplot = "y"
+  
+
   if (length(workers)- length(omitted_workers) > 0)
   {
     plot(range(logfile_content$time),range(unlist(execution_time), na.rm=TRUE),type="n",xlab="time",ylab=paste("execution time [",attr(execution_time[[1]],"units"),"]",sep=""),log=logplot) #prepare plot window

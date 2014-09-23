@@ -1,3 +1,6 @@
+Version: 0.9-989
+- computationally irrelevant: improved plot_optimization_progress.R plot labels. Minor typos and homogenization.
+
 Version: 0.9-988
 - computationally relevant for resuming runs with DDS and an increased number of particles: changed/fixed number of required init-runs
 

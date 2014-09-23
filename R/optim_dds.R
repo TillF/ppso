@@ -95,7 +95,7 @@ if (verbose_master)  {print(paste(Sys.time(),"starting initialization runs..."))
     globvars$node_id[pre_run_computations]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
    if (any(globvars$fitness_X[pre_run_computations] %in% c(NA, NaN)))
-      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
+      stop("Objective function mustn't yield NA nor NaN. Modify it to return very large numbers instead.")
 
     max_number_function_calls=max_number_function_calls-length(pre_run_computations)  #reduce number of available calls due to pre-search
 
@@ -109,7 +109,6 @@ if (verbose_master)  {print(paste(Sys.time(),"starting initialization runs..."))
                                                 rep(calls_per_uninitialized_particle+1,                                 remaining_performed_calls))      
  } else
   function_calls_init = 0*globvars$function_calls
-
 
   if (verbose_master) print(paste(Sys.time()," pre-runs finished, starting actual runs..."))  
  

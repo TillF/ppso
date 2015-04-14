@@ -13,7 +13,7 @@ init_particles=function(lhc_init=FALSE)
   if (is.data.frame(parameter_bounds)) parameter_bounds = as.matrix(parameter_bounds)     #accept dataframes, too
   if (length(parameter_bounds) != number_of_parameters*2) #ignore parameter_bounds, if in wrong format
   {
-    warning("Corrupt parameter_bounds, ignored.")
+    warning("Corrupt parameter_bounds, resuming to defaults")
     parameter_bounds = cbind(rep(-1, number_of_parameters),
                              rep(1, number_of_parameters))
     assign(x="parameter_bounds", value=parameter_bounds, pos=parent.frame())
@@ -24,6 +24,10 @@ init_particles=function(lhc_init=FALSE)
     parameter_bounds = matrix(ncol=2,parameter_bounds)
     assign(x="parameter_bounds", value=parameter_bounds, pos=parent.frame())
   }
+  
+  reversed = which((parameter_bounds[,1] > parameter_bounds[,2]))
+  if (any(reversed))
+    stop(paste("parameter bounds in row(s)",paste(reversed, collapse=", "), "are reversed."))
   
     
   param_names=rownames(parameter_bounds)     #try to retrieve parameter names

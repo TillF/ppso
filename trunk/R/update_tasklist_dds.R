@@ -37,7 +37,7 @@ update_tasklist_dds <- function(loop_counter=1)
     }  
 
    if (any(globvars$fitness_X %in% c(NA, NaN)))
-      stop("Objective function mustn't yield NA nor NaN. Modify it to return very large numbers instead.")
+      stop("Objective function mustn't yield NA or NaN. Modify it to return very large numbers instead.")
 
    # Update the local bests and their fitness
    improved_particles=globvars$fitness_X < globvars$fitness_lbest #mark particles that improved their fitness
@@ -64,23 +64,23 @@ update_tasklist_dds <- function(loop_counter=1)
    
    if (number_of_particles > 1)
    {                                                                            #relocate "astray" particles
-     if (!exists('dds_ver')) dds_ver=2        #DDS-version (subtype for testing)
-     if (dds_ver==1) toberelocated = (globvars$futile_iter_count==max(globvars$futile_iter_count)) & (globvars$fitness_lbest==max(globvars$fitness_lbest)) & (globvars$fitness_lbest!=Inf)    #1. find particles that are worst in both objective function AND improvement
-     if (dds_ver==2) toberelocated = (globvars$fitness_lbest > globvars$fitness_gbest)     #2. relocate all but the best particle
-     if (dds_ver==3) toberelocated = which.max(globvars$futile_iter_count * (globvars$fitness_lbest!=min(globvars$fitness_lbest)))[1]     #3. find particles is worst in improvement (but not the global best) and set to best improving particle
+     if (part_xchange==0) toberelocated = NULL    #0. no relocation/updating
+     if (part_xchange==1) toberelocated = (globvars$futile_iter_count==max(globvars$futile_iter_count)) & (globvars$fitness_lbest==max(globvars$fitness_lbest)) & (globvars$fitness_lbest!=Inf)    #1. find particle that is worst in both objective function AND futile iterations to improve
+     if (part_xchange==2) toberelocated = (globvars$fitness_lbest > globvars$fitness_gbest)     #2. relocate all but the best particle
+     if (part_xchange==3) toberelocated = which.max(globvars$futile_iter_count * (globvars$fitness_lbest!=min(globvars$fitness_lbest)))[1]     #3. find particles is worst in improvement (but not the global best) and set to best improving particle
 
      if (any(toberelocated))
      {
        #cat(paste(sum(toberelocated),"particles globvars$relocated\n"))
        if (do_plot!=FALSE) globvars$relocated=cbind(globvars$X_lbest[toberelocated,],globvars$fitness_lbest[toberelocated])
 
-       if ((dds_ver==1) || (dds_ver==2))  #version 1&2
+       if ((part_xchange==1) || (part_xchange==2))  #version 1&2
        {
          globvars$X_lbest          [toberelocated,]= matrix(rep(globvars$X_gbest[],sum(toberelocated)),ncol=number_of_parameters, byrow = TRUE)         #relocate particles to current best
          globvars$fitness_lbest    [toberelocated] = globvars$fitness_gbest     #set to current best       #could also be set to particle with lowest globvars$futile_iter_count
          globvars$futile_iter_count[toberelocated] = 0             #zero iteration counter
        }
-        if (dds_ver==3) #version 3
+        if (part_xchange==3) #version 3
         {
          most_recent_improved = which.min(globvars$futile_iter_count)[1]       #get index to most recently improved particle
          globvars$X_lbest          [toberelocated,]= matrix(rep(globvars$X_lbest[most_recent_improved,],length(toberelocated)),ncol=number_of_parameters, byrow = TRUE)         #relocate particles to current best

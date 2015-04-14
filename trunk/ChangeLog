@@ -1,3 +1,6 @@
+Version: 0.9-990
+- computationally irrelevant: additional argument for *DDS to control multi-particle runs. Cahngelog abandoned in favour of SVN comments
+
 Version: 0.9-989
 - computationally irrelevant: improved plot_optimization_progress.R plot labels. Minor typos and homogenization.
 

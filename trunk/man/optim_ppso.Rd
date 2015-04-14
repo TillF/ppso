@@ -24,10 +24,10 @@ optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2
 
 optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500,
   r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL,                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
+  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
 optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 1,                               max_number_function_calls= 500,
   r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL,                                                           lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
+  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -71,6 +71,7 @@ FALSE: Update particle velocities after each completed evaluation of function \c
 (row-named) matrix containing columns of initial estimates (column-wise). If enough initial estimates were read from the project file, excess estimates in this parameter will be ignored. See details.
 }
  
+ 
   \item{Vmax}{
 maximum velocity of particles in parameter space
 }
@@ -108,7 +109,7 @@ If set to \code{TRUE}, \code{objective_function} is executed using \code{try}, w
 }
 
 
-for \code{optim_ppso*}:
+for \code{optim_*pso*}:
 
   \item{w}{
 Inertia constant, i.e. "weight" of the particles.
@@ -120,14 +121,23 @@ Cognitive component. Weighting factor for the "personal" experience of each part
 Social component. Weighting factor for the "swarm" experience of each particle.
 }
 
-for \code{optim_pdds*}:
+for \code{optim_*dds*}:
 
   \item{r}{
 Neighbourhood size perturbation parameter . Default value: 0.2.
 }
 
+\item{part_xchange}{
+Relevant for \code{number_of_particles} > 1: mode how DDS particles (i.e. parallel DDS-threads) communicate with each other between iterations:
+\itemize{
+\item{0:} {no communication/relocation between particles}
+\item{1:} {relocate/update particle particle that is worst in both objective function AND futile iterations}
+\item{2:} {relocate all but the best particle}
+\item{3:} {relocate particle that is worst in futile iterations (but not the global best) and set to best improving particle}
+}
+
 for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
-		 \item{nslaves}{
+\item{nslaves}{
 		number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
 		}
 		\item{working_dir_list}{

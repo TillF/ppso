@@ -126,7 +126,6 @@ for \code{optim_*dds*}:
   \item{r}{
 Neighbourhood size perturbation parameter . Default value: 0.2.
 }
-
 \item{part_xchange}{
 Relevant for \code{number_of_particles} > 1: mode how DDS particles (i.e. parallel DDS-threads) communicate with each other between iterations:
 \itemize{
@@ -134,6 +133,7 @@ Relevant for \code{number_of_particles} > 1: mode how DDS particles (i.e. parall
 \item{1:} {relocate/update particle particle that is worst in both objective function AND futile iterations}
 \item{2:} {relocate all but the best particle}
 \item{3:} {relocate particle that is worst in futile iterations (but not the global best) and set to best improving particle}
+}
 }
 
 for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:

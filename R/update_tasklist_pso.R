@@ -33,7 +33,7 @@ update_tasklist_pso=function()                        #update particle positions
       if (is.na(globvars$ch)) globvars$ch=""
     }  
    if (any(globvars$fitness_X %in% c(NA, NaN)))
-      stop("Objective function mustn't yield NA nro NaN. Modify it to return very large numbers instead.")
+      stop("Objective function mustn't yield NA or NaN. Modify it to return very large numbers instead.")
 
 
    # Update the local bests and their fitness

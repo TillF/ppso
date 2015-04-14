@@ -1,6 +1,6 @@
 optim_dds <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles= 1, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
-   parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, lhc_init=FALSE,
+   parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, lhc_init=FALSE, part_xchange=2,
   #runtime & display parameters
     do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
@@ -95,7 +95,7 @@ if (verbose_master)  {print(paste(Sys.time(),"starting initialization runs..."))
     globvars$node_id[pre_run_computations]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)
 
    if (any(globvars$fitness_X[pre_run_computations] %in% c(NA, NaN)))
-      stop("Objective function mustn't yield NA nor NaN. Modify it to return very large numbers instead.")
+      stop("Objective function mustn't yield NA or NaN. Modify it to return very large numbers instead.")
 
     max_number_function_calls=max_number_function_calls-length(pre_run_computations)  #reduce number of available calls due to pre-search
 

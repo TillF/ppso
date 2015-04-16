@@ -115,7 +115,7 @@ if (!is.null(initial_estimates))
       if (any(out_of_bounds))
       {
         warning(paste("initial estimates in row",paste(out_of_bounds,collapse=", "),"are out of bounds, ignored"))
-        initial_estimates = initial_estimates[,- out_of_bounds]     #discard invalid initial estimates
+        initial_estimates = initial_estimates[,- out_of_bounds, drop=FALSE]     #discard invalid initial estimates
       }
       if (ncol(initial_estimates) > noninitialised_particles)
       {

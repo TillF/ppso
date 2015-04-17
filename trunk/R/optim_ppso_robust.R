@@ -37,8 +37,8 @@ globvars$execution_timeout=execution_timeout
 #    globvars$nslaves=3                                      #number of rmpi slaves to spawn (default -1: as many as possible)
 #  
 
-if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
-  stop("max_number_function_calls must be at least number_of_particles.")
+if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < number_of_particles)
+  stop("abs(max_number_function_calls) must be at least number_of_particles.")
 
 environment(update_tasklist_pso)=environment() #force subroutines to have this function as parent (implicitly allowing read-only access to globals)
 environment(init_particles)=environment() 

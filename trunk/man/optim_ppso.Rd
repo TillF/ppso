@@ -68,7 +68,7 @@ FALSE: Update particle velocities after each completed evaluation of function \c
 (row-named) matrix containing lower (first column) and upper (second column) boundary for each parameter. See details.
 }
   \item{initial_estimates}{
-(row-named) matrix containing columns of initial estimates (column-wise). If enough initial estimates were read from the project file, excess estimates in this parameter will be ignored. See details.
+(row-named) matrix containing columns of initial estimates (column-wise). Pending computations from a resumed project file are used first, then all \code{initial_estimates} are used.
 }
  
  

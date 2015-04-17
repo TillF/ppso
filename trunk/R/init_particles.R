@@ -70,7 +70,7 @@ init_particles=function(lhc_init=FALSE)
         noninitialised_particles=number_of_particles_org-nrow(proj_file_content)               #number of particles that need to be initialized
         if (noninitialised_particles > 0)
         {
-          warning(paste(projectfile,"contains less than the specified number of",number_of_particles_org,", ",noninitialised_particles,"particle(s) will be initialized randomly."))
+          warning(paste0(projectfile," contains less than the specified number of ",number_of_particles_org," particles, ",noninitialised_particles,"particle(s) will be initialized from init_estimates or randomly."))
           noninitialised_particles=number_of_particles-nrow(proj_file_content)      #for DDS-initialisation, more particles (number_of_particles instead of number_of_particles_org) have to be initialized for the pre-run
           proj_file_content=proj_file_content[c(1:nrow(proj_file_content),rep(nrow(proj_file_content),noninitialised_particles)), names(proj_file_content) != "begin_execution"]       #just to shape the dataframe and used as marker which particles have to be initialised 
           proj_file_content[(nrow(proj_file_content)-noninitialised_particles+1):nrow(proj_file_content),]=   Inf # used as marker which particles have been initialised 
@@ -96,6 +96,7 @@ init_particles=function(lhc_init=FALSE)
     }
   }
 
+globvars$pending_initial_estimates=array(dim=c(1,0))
 
 if (!is.null(initial_estimates))
   {
@@ -119,8 +120,8 @@ if (!is.null(initial_estimates))
       }
       if (ncol(initial_estimates) > noninitialised_particles)
       {
-        warning(paste ("sufficient initial estimates already loaded from project file, ", ncol(initial_estimates) - noninitialised_particles, "column(s) of argument <initial_estimates> ignored"))
-        initial_estimates = initial_estimates[,0:noninitialised_particles, drop=FALSE]     #discard obsolete initial estimates
+        globvars$pending_initial_estimates = initial_estimates[, (1+noninitialised_particles):ncol(initial_estimates), drop=FALSE]     #initial estimates to be treated later
+        initial_estimates =         initial_estimates[,  0:noninitialised_particles,  drop=FALSE]     #discard obsolete initial estimates
       }
     }
   
@@ -131,7 +132,6 @@ if (!is.null(initial_estimates))
   
 if (any(param_names != rownames(initial_estimates)))
     warning("When using named parameters in parameter_bounds or initial_estimates, ensure that they are identical")
-  
   
   if (noninitialised_particles>0)          #no or not sufficient particles initialized from file -> do random initialisation
   {
@@ -157,12 +157,12 @@ if (any(param_names != rownames(initial_estimates)))
     if (!is.null(initial_estimates) && (ncol(initial_estimates)>0))         #if any initial estimates have been specified as an argument, use these
       globvars$X[which(tobeinitialized)[1:ncol(initial_estimates)],] = t(initial_estimates)
 
-    #...and their other parameters
+    #...and their other properties
     globvars$X_lbest       [tobeinitialized,] =  globvars$X[tobeinitialized,]
-    globvars$V             [tobeinitialized,] = 0
+    globvars$V             [tobeinitialized,] = 0 #t(matrix(runif(sum(tobeinitialized)*number_of_parameters, min=-0.1, max=0.1), nrow=number_of_parameters) *Vmax )
     globvars$fitness_lbest [tobeinitialized] = Inf
     globvars$status        [tobeinitialized] = 0          
-    globvars$node_id       [tobeinitialized] = 0
+    globvars$node_id       [tobeinitialized] =-1      #mark as "dont change anymore until finished"
     globvars$function_calls    [tobeinitialized] = 0
   }
   

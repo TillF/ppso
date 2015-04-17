@@ -56,9 +56,9 @@ update_tasklist_pso=function()                        #update particle positions
 
    if (min_fitness < globvars$fitness_gbest)        #new global minimum found?
    {
-       globvars$fitness_gbest = min_fitness          #update global minimum
-       globvars$X_gbest[] = globvars$X[which(completed_particles)[min_fitness_index],]
-       completed_particles = completed_particles | (globvars$status==0)     #also update the pending tasks with the new optimum
+       globvars$fitness_gbest = min_fitness          #update global minimum value
+       globvars$X_gbest[] = globvars$X[which(completed_particles)[min_fitness_index],] #update global minimum
+       completed_particles = completed_particles | ((globvars$status==0) & (globvars$node_id != -1))     #also update the pending tasks (which are not fixed (initial estimates)) with the new optimum
    }
 
 
@@ -104,23 +104,33 @@ update_tasklist_pso=function()                        #update particle positions
 
    
    # Update the particle velocity and position
-   for (i in which(completed_particles))
+  globvars$status   [completed_particles]=0      #mark as "to be computed"
+  globvars$fitness_X[completed_particles]=Inf
+  globvars$node_id  [completed_particles] =0
+
+    for (i in which(completed_particles))
    {
-     R1 = runif(number_of_parameters)
-     R2 = runif(number_of_parameters)
-     globvars$V[i,] = w*globvars$V[i,] +
-             C1*R1*(globvars$X_lbest[i,] - globvars$X[i,]) +
-             C2*R2*(globvars$X_gbest - globvars$X[i,])
-     globvars$V[i,] = globvars$V[i,] * min(1,abs(Vmax/globvars$V[i,]))        #limit to maximum velocity
-     globvars$X[i,] = globvars$X[i,] + globvars$V[i,]
+     if (ncol(globvars$pending_initial_estimates) > 0) #there are still initial estimates that need to be evaluated
+     {
+       globvars$X[i,] = globvars$pending_initial_estimates[,1]
+       globvars$pending_initial_estimates = globvars$pending_initial_estimates[,-1, drop=FALSE] #remove from list
+       globvars$node_id   [i]= -1      #mark as "dont change anymore until finished"
+     } else
+     {
+       R1 = runif(number_of_parameters)
+       R2 = runif(number_of_parameters)
+       globvars$V[i,] = w*globvars$V[i,] +
+               C1*R1*(globvars$X_lbest[i,] - globvars$X[i,]) +
+               C2*R2*(globvars$X_gbest - globvars$X[i,])
+       globvars$V[i,] = globvars$V[i,] * min(1,abs(Vmax/globvars$V[i,]))        #limit to maximum velocity
+       globvars$X[i,] = globvars$X[i,] + globvars$V[i,]
+     }
    }
    globvars$X[completed_particles, ] = t(pmax(t(globvars$X[completed_particles, ]),
         parameter_bounds[, 1]))
    globvars$X[completed_particles, ] = t(pmin(t(globvars$X[completed_particles, ]),
         parameter_bounds[, 2]))
    
-   globvars$status   [completed_particles]=0      #mark as "to be computed"
-   globvars$fitness_X[completed_particles]=Inf
-   globvars$node_id  [completed_particles] =0
+   
 
 }

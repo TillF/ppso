@@ -134,34 +134,41 @@ update_tasklist_dds <- function(loop_counter=1)
    parameter_ranges=r*(parameter_bounds[,2]-parameter_bounds[,1]) #neighbourhood pertubation parameter * parameter range  
    for (i in which(completed_particles))
    {
-#    p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls)    #probability of including a parameter in the search
-    p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
-
-    rand_num = runif(number_of_parameters) #draw required number of parameters
-    dimensions_to_search=which(rand_num<=p_inclusion) #select parameters accroding to random number and probability
-    if (length(dimensions_to_search)==0) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter in pertubation
-    globvars$V[i,]=0
-
-    norm_rand_num = rnorm(length(dimensions_to_search)) #normally distributed random numbers
-    globvars$V[i,dimensions_to_search] = norm_rand_num * parameter_ranges[dimensions_to_search] #pertubation vector to previous best
-    globvars$X[i,] = globvars$X_lbest[i,] + globvars$V[i,]
-    #reflect parameter if out-of-bounds
-    params_below_bounds = globvars$X[i,] < parameter_bounds[,1]
-    params_above_bounds = globvars$X[i,] > parameter_bounds[,2]
-
-    {
-      globvars$X[i,params_below_bounds]=parameter_bounds[params_below_bounds,1]+(parameter_bounds[params_below_bounds,1]-globvars$X[i,params_below_bounds])
-      params_overreflected=params_below_bounds & (globvars$X[i,] > parameter_bounds[,2])    #identify parameters that are now above bounds due to the reflection
-      globvars$X[i,params_overreflected]=parameter_bounds[params_overreflected,1]                                              #set to lower bounds
-    }
-    {
-      globvars$X[i,params_above_bounds]=parameter_bounds[params_above_bounds,2]+(parameter_bounds[params_above_bounds,2]-globvars$X[i,params_above_bounds])
-      params_overreflected=params_above_bounds & (globvars$X[i,] < parameter_bounds[,1])    #identify parameters that are now below bounds due to the reflection
-      globvars$X[i,params_overreflected]=parameter_bounds[params_overreflected,2]                                              #set to upper bounds
-    }
+     if (ncol(globvars$pending_initial_estimates) > 0) #there are still initial estimates that need to be evaluated
+     {
+       #browser()
+       globvars$X[i,] = globvars$pending_initial_estimates[,1]
+       globvars$pending_initial_estimates = globvars$pending_initial_estimates[,-1, drop=FALSE] #remove from list
+     } else
+     { #do random pertubation  
+       #    p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls)    #probability of including a parameter in the search
+       p_inclusion=1-log(globvars$function_calls[i])/log(max_number_function_calls/number_of_particles)    #probability of including a parameter in the search (parallel version)
+       
+       rand_num = runif(number_of_parameters) #draw required number of parameters
+       dimensions_to_search=which(rand_num<=p_inclusion) #select parameters accroding to random number and probability
+       if (length(dimensions_to_search)==0) dimensions_to_search=sample(number_of_parameters,1)     #include at least one parameter in pertubation
+       globvars$V[i,]=0
+       
+       norm_rand_num = rnorm(length(dimensions_to_search)) #normally distributed random numbers
+       globvars$V[i,dimensions_to_search] = norm_rand_num * parameter_ranges[dimensions_to_search] #pertubation vector to previous best
+       globvars$X[i,] = globvars$X_lbest[i,] + globvars$V[i,]
+       #reflect parameter if out-of-bounds
+       params_below_bounds = globvars$X[i,] < parameter_bounds[,1]
+       params_above_bounds = globvars$X[i,] > parameter_bounds[,2]
+       
+        {
+          globvars$X[i,params_below_bounds]=parameter_bounds[params_below_bounds,1]+(parameter_bounds[params_below_bounds,1]-globvars$X[i,params_below_bounds])
+          params_overreflected=params_below_bounds & (globvars$X[i,] > parameter_bounds[,2])    #identify parameters that are now above bounds due to the reflection
+          globvars$X[i,params_overreflected]=parameter_bounds[params_overreflected,1]                                              #set to lower bounds
+        }
+        {
+          globvars$X[i,params_above_bounds]=parameter_bounds[params_above_bounds,2]+(parameter_bounds[params_above_bounds,2]-globvars$X[i,params_above_bounds])
+          params_overreflected=params_above_bounds & (globvars$X[i,] < parameter_bounds[,1])    #identify parameters that are now below bounds due to the reflection
+          globvars$X[i,params_overreflected]=parameter_bounds[params_overreflected,2]                                              #set to upper bounds
+        }
+     }
    }
-   
-   globvars$status   [completed_particles]=0      #mark as "to be computed"
+globvars$status   [completed_particles]=0      #mark as "to be computed"
    globvars$fitness_X[completed_particles]=Inf
    globvars$node_id  [completed_particles] =0
 

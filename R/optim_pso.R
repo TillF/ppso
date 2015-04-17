@@ -33,9 +33,9 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
 
 #  
 
-if (!is.null(max_number_function_calls) && max_number_function_calls < number_of_particles)
-  stop("max_number_function_calls must be at least number_of_particles.")
-
+if (!is.null(max_number_function_calls) && abs(max_number_function_calls) < number_of_particles)
+  stop("abs(max_number_function_calls) must be at least number_of_particles.")
+  
 globvars$is_mpi = FALSE
   
 environment(update_tasklist_pso)=environment() #force subroutines to have this function as parent (implicitly allowing read-only access to globals)
@@ -92,7 +92,7 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
 while (is.null(globvars$break_flag))
 {
   globvars$computation_start[] =Sys.time()      #store time of start of this computation loop
-  if (wait_complete_iteration)      #evaluate all tasks before updateing
+  if (wait_complete_iteration)      #evaluate all tasks before updating
   {    
       if (tryCall)                  #catch error message during evaluation (slower)
       {
@@ -107,6 +107,7 @@ while (is.null(globvars$break_flag))
         globvars$fitness_X=apply(globvars$X,1,objective_function)     #no error message during evaluation (faster)
 
       globvars$status    [] =1      #mark as "finished"
+      globvars$node_id   [] =0
       globvars$function_calls[] =globvars$function_calls[]+1        #increase iteration counter
       update_tasklist_pso()   #update particle speeds and positions based on available results
   } else
@@ -125,6 +126,7 @@ while (is.null(globvars$break_flag))
       globvars$fitness_X [current_particle] =objective_function(globvars$X[current_particle,])     #no error message during evaluation (faster)
 
     globvars$status    [current_particle] =1      #mark as "finished"
+    globvars$node_id   [current_particle] =0
     globvars$function_calls[current_particle] =globvars$function_calls[current_particle]+1        #increase iteration counter
     update_tasklist_pso()   #update particle speeds and positions based on available results
   }

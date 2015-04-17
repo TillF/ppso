@@ -100,15 +100,15 @@ globvars$pending_initial_estimates=array(dim=c(1,0))
 
 if (!is.null(initial_estimates))
   {
-  if ( length(initial_estimates) %% number_of_parameters != 0)
+
+    if (is.vector(initial_estimates))  
+      initial_estimates = matrix(initial_estimates, ncol=1, dimnames=list(names(initial_estimates), NULL))       #reshape any vector as matrix
+    if ( nrow(initial_estimates) != number_of_parameters)
     {
       warning("initial_estimates must contain <number_of_parameters> rows, ignored.") 
-      initial_estimates =NULL
+      initial_estimates = array(dim=c(1,0))
     }  else
     {
-      if (is.vector(initial_estimates))  
-        initial_estimates = matrix(initial_estimates, nrow=number_of_parameters, dimnames=list(names(initial_estimates), NULL))       #reshape any vector as matrix
-      
       out_of_bounds=NULL    #initial estimates that are out of bounds
       for (i in 1:ncol(initial_estimates))
         if (any ((initial_estimates[,i] < parameter_bounds[,1]) | (initial_estimates[,i] > parameter_bounds[,2])))

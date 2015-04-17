@@ -75,7 +75,11 @@ globvars$fitness_gbest = min(globvars$fitness_lbest);
 
 init_particles(lhc_init)  #initialize velocities and particle positions
 
-
+if (max_number_function_calls < 0)
+{                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
+  globvars$function_calls[]=0
+  max_number_function_calls=abs(max_number_function_calls)
+}
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {

@@ -98,7 +98,12 @@ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile)
   
 init_particles(lhc_init)  #initialize velocities and particle positions
 
- 
+if (max_number_function_calls < 0)
+{                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
+  globvars$function_calls[]=0
+  max_number_function_calls=abs(max_number_function_calls)
+} 
+
    globvars$fitness_itbest= Inf     #best fitness in the last it_last iterations
    globvars$it_last_improvement=0               #counter for counting iterations since last improvement
 

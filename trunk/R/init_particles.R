@@ -90,7 +90,7 @@ init_particles=function(lhc_init=FALSE)
         globvars$status [globvars$status==2]=0
         
         min_fitness_index = which.min(globvars$fitness_lbest)
-        if (exists("Vmax") & all(globvars$V[min_fitness_index,]==0)) 
+        if (exists("Vmax") & !is.null(Vmax) & all(globvars$V[min_fitness_index,]==0)) 
            globvars$V[min_fitness_index,]= runif(number_of_parameters,min=-0.01, max=0.01)*Vmax        #ensure that the best particle doesn't stand still
       }
     }

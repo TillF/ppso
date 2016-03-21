@@ -21,7 +21,7 @@ enable diagnostic messages.
 
 }
 \details{
-  This function pushes an object to the master. Also partial assignments like \code{a[3]=4} are possible.
+  This function requests an object (i.e. variable) from the master. Also partial requests like \code{a[3]} are possible.
   This is not necessary for ordinary optimizations! However, it enables the slave to react specifically on the overall conditions of the optimization.\cr
   Potentially useful objects are the variables listed and explained in globvars.R (see package source code).
  }

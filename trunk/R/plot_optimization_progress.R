@@ -5,6 +5,7 @@
 plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
 {
   logfile_content    =read.table(file=  logfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
+  logfile_content$objective_function=as.numeric(as.character(logfile_content$objective_function))
   projectfile_content=read.table(file=projectfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
   number_of_parameters=which(names(logfile_content)=="objective_function")-2
 

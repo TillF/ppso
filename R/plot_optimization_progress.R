@@ -16,10 +16,9 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
 
 
   curbest=which.min(projectfile_content$best_objective_function)
-  curbest_val=projectfile_content[curbest,1:number_of_parameters] #returr value
+  curbest_val=projectfile_content[curbest,1:number_of_parameters] #return value
   if (verbose)
   {
-    curbest=which.min(projectfile_content$best_objective_function)
     print(paste("current optimum found: ",projectfile_content$best_objective_function[curbest]))
     print(" at parameter set:")
     print(projectfile_content[curbest,1:number_of_parameters])

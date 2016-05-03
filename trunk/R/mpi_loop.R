@@ -3,7 +3,8 @@ mpi_loop = function(init_search=FALSE, method="dds")   #loop in which the master
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 
 {
-
+  verbose_master = globvars$verbose_master #get global value
+  
 if (method=="dds") update_tasklist= update_tasklist_dds else
                    update_tasklist= update_tasklist_pso 
 
@@ -75,14 +76,21 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
                 if (verbose_master) {print("...break_file detected, aborting..."); flush.console()}
                 globvars$break_flag="user interrupt"   
                 return()
-              }  
+              } else
+              if (verbose_master) {print(paste0(Sys.time()," ...no breakfile detected.")); flush.console()}
+            
+              if (verbose_master) {print(paste0(Sys.time()," ...checking for execution timeout of slaves...")); flush.console()}
+            
               if (!is.null(globvars$execution_timeout)) sleeptime=check_execution_timeout()
+              if (verbose_master) {print(paste0(Sys.time()," ...going to sleep for ", sleeptime)); flush.console()}
+              
               Sys.sleep(sleeptime) 
               if (verbose_master)
               {
                  if (difftime(Sys.time(), output_time, units="sec") > 10)
                  {
-                  print(" ...still waiting..."); flush.console()
+                  print(paste(Sys.time()," ...still waiting"));
+                  flush.console()
                   output_time=Sys.time()
                  }
               }

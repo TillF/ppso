@@ -142,7 +142,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
     {
       warning(paste("The following slave(s) could not change into the respective directory and remain unused:\n",
         paste(t(cbind(slave_hosts," : ",wd_to_be_set,"\n ")[failed_dirchanges,]),collapse="")))
-      globvars$closed_slaves=length(failed_dirchanges)         #count the slaves woth failed dirchange as "closed"
+      globvars$closed_slaves=length(failed_dirchanges)         #count the slaves with failed dirchange as "closed"
       nslaves=nslaves-globvars$closed_slaves
       globvars$idle_slaves=globvars$idle_slaves[-failed_dirchanges]     #remove the slaves from list of ready slaves
     }
@@ -152,7 +152,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
   
   if (globvars$mpi_mode=="loop")     #alternative slave-MPI-mode
   {
-      
+    if (verbose_master) print(paste(Sys.time(),"initiating slaves in loop-mode."))      
     mpi_receive_loop = function()
     {
       tag=0
@@ -169,7 +169,8 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
             mpi.send.Robj(obj="bye", dest=0, tag=3) #tag 3 demarks good-bye
 
 
-      }  
+      } 
+      if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": leaving loop, good bye."))    
     }
 
     mpi.bcast.Robj2slave(mpi_receive_loop)               #transfer mpi-loop function to slaves

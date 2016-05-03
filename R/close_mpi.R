@@ -26,17 +26,21 @@ close_mpi=function()
   }
 
   if (globvars$mpi_mode=="loop")
+  {  
+    if (verbose_master){ print(paste(Sys.time()," ...sending slaves kill-tag...")); flush.console()}
     for (slave_id in 1:globvars$nslaves) mpi.send.Robj(obj="kill", dest=slave_id, tag=7)
-
+  }
   #mpi.abort() #causes hangup
   
   if (!is.null(globvars$nslaves) &                                                    #there are slaves
         ((globvars$closed_slaves ==0) || (globvars$closed_slaves == globvars$nslaves))) #all (or none) are still available
 #        & all(globvars$status==1)) 
   {
-    if (verbose_master){ print(paste(Sys.time()," ...trying to close slaves...")); flush.console()}
-
+    if (verbose_master){ print(paste(Sys.time()," ...telling slaves to close log...")); flush.console()}
     if (verbose_slave) mpi.bcast.cmd(sink()) #terminate file logs of slaves - causes hangup for busy slaves
+
+    if (verbose_master){ print(paste(Sys.time()," ...trying to close slaves...")); flush.console()}
+    
     mpi.close.Rslaves()    #close cluster, if enabled, no prior deaths and no pending runs
   }  
   else

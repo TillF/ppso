@@ -22,6 +22,9 @@ environment(init_visualisation)=environment()
 
 verbose_slave  = (verbose == TRUE) | ("slaves" %in% verbose)	#configure output level of slaves
 verbose_master = (verbose == TRUE) | ("master" %in% verbose)	#configure output level of master
+globvars$verbose_master = verbose_master #set global value
+globvars$verbose_slave  = verbose_slave  #set global value
+
 
 if ((!is.null(break_file)) && (file.exists(break_file)))      #delete break_file, if existent
   unlink(break_file)   

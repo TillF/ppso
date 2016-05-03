@@ -29,7 +29,7 @@ check_execution_timeout = function()
   
     if (current_time_execution > mean_execution_time*globvars$execution_timeout)     #current call takes too long?
     {
-       if (verbose_master) {print(paste0(Sys.time()," ...current execution time (", current_time_execution,") greater than benchmark (",mean_execution_time,")"); flush.console()}
+       if (verbose_master) {print(paste0(Sys.time()," ...current execution time (", current_time_execution,") greater than benchmark (",mean_execution_time,")")); flush.console()}
        if (verbose_master) print(paste(Sys.time()," ...slave",i,"exceeded timeout, resetting..."))
               
        globvars$node_id[current_particle] = 0          #reset particle
@@ -43,7 +43,7 @@ check_execution_timeout = function()
         warning(paste("Permanently excluded slave",i,"because of failing to produce results within",mean_execution_time,"s for",maxtries,"attempts."))
        }                               
     } else
-    if (verbose_master) {print(paste0(Sys.time()," ...current execution time (", current_time_execution,") less than benchmark (",mean_execution_time,")"); flush.console()}
+    if (verbose_master) {print(paste0(Sys.time()," ...current execution time (", current_time_execution,") less than benchmark (",mean_execution_time,")")); flush.console()}
     
   }
 

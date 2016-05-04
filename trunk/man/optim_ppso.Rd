@@ -105,7 +105,7 @@ If set to TRUE, corresponds to repeated call of \code{\link{plot_optimization_pr
 }
 
   \item{tryCall}{
-If set to \code{TRUE}, \code{objective_function} is executed using \code{try}, which yield error messages if \code{objective_function} fails on any slave. For very fast evaluating functions, this may increase evaluation time.
+If set to \code{TRUE}, \code{objective_function} is executed using \code{try}, which yield error messages if \code{objective_function} fails on any slave. The optimization retries, but terminates when an error is produced a second time for the same parameter set. For very fast evaluating functions, this may increase evaluation time.
 }
 
 
@@ -182,6 +182,7 @@ recommended use:
 \item{optim_ppso_robust, optim_pdds_robust}{			 parallel computation: computationally demanding objective function and multi-core CPU or network slaves.       }
 }
 concerning reproducibility: setting the seed using \code{set.seed()} should make results reproducable. However, in the parallel versions, the randomness introduced by the order of the results returned from the slaves cannot be controlled, so this may limit reproducibility.
+
 }
 
 \value{

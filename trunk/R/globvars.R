@@ -68,6 +68,7 @@ z = NULL
 #globvars$relocated
 #globvars$progress_window
 #globvars$status                    # [1:nparticles]: denotes open task (0), finished (1) or computing (2)
+#globvars$recent_error                    # if a recent call has produced an error, the slaves's id is stored here
 
 #globvars$V
 #globvars$X                 #current positions of particles (number_of_particles X number_of_parameters)

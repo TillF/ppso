@@ -1,11 +1,11 @@
 #internal function: check if any of the nodes exceeds the allowed execution time
-check_execution_timeout = function()
+check_execution_timeout = function(verbose_master)
 #note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 {
   #maxtries=10        #maximum number of attempts to run on a slave before it is no longer used
   
-  verbose_master = globvars$verbose_master #get global value
+  #verbose_master = globvars$verbose_master #get global value
 
   nodes=unique(globvars$node_id[globvars$status==2])                         #check all nodes that are currently employed
   min_exp_runtime = Inf #minimum expected runtime of all active slaves
@@ -36,7 +36,9 @@ check_execution_timeout = function()
        {print(paste0(Sys.time()," ...current execution time (", current_time_execution,") greater than", globvars$execution_timeout, "* benchmark (",mean_execution_time,"), resetting...")); flush.console()}
 
        globvars$node_id[current_particle] = 0          #reset particle
-       globvars$status [current_particle] = 0  
+       globvars$status [current_particle] = 0 
+       globvars$recent_error [current_particle] = i    #mark this particle as having produced an error recently
+       
        globvars$slave_status[i,"counter"] = globvars$slave_status[i,"counter"] +1   #increase counter of total interruptions
        globvars$slave_status[i,"timeouts_in_row"] = globvars$slave_status[i,"timeouts_in_row"] +1   #increase counter of consecutive interruptions
        

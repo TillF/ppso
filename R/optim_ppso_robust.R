@@ -73,6 +73,7 @@ globvars$X             =array(Inf,c(number_of_particles,number_of_parameters))  
 globvars$V             =array(0,c(number_of_particles,number_of_parameters))  #globvars$V: velocity in parameter space
 globvars$fitness_X     =array(Inf,number_of_particles)            #optimum of each particle at current iteration
 globvars$status        =array(0,number_of_particles)  #particle globvars$status: 0: to be computed; 1: finished; 2: in progress
+globvars$recent_error  =array(0,number_of_particles)  # if a recent call has produced an error, the slaves's id is stored here
 globvars$computation_start=rep(Sys.time(),number_of_particles)          #start of computation (valid only if globvars$status=2)
 globvars$node_id       =array(0,number_of_particles)                              #node number of worker / slave
 globvars$X_lbest       =array(0.,c(number_of_particles,number_of_parameters))        # current optimum of each particle so far

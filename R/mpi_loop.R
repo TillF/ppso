@@ -81,19 +81,21 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
             
               if (verbose_master) {print(paste0(Sys.time()," ...checking for execution timeout of slaves...")); flush.console()}
             
-              if (!is.null(globvars$execution_timeout)) sleeptime=check_execution_timeout()
-              if (verbose_master) {print(paste0(Sys.time()," ...going to sleep for ", sleeptime)); flush.console()}
-              
-              Sys.sleep(sleeptime) 
+              if (!is.null(globvars$execution_timeout)) sleeptime=check_execution_timeout(verbose_master=verbose_master && difftime(Sys.time(), output_time, units="sec") > 10)
               if (verbose_master)
               {
-                 if (difftime(Sys.time(), output_time, units="sec") > 10)
-                 {
+                if (difftime(Sys.time(), output_time, units="sec") > 10)
+                {
                   print(paste(Sys.time()," ...still waiting"));
                   flush.console()
                   output_time=Sys.time()
-                 }
+                }
               }
+              
+              if (verbose_master) {print(paste0(Sys.time()," ...going to sleep for ", sleeptime)); flush.console()}
+              
+              Sys.sleep(sleeptime) 
+              
           }        
         if (!mpi.iprobe(mpi.any.source(),mpi.any.tag())) next #the previous loop was broken because of timeout, re-issue task
         if (verbose_master) {print(paste(Sys.time()," ...message detected")); flush.console()}
@@ -116,6 +118,7 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
         {
           globvars$fitness_X [current_particle] = slave_message
           globvars$status    [current_particle] =1      #mark as "finished"
+          globvars$recent_error [current_particle] = 0  #mark as "no recent error"
           globvars$slave_status[slave_id,"timeouts_in_row"] = 0             #this result was in time, so reset the counter of consecutive timeouts 
           globvars$slave_status[slave_id,"task_particle"] = 0                     #remove association to completed particle
           redundant_calculations = globvars$slave_status[,"task_particle"] == current_particle  #find still treating the same particle
@@ -139,9 +142,17 @@ if (method=="dds") update_tasklist= update_tasklist_dds else
             if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"has gone away")); flush.console()}
             globvars$closed_slaves = globvars$closed_slaves + 1
         } else if (tag == 4) {    # error occured during the execution of the objective function
-            if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"has produced an error:",slave_message)); flush.console()}
-          globvars$break_flag=paste("Abort, slave",slave_id,":",slave_message)
-          globvars$closed_slaves=globvars$nslaves
+            if (verbose_master) print(paste(Sys.time()," ...slave",slave_id,"has produced an error:",slave_message))
+            current_particle = globvars$slave_status[slave_id,"task_particle"]           #find which particle this result belongs to
+            if (globvars$recent_error [current_particle] == 0)
+              if (verbose_master) print(" ...retrying particle...") 
+            else
+            {   
+              if (verbose_master) print(" This particle caused an error the second time, quitting...") 
+              globvars$break_flag=paste("Abort, slave",slave_id,":",slave_message)
+              globvars$closed_slaves=globvars$nslaves
+            }  
+            flush.console()
         } else if (tag == 5) {    #object request from slave 
     			slave_message_info <- mpi.get.sourcetag() 
     			 if (verbose_master) {print(paste(Sys.time()," ...slave",slave_id,"requested object(s)",paste(slave_message, collapse=","))); flush.console()}

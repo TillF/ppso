@@ -41,7 +41,8 @@ close_mpi=function()
 
     if (verbose_master){ print(paste(Sys.time()," ...trying to close slaves...")); flush.console()}
     
-    mpi.close.Rslaves()    #close cluster, if enabled, no prior deaths and no pending runs
+    #mpi.close.Rslaves()    #causes hang on orson: close cluster, if enabled, no prior deaths and no pending runs
+    mpi.quit()
   }  
   else
     if (interactive()) warning("Couldn't close some slaves. You may try by calling 'mpi.close.Rslaves()'. BEWARE: This may crash R, sorry for the inconvenience.")

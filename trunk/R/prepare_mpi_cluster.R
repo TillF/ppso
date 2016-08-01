@@ -78,7 +78,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
           mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            
         } else                             #an error occured during execution
         {
-          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": error during call of objective function, returning message to master..."))
+          if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": error during call of objective function, returning message to master. Error message:",as.character(results)))
           mpi.send.Robj(paste("(",Sys.info()["nodename"],"):",as.character(results)),0,4)    #return the error message, tagged as "error" (4)
         }        
       } else        #non-tryCall option

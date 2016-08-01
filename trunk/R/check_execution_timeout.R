@@ -33,7 +33,7 @@ check_execution_timeout = function(verbose_master)
     if (current_time_execution > mean_execution_time*globvars$execution_timeout)     #current call takes too long?
     {
        if (verbose_master) 
-       {print(paste0(Sys.time()," ...current execution time (", current_time_execution,") greater than", globvars$execution_timeout, "* benchmark (",mean_execution_time,"), resetting...")); flush.console()}
+       {print(paste0(Sys.time(),": slave ",i," current execution time (", current_time_execution,") greater than", globvars$execution_timeout, "* benchmark (",mean_execution_time,"), resetting...")); flush.console()}
 
        globvars$node_id[current_particle] = 0          #reset particle
        globvars$status [current_particle] = 0 

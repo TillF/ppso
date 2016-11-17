@@ -17,17 +17,17 @@
 \usage{
 optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=500,
   w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
+  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, ...)
 optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=500,
   w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
+  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE, ...)
 
 optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500,
   r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
+  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, ...)
 optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 1,                               max_number_function_calls= 500,
   r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
+  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE, ...)
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -106,6 +106,10 @@ If set to TRUE, corresponds to repeated call of \code{\link{plot_optimization_pr
 
   \item{tryCall}{
 If set to \code{TRUE}, \code{objective_function} is executed using \code{try}, which yield error messages if \code{objective_function} fails on any slave. The optimization retries, but terminates when an error is produced a second time for the same parameter set. For very fast evaluating functions, this may increase evaluation time.
+} 
+
+\item{...}{
+additional arguments passed to \code{objective_function}
 }
 
 

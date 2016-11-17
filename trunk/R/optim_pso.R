@@ -2,7 +2,7 @@ optim_pso <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles=40,max_number_of_iterations=5, max_number_function_calls=500, w=1,  C1=2, C2=2, abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE,tryCall=FALSE, verbose=FALSE)
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE,tryCall=FALSE, verbose=FALSE, ...)
 # do particle swarm optimization
 {
   
@@ -100,7 +100,7 @@ while (is.null(globvars$break_flag))
   {    
       if (tryCall)                  #catch error message during evaluation (slower)
       {
-        globvars$fitness_X=try(apply(globvars$X,1,objective_function),silent=TRUE)
+        globvars$fitness_X=try(apply(globvars$X,1,objective_function, ...),silent=TRUE)
         if (!is.numeric(globvars$fitness_X))                      #an error occured during execution
         {
           globvars$break_flag=paste("aborted: ",as.character(globvars$fitness_X))    
@@ -108,7 +108,7 @@ while (is.null(globvars$break_flag))
         }        
       }
       else
-        globvars$fitness_X=apply(globvars$X,1,objective_function)     #no error message during evaluation (faster)
+        globvars$fitness_X=apply(globvars$X,1,objective_function, ...)     #no error message during evaluation (faster)
 
       globvars$status    [] =1      #mark as "finished"
       globvars$node_id   [] =0
@@ -119,7 +119,7 @@ while (is.null(globvars$break_flag))
   {
     if (tryCall)                  #catch error message during evaluation (slower)
     {
-      globvars$fitness_X [current_particle]=try(objective_function(globvars$X[current_particle,]),silent=TRUE)
+      globvars$fitness_X [current_particle]=try(objective_function(globvars$X[current_particle,], ...),silent=TRUE)
       if (!is.numeric(globvars$fitness_X [current_particle]))                      #an error occured during execution
       {
         globvars$break_flag=paste("aborted: ",as.character(globvars$fitness_X [current_particle]))    
@@ -127,7 +127,7 @@ while (is.null(globvars$break_flag))
       }        
     }
     else
-      globvars$fitness_X [current_particle] =objective_function(globvars$X[current_particle,])     #no error message during evaluation (faster)
+      globvars$fitness_X [current_particle] =objective_function(globvars$X[current_particle,], ...)     #no error message during evaluation (faster)
 
     globvars$status    [current_particle] =1      #mark as "finished"
     globvars$node_id   [current_particle] =0

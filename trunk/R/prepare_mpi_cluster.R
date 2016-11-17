@@ -65,7 +65,9 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
       if (tryCall)
       {
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
-        results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
+        #results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
+        results=try(do.call(what = objective_function, args=c(params, additional_args)),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
+        
         if (verbose_slave)
     		{
     			print(paste(Sys.time(),"slave",mpi.comm.rank(),":  ...objective function evaluation completed"))
@@ -84,7 +86,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
       } else        #non-tryCall option
       {  
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
-        results=objective_function(params)  # call the objective function with the respective parameters, and create results (without error handling, faster)
+        results=do.call(what = objective_function, args=c(params, additional_args))  # call the objective function with the respective parameters, and create results (without error handling, faster)
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...objective function evaluation completed"))   
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning results to master..."))
         mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?
@@ -94,8 +96,8 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
       return()
   } #end function "perform_task"
   
- 
-
+  additional_args <- list(...) #get list of arguments hidden in ...
+  mpi.bcast.Robj2slave(additional_args)                   #send any additional arguments to slaves
 
   mpi.bcast.Robj2slave(verbose_slave)                   #send verbose-flags to slaves
   if (verbose_slave)

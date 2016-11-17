@@ -2,7 +2,7 @@ optim_dds <-
 function (objective_function=sample_function, number_of_parameters=2, number_of_particles= 1, max_number_function_calls=500, r=0.2,  abstol=-Inf,  reltol=-Inf,  max_wait_iterations=50,
    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, lhc_init=FALSE, part_xchange=2,
   #runtime & display parameters
-    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE)
+    do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE,...)
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
 
@@ -91,7 +91,7 @@ if (verbose_master)  {print(paste(Sys.time(),"starting initialization runs..."))
     globvars$status[]=1; globvars$status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
   
     globvars$computation_start[pre_run_computations]=Sys.time()
-    globvars$fitness_X [pre_run_computations]=apply(as.matrix(globvars$X[pre_run_computations,],nrow=length(pre_run_computations)),1,objective_function)    #execute pending pre-runs
+    globvars$fitness_X [pre_run_computations]=apply(as.matrix(globvars$X[pre_run_computations,],nrow=length(pre_run_computations)),1,objective_function, ...)    #execute pending pre-runs
     globvars$status    [pre_run_computations] =1      #mark as pre-runs "finished"
   
     if (!is.null(logfile))  write.table(file = logfile, cbind(format(globvars$computation_start[pre_run_computations],"%Y-%m-%d %H:%M:%S"), matrix(globvars$X[pre_run_computations,],ncol=ncol(globvars$X)), globvars$fitness_X[pre_run_computations], #write pre-runs to logfile, too
@@ -150,7 +150,7 @@ while (is.null(globvars$break_flag))
     globvars$computation_start[] =Sys.time()      #store time of start of this computation loop
     if (tryCall)                  #catch error message during evaluation (slower)
     {
-      globvars$fitness_X=try(apply(globvars$X,1,objective_function),silent=TRUE)
+      globvars$fitness_X=try(apply(globvars$X,1,objective_function,...),silent=TRUE)
       if (!is.numeric(globvars$fitness_X))                      #an error occured during execution
       {
         globvars$break_flag=paste("aborted: ",as.character(globvars$fitness_X))    
@@ -158,7 +158,7 @@ while (is.null(globvars$break_flag))
       }        
     }
     else
-      globvars$fitness_X=apply(globvars$X,1,objective_function)     #no error message during evaluation (faster)
+      globvars$fitness_X=apply(globvars$X,1,objective_function, ...)     #no error message during evaluation (faster)
   
     globvars$status    [] =1      #mark as "finished"
     globvars$function_calls[] =globvars$function_calls[]+1        #increase iteration counter

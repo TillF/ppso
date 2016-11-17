@@ -3,7 +3,7 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
    wait_complete_iteration=FALSE,parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, Vmax=(parameter_bounds[,2]-parameter_bounds[,1])/3,lhc_init=FALSE,
   #runtime & display parameters
 do_plot=NULL, wait_for_keystroke=FALSE, logfile="ppso.log",projectfile="ppso.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, 
-tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
+tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE, ...)
 # do particle swarm optimization
 {
 #export r/w globals to separate environment
@@ -89,7 +89,7 @@ globvars$break_flag=NULL       #flag indicating if a termination criterium has b
  globvars$fitness_gbest = Inf;
  globvars$fitness_lbest[] = Inf
 
-if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves,working_dir_list=working_dir_list) else globvars$nslaves=NULL             #initiate cluster, if enabled
+if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves,working_dir_list=working_dir_list, ...) else globvars$nslaves=NULL             #initiate cluster, if enabled
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {
@@ -113,7 +113,7 @@ if (max_number_function_calls < 0)
  update_tasklist_pso()   
   if (!is.null(globvars$break_flag)) 
     globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag) else
-    mpi_loop(init_search=FALSE, method="pso") #perform mpi-loop 
+    mpi_loop(init_search=FALSE, method="pso", ...) #perform mpi-loop 
  
   if (verbose_master) print(paste(Sys.time(),"finished actual runs."))  
 

@@ -3,7 +3,7 @@ function (objective_function=sample_function, number_of_parameters=2, number_of_
    parameter_bounds=cbind(rep(-1,number_of_parameters),rep(1,number_of_parameters)), initial_estimates=NULL, lhc_init=FALSE, part_xchange=2,
   #runtime & display parameters
     do_plot=NULL, wait_for_keystroke=FALSE, logfile="dds.log",projectfile="dds.pro", save_interval=ceiling(number_of_particles/4),load_projectfile="try",break_file=NULL, plot_progress=FALSE, 
-    tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE)
+    tryCall=FALSE, nslaves=-1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE,...)
 
 # do Dynamically Dimensioned Search (DDS) optimization (Tolson & Shoemaker 2007)
 {
@@ -70,7 +70,7 @@ globvars$fitness_lbest[] = Inf
 globvars$fitness_gbest = Inf
 
 if (verbose_master) {print(paste(Sys.time(),"initializing slaves...")); flush.console()}
-if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves, working_dir_list=working_dir_list,verbose_slave=verbose_slave) else globvars$nslaves=NULL             #initiate cluster, if enabled
+if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves, working_dir_list=working_dir_list,verbose_slave=verbose_slave, ...) else globvars$nslaves=NULL             #initiate cluster, if enabled
 if (verbose_master) {print(paste(Sys.time(),"...slaves initialized.")); flush.console()}
 
 #presearch / initialisation: 
@@ -110,7 +110,7 @@ globvars$status_org=globvars$status  #  store original contents
     } 
     globvars$status[]=1; globvars$status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
   
-    mpi_loop(init_search=TRUE) #perform mpi-loop for pre-search
+    mpi_loop(init_search=TRUE, ...) #perform mpi-loop for pre-search
 #    browser()
     
     max_number_function_calls=max_number_function_calls-length(pre_run_computations)  #reduce number of available calls due to pre-search
@@ -163,7 +163,7 @@ if (is.null(globvars$break_flag))
   update_tasklist_dds()   
   if (!is.null(globvars$break_flag)) 
     globvars$break_flag=paste("nothing done; project file fulfills abortion criteria:",globvars$break_flag) else
-    mpi_loop(init_search=FALSE, method="dds") #perform mpi-loop for main search
+    mpi_loop(init_search=FALSE, method="dds", ...) #perform mpi-loop for main search
  
   if (verbose_master) {print(paste(Sys.time(),"finished actual runs.")); flush.console()}
 }

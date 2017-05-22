@@ -15,7 +15,7 @@
 
 globvars$mpi_mode="loop" #"loop"    ("bcast" is probably obsolete, as it is less stable and slower)
 
-prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE)
+prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE, ...)
 {
   if (!is.loaded("mpi_initialize")) {         
   	if (!require("Rmpi")) stop("Package Rmpi not found. Install it or use serial version of this call (optim_pso or optim_dds).")
@@ -55,6 +55,10 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
 
   
   perform_task = function(params,slave_id) {
+    
+    # put all arguments into a list
+    argl <- additional_args
+    argl[[length(argl)+1]] <- params
 
 
       if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": received message for slave",slave_id))
@@ -66,7 +70,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
       {
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
         #results=try(objective_function(params),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
-        results=try(do.call(what = objective_function, args=c(params, additional_args)),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
+        results=try(do.call(what = objective_function, args=argl),silent=TRUE)  # call the objective function with the respective parameters, and create results (with error handling, slower)
         
         if (verbose_slave)
     		{
@@ -86,7 +90,7 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
       } else        #non-tryCall option
       {  
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": calling objective function..."))
-        results=do.call(what = objective_function, args=c(params, additional_args))  # call the objective function with the respective parameters, and create results (without error handling, faster)
+        results=do.call(what = objective_function, args=argl)  # call the objective function with the respective parameters, and create results (without error handling, faster)
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": ...objective function evaluation completed"))   
         if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),": returning results to master..."))
         mpi.send.Robj(results,0,2)      # Send the results back as a task_done slave_message            #ii isend doesn't work - why?

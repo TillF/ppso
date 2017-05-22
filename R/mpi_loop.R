@@ -1,4 +1,4 @@
-mpi_loop = function(init_search=FALSE, method="dds")   #loop in which the master coordinates slave action
+mpi_loop = function(init_search=FALSE, method="dds", ...)   #loop in which the master coordinates slave action
 #note: this function reads and writes to non-local variables (i.e. variables declared in the calling function, usually optim_*)
 #although poor style, this method was chosen to avoid passing large arrays of arguments and results, which is time-intensive
 

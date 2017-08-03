@@ -78,6 +78,15 @@ if (verbose_master) {print(paste(Sys.time(),"...slaves initialized.")); flush.co
 #  for each uninitialized particle (uninitialized_particles) a number of prior calls (init_calls) are performed, of which the best is used
 if (verbose_master) {print(paste(Sys.time(),"initializing particle positions...")); flush.console()}
   init_particles(lhc_init)  #initialize particle positions
+
+if (verbose_master) {  
+  if (load_projectfile=="failed")
+    print(paste(Sys.time(),"...loading projectfile failed."))
+  if (load_projectfile=="loaded")
+    print(paste(Sys.time(),"...particles initialized from projectfile."))
+  flush.console() 
+}  
+
   if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {
     if (!is.null(colnames(globvars$X)))

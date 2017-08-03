@@ -21,10 +21,13 @@ close_mpi=function()
         i=i+1 #count orphaned messages
     }
     if (i > sum(globvars$status==2)) warning(paste(i,"orphaned MPI-messages discarded."))
-    if (i < sum(globvars$status==2)) 
-      warning(paste(sum(globvars$status==2)-i,"slave(s) may still be evaluating."))
   }
-
+  if (i < sum(globvars$status==2)) 
+  {  
+    warning(paste(sum(globvars$status==2)-i,"slave(s) may still be evaluating."))
+    if (verbose_master) print(paste(sum(globvars$status==2)-i,"slave(s) may still be evaluating.")) 
+  }
+  
   if (globvars$mpi_mode=="loop")
   {  
     if (verbose_master){ print(paste(Sys.time()," ...sending slaves kill-tag...")); flush.console()}
@@ -41,8 +44,10 @@ close_mpi=function()
 
     if (verbose_master){ print(paste(Sys.time()," ...trying to close slaves...")); flush.console()}
     
-    #mpi.close.Rslaves()    #causes hang on orson: close cluster, if enabled, no prior deaths and no pending runs
+    #mpi.close.Rslaves()    #causes hang, when slaves are still in mpi_loop (which they don't leave, because the kill-message has been deleted?)
+    
     #mpi.quit()   #causes hang on orson
+    if (verbose_master){ print(paste(Sys.time()," end of close_mpi.")); flush.console()}
   }  
   else
     if (interactive()) warning("Couldn't close some slaves. You may try by calling 'mpi.close.Rslaves()'. BEWARE: This may crash R, sorry for the inconvenience.")

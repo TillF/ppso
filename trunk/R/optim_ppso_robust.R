@@ -89,7 +89,10 @@ globvars$break_flag=NULL       #flag indicating if a termination criterium has b
  globvars$fitness_gbest = Inf;
  globvars$fitness_lbest[] = Inf
 
-if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves,working_dir_list=working_dir_list, ...) else globvars$nslaves=NULL             #initiate cluster, if enabled
+if (verbose_master) {print(paste(Sys.time(),"initializing slaves...")); flush.console()}
+if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves, working_dir_list=working_dir_list,verbose_slave=verbose_slave, ...) else globvars$nslaves=NULL             #initiate cluster, if enabled
+if (verbose_master) {print(paste(Sys.time(),"...slaves initialized.")); flush.console()}
+
 
 if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
   {

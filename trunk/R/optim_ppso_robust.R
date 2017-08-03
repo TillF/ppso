@@ -107,12 +107,13 @@ if (verbose_master) {print(paste(Sys.time(),"...slaves initialized.")); flush.co
  
  if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
  {
-   if (!is.null(colnames(globvars$X)))
+   if (verbose_master) {print(paste(Sys.time(),"...prepared log file (header written)")); flush.console()}
+  if (!is.null(colnames(globvars$X)))
      par_names=paste(colnames(globvars$X),collapse="\t") else
        par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters
      write.table(paste("time",par_names,"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
  }
-
+ 
 if (max_number_function_calls < 0)
 {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
   globvars$function_calls[]=0

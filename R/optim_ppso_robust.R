@@ -94,15 +94,24 @@ if (!is.null(globvars$nslaves)) prepare_mpi_cluster(nslaves=globvars$nslaves, wo
 if (verbose_master) {print(paste(Sys.time(),"...slaves initialized.")); flush.console()}
 
 
-if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
-  {
-    if (!is.null(colnames(globvars$X)))
-      par_names=paste(colnames(globvars$X),collapse="\t") else
-      par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters
-    write.table(paste("time",par_names,"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
-  }
-  
-init_particles(lhc_init)  #initialize velocities and particle positions
+ if (verbose_master) {print(paste(Sys.time(),"initializing particle positions...")); flush.console()}
+ init_particles(lhc_init)  #initialize particle positions
+ 
+ if (verbose_master) {  
+   if (load_projectfile=="failed")
+     print(paste(Sys.time(),"...loading projectfile failed."))
+   if (load_projectfile=="loaded")
+     print(paste(Sys.time(),"...particles initialized from projectfile."))
+   flush.console() 
+ }  
+ 
+ if (!is.null(logfile) && ((load_projectfile!="loaded") || (!file.exists(logfile))))        #create logfile header, if it is not to be appended, or if it does not yet exist
+ {
+   if (!is.null(colnames(globvars$X)))
+     par_names=paste(colnames(globvars$X),collapse="\t") else
+       par_names=paste(rep("parameter",number_of_parameters),seq(1,number_of_parameters),sep="_",collapse="\t") #simple numbering of parameters
+     write.table(paste("time",par_names,"objective_function","worker",sep="\t") , file = logfile, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+ }
 
 if (max_number_function_calls < 0)
 {                                                         #indicator for "reset function counter" - ignore the number of function calls read from the project file
@@ -127,9 +136,9 @@ if ((globvars$closed_slaves==globvars$nslaves) && is.null(globvars$break_flag))
 ret_val=list(value=globvars$fitness_gbest,par=globvars$X_gbest,function_calls=sum(globvars$function_calls),break_flag=globvars$break_flag) 
 
 
-if (verbose_master) print(paste(Sys.time(),"closing MPI..."))    
+if (verbose_master) {print(paste(Sys.time(),"closing MPI...")); flush.console()}
 close_mpi()                        #diligently close Rmpi session
-if (verbose_master) print(paste(Sys.time(),"...closed."))    
+if (verbose_master) {print(paste(Sys.time(),"...closed.")); flush.console()}
 
 return(ret_val) 
 }

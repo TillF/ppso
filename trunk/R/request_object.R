@@ -16,16 +16,16 @@
         messge = mpi.recv.Robj(source=0, tag=mpi.any.tag())
         messge_info = mpi.get.sourcetag()
         tag      = messge_info[2]
-        if (tag == 7)
+        if (tag == 7) #this is the shutdown command
         {
             if (messge != "kill") #dunno why, but this happens!
             {
               if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  received erroneous kill message, Ignored. Message: ",messge))        
-              next
+              next #wait for next message
             }
             if (verbose_slave) print(paste(Sys.time(),"slave",mpi.comm.rank(),":  received kill message, aborting. Message: ",messge))
-            stop("slave stopped.")    #abort current evaluation of functions on this slave
-            return("xstopped")
+            assign("globvars$kill_msg", TRUE,parent.frame(n=2)) #set global flag for kill message
+            return("Received kill-signal, no more waiting for requested object.")    #abort current evaluation of functions on this slave
         }
         if (is.function(messge) || length(messge)!=length(object_names)) 
         {

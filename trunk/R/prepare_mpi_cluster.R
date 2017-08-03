@@ -171,7 +171,8 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
           if ((tag == 0) )     #task message
             perform_task(params=messge, slave_id=mpi.comm.rank())        #do task
             
-          if ((tag == 7) && (messge == "kill"))     #kill-message
+          if (((tag == 7) && (messge == "kill")) ||
+              !is.null(globvars$kill_msg))     #kill-message
             mpi.send.Robj(obj="bye", dest=0, tag=3) #tag 3 demarks good-bye
 
 

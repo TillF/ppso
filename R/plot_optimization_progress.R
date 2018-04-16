@@ -126,6 +126,7 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   most_used_unit = names(sort(table(tunits), decreasing = TRUE)[1]) #find most used units among execution times
   for (i in 1:length(workers))
   { 
+    if (workers[i] %in% omitted_workers) next
     units(execution_time[[i]])=most_used_unit
     
     if (verbose)

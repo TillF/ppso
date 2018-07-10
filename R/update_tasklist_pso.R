@@ -32,9 +32,12 @@ update_tasklist_pso=function()                        #update particle positions
       if (globvars$ch!="c") globvars$ch = strtoi(globvars$ch) #counter
       if (is.na(globvars$ch)) globvars$ch=""
     }  
-   if (any(globvars$fitness_X %in% c(NA, NaN)))
-      stop("Objective function mustn't yield NA or NaN. Modify it to return very large numbers instead.")
-
+   invalid_gofs = globvars$fitness_X %in% c(NA, NaN)
+   if (any(invalid_gofs))
+   { 
+      inv_pars = paste0(globvars$X[which(invalid_gofs)[1],], collapse=", ")
+      stop(paste0("Objective function mustn't yield NA or NaN. Modify it to return very large numbers instead.\nProblematic parameter set: ", inv_pars))
+   }
 
    # Update the local bests and their fitness
    improved_particles=globvars$fitness_X < globvars$fitness_lbest #mark particles that improved their fitness

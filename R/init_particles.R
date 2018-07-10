@@ -109,13 +109,16 @@ if (!is.null(initial_estimates))
       initial_estimates = array(dim=c(1,0))
     }  else
     {
-      out_of_bounds=NULL    #initial estimates that are out of bounds
+      out_of_bounds=NULL    #initial estimates number that are out of bounds
+      pars_oob = list() #for collecting which parameters are out of bounds
       for (i in 1:ncol(initial_estimates))
-        if (any ((initial_estimates[,i] < parameter_bounds[,1]) | (initial_estimates[,i] > parameter_bounds[,2])))
+        p_t = (initial_estimates[,i] < parameter_bounds[,1]) | (initial_estimates[,i] > parameter_bounds[,2])
+        if (any (p_t))
          out_of_bounds=c(out_of_bounds,i)
+        pars_oob = c(pars_oob, which(p_t))
       if (any(out_of_bounds))
       {
-        warning(paste("initial estimates in row",paste(out_of_bounds,collapse=", "),"are out of bounds, ignored"))
+        warning(paste("initial estimates in row(s)",paste(out_of_bounds,collapse=", "),"are out of bounds (parameters ", paste0(pars_oob, collapse=", "),", respectively), ignored."))
         initial_estimates = initial_estimates[,- out_of_bounds, drop=FALSE]     #discard invalid initial estimates
       }
       if (ncol(initial_estimates) > noninitialised_particles)

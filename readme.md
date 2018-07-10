@@ -9,7 +9,7 @@ The parallelized version builds on Rmpi and is intended for highly computational
 Another focus of this package is the possibility to resume interrupted optimization runs from the intermediate project files.
 These features make this package useful for the automatic calibration of complex numerical models (e.g. hydrological models). 
 
-For bug fixes, comments or further development please open an issue.
+For bug fixes, comments or further development please open an issue here at github.
 
 ## Installation
 

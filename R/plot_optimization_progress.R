@@ -2,7 +2,7 @@
 #use like:
 #plot_optimization_progress(logfile="ppso.log", projectfile="ppso.pro", cutoff_quantile=0.7, verbose=TRUE)
 
-plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE)
+plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro", progress_plot_filename=NULL, goodness_plot_filename=NULL, cutoff_quantile=0.95, verbose=FALSE, plots = c("eval_vs_param","param_vs_objfun"))
 {
   logfile_content    =read.table(file=  logfile,header=TRUE,sep="\t", stringsAsFactors =FALSE)
   logfile_content$objective_function=as.numeric(as.character(logfile_content$objective_function))
@@ -29,8 +29,22 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   mfrow=ceiling(sqrt(3/4*necessary_plots))    #determine number of rows and columns in plot window
   mfcol=ceiling(necessary_plots / mfrow)
 
+  
+  #compute "best-so-far"
+  best_so_far = logfile_content[,1+(1:number_of_parameters)]
+  best_obj_fun= logfile_content$objective_function
+  for (j in 2:nrow(logfile_content))
+  {  
+    if (logfile_content$objective_function[j] < best_obj_fun[j-1])
+    {
+      best_so_far[j:nrow(logfile_content),] = logfile_content[j,1+(1:number_of_parameters)]
+      best_obj_fun[j:nrow(logfile_content)] = logfile_content$objective_function[j] 
+    }
+  }
 
-#do progress plot
+#do progress plot ####
+if ("eval_vs_param" %in% plots)  
+{ 
   if (exists("progress_window", where=globvars) && (globvars$progress_window %in% dev.list()))     #activate progress_plot window, if already open
   {
     dev.set(globvars$progress_window)
@@ -45,15 +59,17 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   for (i in 1:number_of_parameters)
   {
     plot(logfile_content[,i+1],pch=20,xlab="function evaluations", ylab=names(logfile_content)[i+1])  
-    points(projectfile_content$function_call_number,projectfile_content[,i],col="red",pch=23)
+    points(1:nrow(logfile_content), best_so_far[,i], col="blue", pch=20) #best so far
+    points(projectfile_content$function_call_number,projectfile_content[,i],col="red",pch=23) #particles best    
   }
   
   ylim=quantile(logfile_content$objective_function[is.finite(logfile_content$objective_function)],
                 c(0,cutoff_quantile))
-  plot(logfile_content$objective_function,pch=20,xlab="function evaluations", ylab="objective function value",ylim = ylim,col="blue")  
+  plot(logfile_content$objective_function,pch=20,xlab="function evaluations", ylab="objective function value",ylim = ylim,col="black")  
+  points(1:nrow(logfile_content), best_obj_fun, col="blue", pch=20) #best so far
   points(projectfile_content$function_call_number,projectfile_content$best_objective_function,col="red",pch=23)
   plot.new()
-  legend("left", "particles' best", pch=23, col="red")    #plot legend only once
+  legend("left", legend = c("particles' best","best-so-far"), pch=c(23, 20), col=c("red", "blue"))    #plot legend only once
   if (!is.null(progress_plot_filename))
   {
     tt=regexpr("[^\\.]*$",progress_plot_filename)
@@ -65,8 +81,11 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     }
     savePlot(filename = progress_plot_filename, type = extension, device = dev.cur())
   }
-
-#do goodness plot
+}
+  
+#do goodness plot ####
+if ("param_vs_objfun" %in% plots)  
+{
   if (exists("goodness_window", where=globvars) && (globvars$goodness_window %in% dev.list()))     #activate goodness_plot window, if already open
   {
     dev.set(globvars$goodness_window)
@@ -80,7 +99,9 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
   for (i in 1:number_of_parameters)
   {
     plot(logfile_content[,i+1],logfile_content$objective_function,pch=20,ylab="objective function value", xlab=names(logfile_content)[i+1], ylim=ylim)  
+    points(best_so_far[,i], best_obj_fun,  col="blue", pch=20) #best so far
     points(projectfile_content[,i],projectfile_content$best_objective_function,col="red",pch=23)
+    
   }
   workers=sort(unique(logfile_content$worker))
   if (length(workers)>=2)
@@ -170,6 +191,9 @@ plot_optimization_progress = function  (logfile="pso.log", projectfile="pso.pro"
     }
     savePlot(filename = goodness_plot_filename, type = extension, device = dev.cur())
   }
+}
+  
+  
   
   return(curbest_val)
 }

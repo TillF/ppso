@@ -91,8 +91,19 @@ if (verbose_master)  {print(paste(Sys.time(),"starting initialization runs..."))
     globvars$status[]=1; globvars$status[pre_run_computations]=0    #do computations only for the particles to be initialized, skip those that have been initialized from file
   
     globvars$computation_start[pre_run_computations]=Sys.time()
-    globvars$fitness_X [pre_run_computations]=apply(as.matrix(globvars$X[pre_run_computations,],nrow=length(pre_run_computations)),1,objective_function, ...)    #execute pending pre-runs
-    globvars$status    [pre_run_computations] =1      #mark as pre-runs "finished"
+
+    #try a single call first, to interrupt soon if not working correctly
+    tt = apply(as.matrix(globvars$X[pre_run_computations[1],, drop=FALSE], nrow=length(pre_run_computations[1])), 1, objective_function, ...)    #execute pending pre-runs
+    if(is.null(tt)) stop("Call to objective function yielded NULL as return value. Please check objective function separately.")
+    globvars$fitness_X [pre_run_computations[1]] = tt #call went smoothly
+    
+    #do remaining calls
+    pre_run_computations=pre_run_computations[-1]
+    tt = apply(as.matrix(globvars$X[pre_run_computations,, drop=FALSE], nrow=length(pre_run_computations)), 1, objective_function, ...)    #execute pending pre-runs
+    if(length(tt) != length(pre_run_computations)) stop("Call to objective function sometimes yields NULL as return value. Please check objective function separately.")
+    
+    globvars$fitness_X [pre_run_computations] = tt #call went smoothly
+    globvars$status    [pre_run_computations] = 1      #mark as pre-runs "finished"
   
     if (!is.null(logfile))  write.table(file = logfile, cbind(format(globvars$computation_start[pre_run_computations],"%Y-%m-%d %H:%M:%S"), matrix(globvars$X[pre_run_computations,],ncol=ncol(globvars$X)), globvars$fitness_X[pre_run_computations], #write pre-runs to logfile, too
     globvars$node_id[pre_run_computations]), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE,append=TRUE)

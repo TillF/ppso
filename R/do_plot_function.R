@@ -2,7 +2,7 @@ do_plot_function = function() #real time plotting of 2-D surface of objective fu
 {
     if (("base" %in% do_plot))       #do base plotting
     {
-      if (exists("plot_window") && (plot_window %in% dev.list()))     #activate progress_plot window, if already open
+      if (exists("plot_window") && ! is.null(plot_window) && (plot_window %in% dev.list()))     #activate progress_plot window, if already open
       {
         dev.set(plot_window)
       }  else

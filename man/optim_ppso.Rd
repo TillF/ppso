@@ -15,22 +15,43 @@
 \code{optim_dds} minimizes using a Dynamically Dimensioned Search with  \code{optim_pdds_robust} being the parallel version.
 }
 \usage{
-optim_pso        (objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=500,
-  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, ...)
-optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=500,
-  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3, lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log", projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE, ...)
+optim_pso        (objective_function = sample_function, number_of_parameters = 2,
+  number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=500,
+  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50,
+  wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),
+  initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3,
+  lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log",
+  projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try",
+  break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, ...)
+optim_ppso_robust(objective_function = sample_function, number_of_parameters = 2,
+  number_of_particles = 40, max_number_of_iterations = 5, max_number_function_calls=500,
+  w = 1, C1 = 2, C2 = 2, abstol = -Inf, reltol = -Inf, max_wait_iterations = 50, 
+  wait_complete_iteration = FALSE, parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),
+  initial_estimates=NULL, Vmax = (parameter_bounds[, 2] - parameter_bounds[, 1])/3,
+  lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile = "ppso.log",
+  projectfile = "ppso.pro", save_interval = ceiling(number_of_particles/4), load_projectfile = "try",
+  break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, 
+  nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, ...)
 
-optim_dds        (objective_function = sample_function, number_of_parameters = 2, number_of_particles =  1,                               max_number_function_calls= 500,
-  r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, ...)
-optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2, number_of_particles = 1,                               max_number_function_calls= 500,
-  r=0.2,                 abstol = -Inf, reltol = -Inf, max_wait_iterations=50,                                    parameter_bounds = cbind(rep(-1, number_of_parameters),
-  rep(1, number_of_parameters)), initial_estimates=NULL, part_xchange=2,                                                          lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try", break_file=NULL, plot_progress=FALSE, tryCall=FALSE, nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, verbose=FALSE, ...)
+optim_dds        (objective_function = sample_function, number_of_parameters = 2,
+  number_of_particles =  1, max_number_function_calls= 500, 
+  r=0.2, abstol = -Inf, reltol = -Inf, max_wait_iterations=50,
+  parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)), 
+  initial_estimates=NULL, part_xchange=2,
+  lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",
+  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try",
+  break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, ...)
+optim_pdds_robust(objective_function = sample_function, number_of_parameters = 2,
+  number_of_particles = 1, max_number_function_calls= 500,
+  r=0.2, abstol = -Inf, reltol = -Inf, max_wait_iterations=50,
+  parameter_bounds = cbind(rep(-1, number_of_parameters), rep(1, number_of_parameters)),
+  initial_estimates=NULL, part_xchange=2,
+  lhc_init=FALSE, do_plot = NULL, wait_for_keystroke = FALSE, logfile=  "dds.log",
+  projectfile = "dds.pro",  save_interval = ceiling(number_of_particles/4), load_projectfile = "try",
+  break_file=NULL, plot_progress=FALSE, tryCall=FALSE, verbose=FALSE, 
+  nslaves = -1, working_dir_list=NULL, execution_timeout=NULL, maxtries=10, ...)
 
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{objective_function}{
 function whose numerical return value is to be minimized.  \code{objective_function} needs to accept a vector \code{X} as argument, which contains \code{number_of_parameters} numerical values.
@@ -169,7 +190,7 @@ for didactical purpose (only for two-parameter search and fast objective functio
   \item{do_plot}{
 enable 3D-plot of response surface and search progress.
 "base": use basic 3D-plotting functions.
-"rgl":  use moveable rgl-plotting (requires package \code{rgl})
+"rgl":  use interactive rgl-plotting (requires package \code{rgl})
 }
   \item{wait_for_keystroke}{
 waiting for keystroke between iterations (e.g. for plotting). Option for changing into debug mode.

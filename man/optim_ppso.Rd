@@ -208,6 +208,10 @@ recommended use:
 }
 concerning reproducibility: setting the seed using \code{set.seed()} should make results reproducable. However, in the parallel versions, the randomness introduced by the order of the results returned from the slaves cannot be controlled, so this may limit reproducibility.
 
+Please note:\cr
+- if optim_ppso_robust() finds an active Rmpi session (i.e. is.loaded("mpi_initialize")), it will NOT close the session on exit\cr
+- if optim_ppso_robust() does not find an active Rmpi sessionit will initiate on and close the session on exit. This precludes any further use of Rmpi in this R session!\cr
+Thus, if you want to continue using Rmpi after the call of the function (e.g. repeatedly calling it), add the initialization of Rmpi (i.e \code{library("Rmpi")}) before \code{optim_*_robust()} is called for the first time.
 }
 
 \value{

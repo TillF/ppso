@@ -182,11 +182,13 @@ if ((globvars$closed_slaves==globvars$nslaves) && is.null(globvars$break_flag))
 
 ret_val=list(value=globvars$fitness_gbest,par=globvars$X_gbest,function_calls=sum(globvars$function_calls+function_calls_init),break_flag=globvars$break_flag) 
 
-
-if (verbose_master) {print(paste(Sys.time(),"closing MPI...")); flush.console()}
-close_mpi()                        #diligently close Rmpi session
-if (verbose_master) {print(paste(Sys.time(),"...closed.")); flush.console()}
-
+	if (!globvars$mpi_initialized_before) #if MPI was already initialized by the user, it should not be terminated now
+	{
+	  if (verbose_master) {print(paste(Sys.time(),"closing MPI...")); flush.console()}
+	  close_mpi()                        #diligently close Rmpi session
+	  if (verbose_master) {print(paste(Sys.time(),"...closed.")); flush.console()}
+	}
+	
 return(ret_val) 
 }
 

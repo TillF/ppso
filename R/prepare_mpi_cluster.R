@@ -19,7 +19,9 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
 {
   if (!is.loaded("mpi_initialize")) {         
   	if (!require("Rmpi")) stop("Package Rmpi not found. Install it or use serial version of this call (optim_pso or optim_dds).")
-  }
+    globvars$mpi_initialized_before = FALSE 
+  } else
+  globvars$mpi_initialized_before = TRUE #indicate that MPI was already initialized by the user (and should not be terminated later)
  
   if (nslaves == -1) nslaves=mpi.universe.size() else  # Spawn as many slaves as possible
   if (nslaves > mpi.universe.size()) warning("Number of specified slaves exceeds number of available slaves.")

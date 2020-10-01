@@ -20,7 +20,7 @@ devtools::install_github("TillF/ppso")
 ```
 
 ## Dependencies
-basic functionality: no further dependencies; optionally R-packages `rgl`, `lhs`
+basic functionality: no further dependencies; optionally R-packages `rgl` (visualization)), `lhs` (improved initialization of starting values)
 ### for installation only
 * R-packages: `devtools`
 * system libraries for `devtools`
@@ -29,7 +29,7 @@ in debian, install using:
 
 In Windows, this requires RTools, which will be installed along.
 ### in parallel mode (for computationally-demanding functions, e.g. model calibration)
-* R-packages: `Rmpi` (may inquire further system installations, please check [the Rmpi pages](http://www.stats.uwo.ca/faculty/yu/Rmpi/).
+* R-package: `Rmpi` (may inquire further system installations, please check [the Rmpi pages](http://www.stats.uwo.ca/faculty/yu/Rmpi/).
 
 
 

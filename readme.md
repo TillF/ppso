@@ -18,7 +18,8 @@ For bug fixes, comments or further development please [open an issue here at git
 install.packages("devtools")
 devtools::install_github("TillF/ppso")
 ```
-
+ If you are unable to get RTools and devtools running, you may also download the files (green button "Code" at top right, "Download ZIP") and proceed following [these instructions](https://stackoverflow.com/questions/30989027/how-to-install-a-package-from-a-download-zip-file/30989367).
+ 
 ## Dependencies
 basic functionality: no further dependencies; optionally R-packages `rgl` (visualization)), `lhs` (improved initialization of starting values)
 ### for installation only

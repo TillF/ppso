@@ -224,7 +224,13 @@ The functions return a list with the elements
 \references{
   Tolson, B. A., and C. A. Shoemaker (2007)
   Dynamically dimensioned search algorithm for computationally efficient watershed model calibration, \emph{Water Resour. Res.,}
-  43, W01413, doi:10.1029/2005WR004723.  \url{http://www.agu.org/journals/wr/wr0701/2005WR004723/}
+  43, W01413, doi:10.1029/2005WR004723. \url{http://www.agu.org/journals/wr/wr0701/2005WR004723/}
+
+  Kennedy, J. and Eberhart, R. (1995)
+  Particle swarm optimization, in: Proceedings of ICNN’95 - International Conference on Neural Networks, Proceedings of ICNN’95 - International Conference on Neural Networks, 1942–1948 vol.4, \url{https://doi.org/10.1109/ICNN.1995.488968}
+
+  Kennedy, J., Eberhart, R. C., and Shi, Y.(2001): Swarm Intelligence, Morgan Kaufmann Publishers, San Francisco.
+  
 }
 \author{
 Till Francke <francke_at_uni-potsdam.de>

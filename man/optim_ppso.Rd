@@ -166,9 +166,9 @@ for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
 		number of rmpi slaves to spawn (default -1: as many as possible, requires package \code{Rmpi})
 		}
 		\item{working_dir_list}{
-		 String matrix of working directories the slaves should change to. First column holds the hostname, the second column the directory.\\ 
-		 A hostname may be listed several times, if more than one slave is run on it. If a host is listed less times than it has slaves, the last entry will be recycled as necessary.\\ 
-		 The entry "default" denotes the directory all slaves of unlisted hosts will be change to. If missing, slaves on unlisted hosts will stay in the directory they are spawned in (don't ask me which this is).\\
+		 Data frame of working directories the slaves should change to. First column 'hostname' holds the hostname, the second column 'wd' the directory.\cr 
+		 A hostname may be listed several times, if more than one slave is run on it. If a host is listed less times than it has slaves, the last entry will be recycled as necessary.\cr
+		 The entry "default" in column 'hostname' denotes the directory all slaves of unmentioned hosts will change to. Without this entry, slaves on unmentioned hosts will stay in the directory they are spawned in (don't ask me which one).\cr
 		 Beware: "~" apparently doesn't work, so rather use the full path. 
 		}
 		\item{execution_timeout}{
@@ -178,9 +178,9 @@ for the parallel versions \code{optim_ppso*}, \code{optim_pdds*}:
 		Number of times a slave may exceed \code{execution_timeout} in a row before being excluded from further tasks. Ignored, when \code{execution_timeout} is not set.
 		}
 		\item{verbose}{
-		   generate screen output documenting the message passing}
+		   generate output documenting the message passing (useful for debugging)}
 		   \itemize{
-			   \item{"master"}{master generates output}
+			   \item{"master"}{master generates output (on screen)}
 			   \item{"slaves"}{ slaves generate output (into text files named "slave<nn>")}
 			   \item{TRUE}{ master and slaves generate output}
 			   }
@@ -208,9 +208,9 @@ recommended use:
 }
 concerning reproducibility: setting the seed using \code{set.seed()} should make results reproducable. However, in the parallel versions, the randomness introduced by the order of the results returned from the slaves cannot be controlled, so this may limit reproducibility.
 
-Please note:\cr
+Note on Rmpi usage:\cr
 - if optim_ppso_robust() finds an active Rmpi session (i.e. is.loaded("mpi_initialize")), it will NOT close the session on exit\cr
-- if optim_ppso_robust() does not find an active Rmpi sessionit will initiate on and close the session on exit. This precludes any further use of Rmpi in this R session!\cr
+- if optim_ppso_robust() does not find an active Rmpi session, it will initiate one and close this session on exit. (Apparently, this precludes any further use of Rmpi in this R session, so restart R, if required.)\cr
 Thus, if you want to continue using Rmpi after the call of the function (e.g. repeatedly calling it), add the initialization of Rmpi (i.e \code{library("Rmpi")}) before \code{optim_*_robust()} is called for the first time.
 }
 
@@ -236,10 +236,8 @@ The functions return a list with the elements
 Till Francke <francke_at_uni-potsdam.de>
 }
 \note{
-- still in development, use with care, all comments welcome -
-
 Parallelization is a great thing, especially when it works. On its dark side, you just parallelize errors and multiply debugging effort. Enabling \code{verbose=TRUE} and  \code{tryCall=TRUE} may help to find the error.\cr
-Master or slave crashes can cause the entire session to stall, so restarting R may be necessary. Under Windows, orphaned mpi-sessions and slaves may have to be killed manually to prevent stalling the entire system: Use "Process Explorer" (free) and kill the smpd.exe-tree and mpiexec.exe.
+Master or slave crashes can cause the entire session to stall, so restarting R may be necessary. Under Windows, orphaned mpi-sessions and slaves may have to be killed manually to prevent stalling the entire system: Use "Process Explorer" (free) and kill the smpd.exe-tree and mpiexec.exe, if necessary.
 }
 
 

@@ -126,10 +126,10 @@ prepare_mpi_cluster=function(nslaves, working_dir_list=NULL, verbose_slave=FALSE
 
   if (!is.null(working_dir_list))    #change working directories of slaves, if specified
   {
-    slave_hosts=capture.output(slave.hostinfo())
-    slave_hosts=sub(" ","",sub("[^:]*: ","",slave_hosts[-1]))  #extract hostnames of slaves, discard master
+    slave_hosts = capture.output(slave.hostinfo(short = FALSE))
+    slave_hosts = sub(" ","",sub("[^:]*: ","",slave_hosts[-1]))  #extract hostnames of slaves, discard master
 
-    wd_to_be_set=array("",length(slave_hosts))                                       #this will be a list with a default directory to each slave
+    wd_to_be_set = array("",length(slave_hosts))                                       #this will be a list with a default directory to each slave
     
     default_dir=working_dir_list[which(working_dir_list[,"host"]=="default"),"wd"]  #get name of default_dir
     if (length(default_dir)==0) default_dir="./"                                    #if default dir not specified, use "./"

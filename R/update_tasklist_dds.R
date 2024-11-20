@@ -41,7 +41,7 @@ update_tasklist_dds <- function(loop_counter=1)
 
    # Update the local bests and their fitness
    improved_particles=globvars$fitness_X < globvars$fitness_lbest #mark particles that improved their fitness
-
+   improved_particles[is.na(improved_particles)]=FALSE #dirty fix for strange error found by Kindie (sometimes, improved_particles have an entry with NA)
    globvars$futile_iter_count[!improved_particles]  = globvars$futile_iter_count[!improved_particles] + 1        #reset counter of futile iterations for improved particles
    globvars$futile_iter_count[ improved_particles]  = 0        #reset counter of futile iterations for improved particles     
    
